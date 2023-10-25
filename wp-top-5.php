@@ -23,6 +23,8 @@
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       wp-top-5
  * Domain Path:       /languages
+ * GitHub Plugin URI: jwilson529/wp-top-5
+ * GitHub Plugin URI: https://github.com/jwilson529/wp-top-5
  */
 
 // If this file is called directly, abort.
