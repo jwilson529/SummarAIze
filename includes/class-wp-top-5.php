@@ -1,12 +1,11 @@
 <?php
-
 /**
  * The file that defines the core plugin class
  *
  * A class definition that includes attributes and functions used across both the
  * public-facing side of the site and the admin area.
  *
- * @link       https://middletnwebdesign.com
+ * @link       https://oneclickcontent.com
  * @since      1.0.0
  *
  * @package    Wp_Top_5
@@ -78,7 +77,6 @@ class Wp_Top_5 {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
-
 	}
 
 	/**
@@ -87,7 +85,7 @@ class Wp_Top_5 {
 	 * Include the following files that make up the plugin:
 	 *
 	 * - Wp_Top_5_Loader. Orchestrates the hooks of the plugin.
-	 * - Wp_Top_5_i18n. Defines internationalization functionality.
+	 * - Wp_Top_5_I18n. Defines internationalization functionality.
 	 * - Wp_Top_5_Admin. Defines all hooks for the admin area.
 	 * - Wp_Top_5_Public. Defines all hooks for the public side of the site.
 	 *
@@ -103,33 +101,37 @@ class Wp_Top_5 {
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-top-5-loader.php';
+		require_once plugin_dir_path( __DIR__ ) . 'includes/class-wp-top-5-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-top-5-i18n.php';
+		require_once plugin_dir_path( __DIR__ ) . 'includes/class-wp-top-5-i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-wp-top-5-admin.php';
+		require_once plugin_dir_path( __DIR__ ) . 'admin/class-wp-top-5-admin.php';
+
+		/**
+		 * The class responsible for defining all actions that occur in the admin area.
+		 */
+		require_once plugin_dir_path( __DIR__ ) . 'admin/class-wp-top-5-admin-settings.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-top-5-public.php';
+		require_once plugin_dir_path( __DIR__ ) . 'public/class-wp-top-5-public.php';
 
 		$this->loader = new Wp_Top_5_Loader();
-
 	}
 
 	/**
 	 * Define the locale for this plugin for internationalization.
 	 *
-	 * Uses the Wp_Top_5_i18n class in order to set the domain and to register the hook
+	 * Uses the Wp_Top_5_I18n class in order to set the domain and to register the hook
 	 * with WordPress.
 	 *
 	 * @since    1.0.0
@@ -137,10 +139,9 @@ class Wp_Top_5 {
 	 */
 	private function set_locale() {
 
-		$plugin_i18n = new Wp_Top_5_i18n();
+		$plugin_i18n = new Wp_Top_5_I18n();
 
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
-
 	}
 
 	/**
@@ -152,36 +153,17 @@ class Wp_Top_5 {
 	 */
 	private function define_admin_hooks() {
 
-		// error_log('define_admin_hooks called.');
-		
 		$plugin_admin = new Wp_Top_5_Admin( $this->get_plugin_name(), $this->get_version() );
 
-		if (is_object($plugin_admin)) {
-		    // error_log('Plugin admin object successfully created.');
-		} else {
-		    // error_log('Failed to create plugin admin object.');
-		}
-		$plugin_admin = new Wp_Top_5_Admin( $this->get_plugin_name(), $this->get_version() );
-
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'wp_top_5_register_options_page' );
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'wp_top_5_register_settings' );
+		$this->loader->add_action( 'admin_menu', 'Wp_Top_5_Admin_Settings', 'wp_top_5_register_options_page' );
+		$this->loader->add_action( 'admin_menu', 'Wp_Top_5_Admin_Settings', 'wp_top_5_register_settings' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'add_meta_box' );
 
 		$this->loader->add_action( 'save_post', $plugin_admin, 'save_top_5_points' );
 		$this->loader->add_action( 'init', $plugin_admin, 'register_shortcodes' );
-
-
-		// $this->loader->add_action( 'wp_ajax_contentmaster_generate_content', $plugin_admin, 'contentmaster_generate_content' );
-		$this->loader->add_action( 'wp_ajax_contentmaster_gather_content', $plugin_admin, 'contentmaster_gather_content' );
-		// $this->loader->add_action( 'admin_init', $plugin_admin, 'activation_redirect' );
-		// $this->loader->add_action( 'add_meta_boxes', $plugin_admin, 'wp_top_5_add_button_to_tags_metabox' );
-		// Add link to settings in plugins list.
-		// $this->loader->add_action( 'plugin_action_links_' . plugin_basename( CONTENTMASTER_FILE ), $plugin_admin, 'add_settings_link' );
-		// $this->loader->add_action( 'plugin_row_meta', $plugin_admin, 'add_plugin_row_meta' );
-
+		$this->loader->add_action( 'wp_ajax_wp_top_5_gather_content', $plugin_admin, 'wp_top_5_gather_content' );
 	}
 
 	/**
@@ -197,7 +179,6 @@ class Wp_Top_5 {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-
 	}
 
 	/**
@@ -239,5 +220,4 @@ class Wp_Top_5 {
 	public function get_version() {
 		return $this->version;
 	}
-
 }

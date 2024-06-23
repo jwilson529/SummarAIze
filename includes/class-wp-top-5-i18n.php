@@ -1,12 +1,11 @@
 <?php
-
 /**
  * Define the internationalization functionality
  *
  * Loads and defines the internationalization files for this plugin
  * so that it is ready for translation.
  *
- * @link       https://middletnwebdesign.com
+ * @link       https://oneclickcontent.com
  * @since      1.0.0
  *
  * @package    Wp_Top_5
@@ -24,7 +23,7 @@
  * @subpackage Wp_Top_5/includes
  * @author     James Wilson <james@middletnwebdesign.com>
  */
-class Wp_Top_5_i18n {
+class Wp_Top_5_I18n {
 
 
 	/**
@@ -39,9 +38,5 @@ class Wp_Top_5_i18n {
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);
-
 	}
-
-
-
 }

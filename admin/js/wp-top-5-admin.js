@@ -1,14 +1,20 @@
 (function($) {
     'use strict';
 
+    /**
+     * Get the editor data from either the Gutenberg or Classic editor.
+     * 
+     * @return {Object} The editor data including title, content, and tags.
+     */
     function getEditorData() {
-        var title, content, tags, model;
+        var title, content, tags;
 
         if ($('#editor').length) {
             // Gutenberg editor
             title = wp.data.select('core/editor').getEditedPostAttribute('title');
             content = wp.data.select('core/editor').getEditedPostContent();
-            tags = wp.data.select('core/editor').getEditedPostAttribute('tags').join(', ');
+            var tagArray = wp.data.select('core/editor').getEditedPostAttribute('tags');
+            tags = Array.isArray(tagArray) ? tagArray.join(', ') : '';
         } else {
             // Classic editor
             title = $('input#title').val();
@@ -16,33 +22,43 @@
             tags = $('input[name="tax_input[post_tag]"]').val();
         }
 
-        model = $('#contentmaster_selected_model').val();
-
-        return { title, content, tags, model };
+        return { title, content, tags };
     }
 
+    /**
+     * Event handler for the Generate Top 5 Points button click.
+     * 
+     * @param {Event} event The click event.
+     */
     $(document).on('click', '#generate-top-5-button', function(event) {
         event.preventDefault();
+        
         // Show loading icon
         $('#loading-icon').show();
 
         var editorData = getEditorData();
+        console.log("Editor Data:", editorData);
+
+        // Get the selected model from the options.
+        var selectedModel = wp_top_5_admin_vars.selected_model;
+        console.log("Selected Model:", selectedModel);
 
         $.ajax({
             url: wp_top_5_admin_vars.ajax_url,
             type: 'POST',
             dataType: 'json',
             data: {
-                action: 'contentmaster_gather_content',
+                action: 'wp_top_5_gather_content',
                 nonce: wp_top_5_admin_vars.wp_top_5_ajax_nonce,
                 title: editorData.title,
-                tags: editorData.tags,
+                tags: editorData.tags || '',
                 content: editorData.content,
-                model: editorData.model
+                model: selectedModel
             },
         })
         .done(function(response) {
             $('#loading-icon').hide();
+            console.log("AJAX Response:", response);
             if (response.success && Array.isArray(response.data)) {
                 var listHTML = '';
 
@@ -54,20 +70,20 @@
                     $('input[name="wp_top_5_points[' + (index + 1) + ']"]').val(point);
                 });
 
-                console.log("success", response);
+                $('#top-5-points-list').html(listHTML);
+
+                console.log("Success:", response);
             } else {
-                console.log("Failed to generate points", response);
+                console.log("Failed to generate points:", response);
             }
         })
         .fail(function(response) {
             $('#loading-icon').hide();
-            console.log("error");
-            console.log(response);
+            console.log("Error:", response);
         })
         .always(function(response) {
-            console.log("complete");
+            console.log("Complete:", response);
         });
     });
-
 
 })(jQuery);

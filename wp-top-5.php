@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The plugin bootstrap file
  *
@@ -8,17 +7,17 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              https://middletnwebdesign.com
+ * @link              https://oneclickcontent.com
  * @since             1.0.0
  * @package           Wp_Top_5
  *
  * @wordpress-plugin
  * Plugin Name:       WP Top 5
- * Plugin URI:        https://middletnwebdesign.com
+ * Plugin URI:        https://oneclickcontent.com
  * Description:       WP Top 5
  * Version:           1.0.0
  * Author:            James Wilson
- * Author URI:        https://middletnwebdesign.com/
+ * Author URI:        https://oneclickcontent.com/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       wp-top-5
@@ -79,6 +78,5 @@ function run_wp_top_5() {
 
 	$plugin = new Wp_Top_5();
 	$plugin->run();
-
 }
 run_wp_top_5();

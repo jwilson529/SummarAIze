@@ -1,9 +1,8 @@
 <?php
-
 /**
  * Fired during plugin activation
  *
- * @link       https://middletnwebdesign.com
+ * @link       https://oneclickcontent.com
  * @since      1.0.0
  *
  * @package    Wp_Top_5
@@ -30,7 +29,5 @@ class Wp_Top_5_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
-
 	}
-
 }
