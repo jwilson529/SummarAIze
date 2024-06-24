@@ -112,28 +112,24 @@ class Wp_Top_5_Admin {
 	 * @param WP_Post $post The current post.
 	 */
 	public function render_meta_box( $post ) {
-		wp_nonce_field( 'wp_top_5_meta_box', 'wp_top_5_meta_box_nonce' );
+	    wp_nonce_field( 'wp_top_5_meta_box', 'wp_top_5_meta_box_nonce' );
 
-		$top_5_points = get_post_meta( $post->ID, 'wp_top_5_points', true ) ? get_post_meta( $post->ID, 'wp_top_5_points', true ) : array();
+	    $top_5_points_meta = get_post_meta( $post->ID, 'wp_top_5_points', true );
+	    $top_5_points = $top_5_points_meta ? $top_5_points_meta : array();
 
-		// Get OpenAI API key from settings.
-		$openai_api_key = get_option( 'wp_top_5_openai_api_key', '' );
+	    echo '<button id="generate-top-5-button">Generate Top 5 Points</button>';
+	    echo '<div id="loading-icon" style="display:none;">Thinking...</div>';
+	    echo '<div id="top-5-points-list" class="list-group">';
 
-		$selected_model = get_option( 'wp_top_5_selected_model', 'gpt3.5-turbo' );
+	    for ( $i = 1; $i <= 5; $i++ ) {
+	        $point = isset($top_5_points[$i - 1]) ? $top_5_points[$i - 1] : '';
+	        echo "<div style='margin-bottom: 10px;'>";
+	        echo "<label for='wp_top_5_points[" . esc_attr( $i ) . "]'>" . esc_html( "Point $i:" ) . "</label>";
+	        echo "<input id='wp_top_5_points_" . esc_attr( $i ) . "' style='width: 100%;' type='text' name='wp_top_5_points[" . esc_attr( $i ) . "]' value='" . esc_attr( $point ) . "' placeholder='" . esc_attr( "Point $i" ) . "' />";
+	        echo '</div>';
+	    }
 
-		echo '<button id="generate-top-5-button">Generate Top 5 Points</button>';
-		echo '<div id="loading-icon" style="display:none;">Thinking...</div>';
-		echo '<div id="top-5-points-list" class="list-group">';
-
-		for ( $i = 1; $i <= 5; $i++ ) {
-			$point = $top_5_points[ $i ] ?? '';
-			echo "<div style='margin-bottom: 10px;'>";
-			echo "<label for='wp_top_5_points[" . esc_attr( $i ) . "]'>" . esc_html( "Point $i:" ) . '</label>';
-			echo "<input style='width: 100%;' type='text' name='wp_top_5_points[" . esc_attr( $i ) . "]' value='" . esc_attr( $point ) . "' placeholder='" . esc_attr( "Point $i" ) . "' />";
-			echo '</div>';
-		}
-
-		echo '</div>';
+	    echo '</div>';
 	}
 
 	/**
@@ -143,33 +139,35 @@ class Wp_Top_5_Admin {
 	 * @param int $post_id The ID of the post being saved.
 	 */
 	public function save_top_5_points( $post_id ) {
-		// Check if our nonce is set.
-		if ( ! isset( $_POST['wp_top_5_meta_box_nonce'] ) ) {
-			return;
-		}
+	    // Check if our nonce is set.
+	    if ( ! isset( $_POST['wp_top_5_meta_box_nonce'] ) ) {
+	        return;
+	    }
 
-		// Verify that the nonce is valid.
-		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wp_top_5_meta_box_nonce'] ) ), 'wp_top_5_meta_box' ) ) {
-			return;
-		}
+	    // Verify that the nonce is valid.
+	    if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wp_top_5_meta_box_nonce'] ) ), 'wp_top_5_meta_box' ) ) {
+	        return;
+	    }
 
-		// Don't save during autosave.
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
-		}
+	    // Don't save during autosave.
+	    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+	        return;
+	    }
 
-		// Check permissions.
-		if ( isset( $_POST['post_type'] ) && 'page' === sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) ) {
-			if ( ! current_user_can( 'edit_page', $post_id ) ) {
-				return;
-			}
-		} elseif ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return;
-		}
+	    // Check permissions.
+	    if ( isset( $_POST['post_type'] ) && 'page' === sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) ) {
+	        if ( ! current_user_can( 'edit_page', $post_id ) ) {
+	            return;
+	        }
+	    } elseif ( ! current_user_can( 'edit_post', $post_id ) ) {
+	        return;
+	    }
 
-		// Save the meta data.
-		$top_5_points = isset( $_POST['wp_top_5_points'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['wp_top_5_points'] ) ) : array();
-		update_post_meta( $post_id, 'wp_top_5_points', $top_5_points );
+	    // Save the meta data.
+	    $top_5_points = isset( $_POST['wp_top_5_points'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['wp_top_5_points'] ) ) : array();
+	    error_log('Top 5 Points to be saved: ' . print_r($top_5_points, true)); // Log the points to be saved
+
+	    update_post_meta( $post_id, 'wp_top_5_points', $top_5_points );
 	}
 
 	/**
@@ -178,80 +176,109 @@ class Wp_Top_5_Admin {
 	 * @since 1.0.0
 	 */
 	public static function wp_top_5_gather_content() {
-		// Verify the nonce.
-		$nonce = sanitize_key( wp_unslash( $_POST['nonce'] ?? '' ) );
-		if ( ! wp_verify_nonce( $nonce, 'wp_top_5_ajax_nonce' ) ) {
-			wp_send_json_error( 'Nonce verification failed. Unable to proceed.' );
-			exit;
-		}
+	    error_log('wp_top_5_gather_content function called'); // Verify function call
 
-		// Sanitize and validate inputs.
-		$title   = sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) );
-		$tags    = sanitize_text_field( wp_unslash( $_POST['tags'] ?? '' ) );
-		$content = sanitize_textarea_field( wp_unslash( $_POST['content'] ?? '' ) );
-		$model   = sanitize_text_field( wp_unslash( $_POST['model'] ?? '' ) );
+	    // Verify the nonce.
+	    $nonce = sanitize_key( wp_unslash( $_POST['nonce'] ?? '' ) );
+	    if ( ! wp_verify_nonce( $nonce, 'wp_top_5_ajax_nonce' ) ) {
+	        error_log('Nonce verification failed'); // Log nonce failure
+	        wp_send_json_error( 'Nonce verification failed. Unable to proceed.' );
+	        exit;
+	    }
 
-		// Get the API key.
-		$api_key = get_option( 'wp_top_5_openai_api_key' );
-		if ( empty( $api_key ) ) {
-			wp_send_json_error( 'API key is missing.' );
-			exit;
-		}
+	    // Sanitize and validate inputs.
+	    $title   = sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) );
+	    $tags    = sanitize_text_field( wp_unslash( $_POST['tags'] ?? '' ) );
+	    $content = sanitize_textarea_field( wp_unslash( $_POST['content'] ?? '' ) );
+	    $model   = sanitize_text_field( wp_unslash( $_POST['model'] ?? '' ) );
 
-		// Set up the OpenAI API call.
-		$url            = 'https://api.openai.com/v1/chat/completions';
-		$headers        = array(
-			'Content-Type'  => 'application/json',
-			'Authorization' => "Bearer $api_key",
-		);
-		$system_message = 'You are a helpful assistant that analyzes an article and identifies its top five points. Return these points in an array format.';
+	    // Log the inputs for debugging
+	    error_log("Title: $title");
+	    error_log("Tags: $tags");
+	    error_log("Content: $content");
+	    error_log("Model: $model");
 
-		$data = array(
-			'model'    => $model,
-			'messages' => array(
-				array(
-					'role'    => 'system',
-					'content' => $system_message,
-				),
-				array(
-					'role'    => 'user',
-					'content' => "Please analyze the following article and identify its top five points:\n\nTitle: {$title}\nTags: {$tags}\nContent: {$content}",
-				),
-			),
-		);
-		$args = array(
-			'headers'   => $headers,
-			'body'      => wp_json_encode( $data ),
-			'sslverify' => true, // Enable SSL verification.
-			'timeout'   => 120,  // Set the timeout value to 120 seconds.
-		);
+	    // Get the API key.
+	    $api_key = get_option( 'wp_top_5_openai_api_key' );
+	    if ( empty( $api_key ) ) {
+	        error_log('API key is missing'); // Log missing API key
+	        wp_send_json_error( 'API key is missing.' );
+	        exit;
+	    }
 
-		// Make the API call.
-		$response = wp_remote_post( $url, $args );
+	    // Set up the OpenAI API call.
+	    $url            = 'https://api.openai.com/v1/chat/completions';
+	    $headers        = array(
+	        'Content-Type'  => 'application/json',
+	        'Authorization' => "Bearer $api_key",
+	    );
+	    $system_message = 'You are a helpful assistant that analyzes an article and identifies its top five points. Return these points in an array format.';
 
-		if ( is_wp_error( $response ) ) {
-			wp_send_json_error( $response->get_error_message() );
-			exit;
-		}
+	    $data = array(
+	        'model'    => $model,
+	        'messages' => array(
+	            array(
+	                'role'    => 'system',
+	                'content' => $system_message,
+	            ),
+	            array(
+	                'role'    => 'user',
+	                'content' => "Please analyze the following article and identify its top five points:\n\nTitle: {$title}\nTags: {$tags}\nContent: {$content}",
+	            ),
+	        ),
+	    );
+	    $args = array(
+	        'headers'   => $headers,
+	        'body'      => wp_json_encode( $data ),
+	        'sslverify' => true, // Enable SSL verification.
+	        'timeout'   => 120,  // Set the timeout value to 120 seconds.
+	    );
 
-		$body                  = wp_remote_retrieve_body( $response );
-		$json                  = json_decode( $body, true );
-		$article_points_string = $json['choices'][0]['message']['content'] ?? '';
-		preg_match_all( '/\d+\.\s.*?(\n|$)/', $article_points_string, $matches );
+	    // Log the data being sent to the API for debugging
+	    error_log("OpenAI API Request Data: " . print_r($data, true));
 
-		if ( isset( $matches[0] ) && is_array( $matches[0] ) ) {
-			$article_points_array = $matches[0];
-		} else {
-			$article_points_array = array();
-		}
+	    // Make the API call.
+	    $response = wp_remote_post( $url, $args );
 
-		if ( $article_points_array ) {
-			wp_send_json_success( $article_points_array );
-		} else {
-			wp_send_json_error( 'Failed to generate top 5 points.' );
-		}
-		exit;
+	    if ( is_wp_error( $response ) ) {
+	        error_log("OpenAI API Error: " . $response->get_error_message());
+	        wp_send_json_error( $response->get_error_message() );
+	        exit;
+	    }
+
+	    $body = wp_remote_retrieve_body( $response );
+	    $json = json_decode( $body, true );
+
+	    // Log the API response for debugging
+	    error_log("OpenAI API Response: " . print_r($json, true));
+
+	    if ( empty( $json ) || isset( $json['error'] ) ) {
+	        $error_message = isset( $json['error']['message'] ) ? $json['error']['message'] : 'Unknown error';
+	        error_log("OpenAI API Error: " . $error_message);
+	        wp_send_json_error( $error_message );
+	        exit;
+	    }
+
+	    $article_points_string = $json['choices'][0]['message']['content'] ?? '';
+	    error_log("Article Points String: " . $article_points_string); // Log the article points string
+
+	    // Remove the JSON code block markers
+	    $article_points_string = trim($article_points_string, "```json \n```");
+	    error_log("Cleaned Article Points String: " . $article_points_string); // Log the cleaned article points string
+
+	    // Decode the JSON string
+	    $article_points_array = json_decode($article_points_string, true);
+	    error_log("Article Points Array: " . print_r($article_points_array, true)); // Log the decoded points array
+
+	    if ( json_last_error() === JSON_ERROR_NONE && is_array($article_points_array) ) {
+	        wp_send_json_success( $article_points_array );
+	    } else {
+	        error_log('Failed to generate top 5 points.'); // Log failure to generate points
+	        wp_send_json_error( 'Failed to generate top 5 points.' );
+	    }
+	    exit;
 	}
+
 
 	/**
 	 * Display top 5 points on the front-end.

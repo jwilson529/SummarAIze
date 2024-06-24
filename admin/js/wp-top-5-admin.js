@@ -60,18 +60,27 @@
             $('#loading-icon').hide();
             console.log("AJAX Response:", response);
             if (response.success && Array.isArray(response.data)) {
-                var listHTML = '';
-
-                // Loop through each point, add it to the list, and populate the corresponding input field
                 response.data.forEach(function(point, index) {
-                    listHTML += '<a href="#" class="list-group-item list-group-item-action">' + point + '</a>';
+                    // Remove Markdown formatting
+                    point = point.replace(/\*\*(.*?)\*\*/g, '$1');
+                    
+                    var inputSelector = '#wp_top_5_points_' + (index + 1);
+                    var inputField = $(inputSelector);
+                    
+                    console.log("Setting point", index + 1, "to", point, "using selector", inputSelector);
+                    
+                    if (inputField.length) {
+                        inputField.val(point).change();
+                        console.log('Input field found and set for point', index + 1);
 
-                    // Populate the input fields. Assumes your input fields have names like wp_top_5_points[1], wp_top_5_points[2], etc.
-                    $('input[name="wp_top_5_points[' + (index + 1) + ']"]').val(point);
+                        // Force re-render with a delay
+                        setTimeout(function() {
+                            inputField.val(point).trigger('change');
+                        }, 100);
+                    } else {
+                        console.log('Input field not found for point', index + 1);
+                    }
                 });
-
-                $('#top-5-points-list').html(listHTML);
-
                 console.log("Success:", response);
             } else {
                 console.log("Failed to generate points:", response);
