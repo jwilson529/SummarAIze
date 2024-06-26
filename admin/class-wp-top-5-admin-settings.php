@@ -209,7 +209,6 @@ class Wp_Top_5_Admin_Settings {
 
 		echo '</select>';
 		echo '<div class="wp-top-5-selected-model-description">';
-		echo '<p>' . esc_html__( 'It is recommended to choose one of the following OpenAI models for tag generation: Davinci, GPT-3 or GPT-3.5 Turbo.', 'wp-top-5' ) . '</p>';
 		echo '<a href="https://beta.openai.com/docs/models/overview" target="_blank">' . esc_html__( 'Learn more about OpenAI models', 'wp-top-5' ) . '</a>';
 		echo '</div>';
 		echo '</div>';

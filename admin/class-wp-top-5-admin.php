@@ -40,17 +40,12 @@ class Wp_Top_5_Admin {
 	}
 
 	/**
-	 * Enqueue styles for the public-facing side of the site.
+	 * Enqueue admin styles.
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style(
-			$this->plugin_name,
-			plugin_dir_url( __FILE__ ) . 'css/wp-top-5-public.css',
-			array(),
-			$this->version,
-			'all'
-		);
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wp-top-5-admin.css', array(), $this->version, 'all' );
 	}
+
 
 	/**
 	 * Register the JavaScript for the admin area.

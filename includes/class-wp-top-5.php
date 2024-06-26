@@ -161,7 +161,7 @@ class Wp_Top_5 {
 		$plugin_admin = new Wp_Top_5_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_menu', 'Wp_Top_5_Admin_Settings', 'wp_top_5_register_options_page' );
 		$this->loader->add_action( 'admin_menu', 'Wp_Top_5_Admin_Settings', 'wp_top_5_register_settings' );
 		$this->loader->add_action( 'admin_enqueue_scripts', 'Wp_Top_5_Admin_Metabox', 'add_meta_box' );
