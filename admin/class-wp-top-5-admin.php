@@ -1,50 +1,38 @@
 <?php
 /**
- * The admin-specific functionality of the plugin.
+ * The public-facing functionality of the plugin.
  *
  * @link       https://oneclickcontent.com
  * @since      1.0.0
  *
  * @package    Wp_Top_5
- * @subpackage Wp_Top_5/admin
+ * @subpackage Wp_Top_5/public
  */
 
 /**
- * The admin-specific functionality of the plugin.
- *
- * Defines the plugin name, version, and two example hooks for how to
- * enqueue the admin-specific stylesheet and JavaScript.
- *
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/admin
- * @author     James Wilson <james@middletnwebdesign.com>
+ * The public-facing functionality of the plugin.
  */
 class Wp_Top_5_Admin {
 
 	/**
-	 * The ID of this plugin.
+	 * The name of the plugin.
 	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string $plugin_name The ID of this plugin.
+	 * @var string
 	 */
 	private $plugin_name;
 
 	/**
-	 * The version of this plugin.
+	 * The version of the plugin.
 	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string $version The current version of this plugin.
+	 * @var string
 	 */
 	private $version;
 
 	/**
-	 * Initialize the class and set its properties.
+	 * Constructor.
 	 *
-	 * @since    1.0.0
-	 * @param string $plugin_name The name of this plugin.
-	 * @param string $version The version of this plugin.
+	 * @param string $plugin_name The name of the plugin.
+	 * @param string $version     The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
 		$this->plugin_name = $plugin_name;
@@ -52,12 +40,16 @@ class Wp_Top_5_Admin {
 	}
 
 	/**
-	 * Register the stylesheets for the admin area.
-	 *
-	 * @since 1.0.0
+	 * Enqueue styles for the public-facing side of the site.
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wp-top-5-admin.css', array(), $this->version, 'all' );
+		wp_enqueue_style(
+			$this->plugin_name,
+			plugin_dir_url( __FILE__ ) . 'css/wp-top-5-public.css',
+			array(),
+			$this->version,
+			'all'
+		);
 	}
 
 	/**
@@ -85,238 +77,332 @@ class Wp_Top_5_Admin {
 	}
 
 	/**
-	 * Add meta box to post edit screen.
-	 *
-	 * @since 1.0.0
+	 * Handle AJAX request from the front-end.
 	 */
-	public function add_meta_box() {
-		// Get selected post types from the plugin settings.
-		$post_types = get_option( 'wp_top_5_post_types', array() );
+	public function wp_top_5_gather_content() {
+		// Verify nonce.
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wp_top_5_ajax_nonce' ) ) {
+			wp_send_json_error( 'Invalid nonce.' );
+			wp_die();
+		}
 
-		foreach ( $post_types as $post_type ) {
-			add_meta_box(
-				'wp_top_5_meta_box',
-				__( 'WP Top 5 Pro', 'wp-top-5' ),
-				array( $this, 'render_meta_box' ),
-				$post_type,
-				'side',
-				'default'
+		// Ensure content is set.
+		if ( ! isset( $_POST['content'] ) ) {
+			wp_send_json_error( 'Missing content.' );
+			wp_die();
+		}
+
+		$query = sanitize_text_field( wp_unslash( $_POST['content'] ) );
+
+		// Retrieve individual options.
+		$api_key      = get_option( 'wp_top_5_openai_api_key' );
+		$assistant_id = get_option( 'wp_top_5_assistant_id' );
+
+		if ( empty( $api_key ) ) {
+			wp_send_json_error( 'API key is not configured.' );
+			wp_die();
+		}
+
+		if ( empty( $assistant_id ) ) {
+			wp_send_json_error( 'Assistant ID is not configured.' );
+			wp_die();
+		}
+
+		// Step 2: Create a thread.
+		$thread_id = $this->create_thread( $api_key );
+		if ( ! $thread_id ) {
+			wp_send_json_error( 'Failed to create a thread.' );
+			wp_die();
+		}
+
+		// Step 3: Add a user's message to the thread.
+		$response = $this->add_message_and_run_thread( $api_key, $thread_id, $assistant_id, $query );
+		if ( is_string( $response ) ) {
+			wp_send_json_error( $response );
+		} else {
+			wp_send_json_success( $response );
+		}
+		wp_die();
+	}
+
+
+	/**
+	 * Create a new thread in the OpenAI API.
+	 *
+	 * @param string $api_key The OpenAI API key.
+	 * @return string|null The thread ID or null if failed.
+	 */
+	private function create_thread( $api_key ) {
+		$response = wp_remote_post(
+			'https://api.openai.com/v1/threads',
+			array(
+				'headers' => array(
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . $api_key,
+					'OpenAI-Beta'   => 'assistants=v2',
+				),
+				'body'    => '{}',
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return null;
+		}
+
+		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( ! isset( $response_body['id'] ) ) {
+			return null;
+		}
+
+		return $response_body['id'];
+	}
+
+	/**
+	 * Add a message and run the thread in the OpenAI API.
+	 *
+	 * @param string $api_key      The OpenAI API key.
+	 * @param string $thread_id    The thread ID.
+	 * @param string $assistant_id The assistant ID.
+	 * @param string $query        The query to add as a message.
+	 * @return mixed The result of the run or an error message.
+	 */
+	private function add_message_and_run_thread( $api_key, $thread_id, $assistant_id, $query ) {
+		// Step 3: Add a message to the thread.
+		$message_api_url = "https://api.openai.com/v1/threads/{$thread_id}/messages";
+		$body            = wp_json_encode(
+			array(
+				'role'    => 'user',
+				'content' => $query,
+			)
+		);
+		$response        = wp_remote_post(
+			$message_api_url,
+			array(
+				'headers' => array(
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . $api_key,
+					'OpenAI-Beta'   => 'assistants=v2',
+				),
+				'body'    => $body,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return 'Failed to add message.';
+		}
+
+		// Step 4: Run the thread.
+		$run_api_url = "https://api.openai.com/v1/threads/{$thread_id}/runs";
+		$body        = wp_json_encode(
+			array(
+				'assistant_id' => $assistant_id,
+			)
+		);
+		$response    = wp_remote_post(
+			$run_api_url,
+			array(
+				'headers' => array(
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . $api_key,
+					'OpenAI-Beta'   => 'assistants=v2',
+				),
+				'body'    => $body,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return 'Failed to run thread.';
+		}
+
+		$response_body    = wp_remote_retrieve_body( $response );
+		$decoded_response = json_decode( $response_body, true );
+
+		if ( 'queued' === $decoded_response['status'] || 'running' === $decoded_response['status'] ) {
+			return $this->wait_for_run_completion( $api_key, $decoded_response['id'], $thread_id );
+		} elseif ( 'completed' === $decoded_response['status'] ) {
+			return $this->fetch_messages_from_thread( $api_key, $thread_id );
+		} else {
+			return 'Run failed or was cancelled.';
+		}
+	}
+
+	/**
+	 * Wait for the run to complete in the OpenAI API.
+	 *
+	 * @param string $api_key  The OpenAI API key.
+	 * @param string $run_id   The run ID.
+	 * @param string $thread_id The thread ID.
+	 * @return mixed The run result or an error message.
+	 */
+	private function wait_for_run_completion( $api_key, $run_id, $thread_id ) {
+		$status_check_url = "https://api.openai.com/v1/threads/{$thread_id}/runs/{$run_id}";
+
+		$attempts     = 0;
+		$max_attempts = 20;
+
+		while ( $attempts < $max_attempts ) {
+			sleep( 5 );
+			$response = wp_remote_get(
+				$status_check_url,
+				array(
+					'headers' => array(
+						'Authorization' => 'Bearer ' . $api_key,
+						'OpenAI-Beta'   => 'assistants=v2',
+					),
+				)
 			);
-		}
-	}
 
-	/**
-	 * Render the meta box.
-	 *
-	 * @since 1.0.0
-	 * @param WP_Post $post The current post.
-	 */
-	public function render_meta_box( $post ) {
-	    wp_nonce_field( 'wp_top_5_meta_box', 'wp_top_5_meta_box_nonce' );
+			if ( is_wp_error( $response ) ) {
+				return 'Failed to check run status.';
+			}
 
-	    $top_5_points_meta = get_post_meta( $post->ID, 'wp_top_5_points', true );
-	    $top_5_points = $top_5_points_meta ? $top_5_points_meta : array();
+			$response_body    = wp_remote_retrieve_body( $response );
+			$decoded_response = json_decode( $response_body, true );
 
-	    echo '<button id="generate-top-5-button">Generate Top 5 Points</button>';
-	    echo '<div id="loading-icon" style="display:none;">Thinking...</div>';
-	    echo '<div id="top-5-points-list" class="list-group">';
+			if ( isset( $decoded_response['error'] ) ) {
+				return 'Error retrieving run status: ' . $decoded_response['error']['message'];
+			}
 
-	    for ( $i = 1; $i <= 5; $i++ ) {
-	        $point = isset($top_5_points[$i - 1]) ? $top_5_points[$i - 1] : '';
-	        echo "<div style='margin-bottom: 10px;'>";
-	        echo "<label for='wp_top_5_points[" . esc_attr( $i ) . "]'>" . esc_html( "Point $i:" ) . "</label>";
-	        echo "<input id='wp_top_5_points_" . esc_attr( $i ) . "' style='width: 100%;' type='text' name='wp_top_5_points[" . esc_attr( $i ) . "]' value='" . esc_attr( $point ) . "' placeholder='" . esc_attr( "Point $i" ) . "' />";
-	        echo '</div>';
-	    }
+			if ( isset( $decoded_response['status'] ) && 'completed' === $decoded_response['status'] ) {
+				return $this->fetch_messages_from_thread( $api_key, $thread_id );
+			} elseif ( isset( $decoded_response['status'] ) && ( 'failed' === $decoded_response['status'] || 'cancelled' === $decoded_response['status'] ) ) {
+				return 'Run failed or was cancelled.';
+			} elseif ( isset( $decoded_response['status'] ) && 'requires_action' === $decoded_response['status'] ) {
+				return $this->handle_requires_action( $api_key, $run_id, $thread_id, $decoded_response['required_action'] );
+			}
 
-	    echo '</div>';
-	}
-
-	/**
-	 * Save the meta box data.
-	 *
-	 * @since 1.0.0
-	 * @param int $post_id The ID of the post being saved.
-	 */
-	public function save_top_5_points( $post_id ) {
-	    // Check if our nonce is set.
-	    if ( ! isset( $_POST['wp_top_5_meta_box_nonce'] ) ) {
-	        return;
-	    }
-
-	    // Verify that the nonce is valid.
-	    if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wp_top_5_meta_box_nonce'] ) ), 'wp_top_5_meta_box' ) ) {
-	        return;
-	    }
-
-	    // Don't save during autosave.
-	    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-	        return;
-	    }
-
-	    // Check permissions.
-	    if ( isset( $_POST['post_type'] ) && 'page' === sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) ) {
-	        if ( ! current_user_can( 'edit_page', $post_id ) ) {
-	            return;
-	        }
-	    } elseif ( ! current_user_can( 'edit_post', $post_id ) ) {
-	        return;
-	    }
-
-	    // Save the meta data.
-	    $top_5_points = isset( $_POST['wp_top_5_points'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['wp_top_5_points'] ) ) : array();
-	    error_log('Top 5 Points to be saved: ' . print_r($top_5_points, true)); // Log the points to be saved
-
-	    update_post_meta( $post_id, 'wp_top_5_points', $top_5_points );
-	}
-
-	/**
-	 * Gather content using OpenAI API.
-	 *
-	 * @since 1.0.0
-	 */
-	public static function wp_top_5_gather_content() {
-	    error_log('wp_top_5_gather_content function called'); // Verify function call
-
-	    // Verify the nonce.
-	    $nonce = sanitize_key( wp_unslash( $_POST['nonce'] ?? '' ) );
-	    if ( ! wp_verify_nonce( $nonce, 'wp_top_5_ajax_nonce' ) ) {
-	        error_log('Nonce verification failed'); // Log nonce failure
-	        wp_send_json_error( 'Nonce verification failed. Unable to proceed.' );
-	        exit;
-	    }
-
-	    // Sanitize and validate inputs.
-	    $title   = sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) );
-	    $tags    = sanitize_text_field( wp_unslash( $_POST['tags'] ?? '' ) );
-	    $content = sanitize_textarea_field( wp_unslash( $_POST['content'] ?? '' ) );
-	    $model   = sanitize_text_field( wp_unslash( $_POST['model'] ?? '' ) );
-
-	    // Log the inputs for debugging
-	    error_log("Title: $title");
-	    error_log("Tags: $tags");
-	    error_log("Content: $content");
-	    error_log("Model: $model");
-
-	    // Get the API key.
-	    $api_key = get_option( 'wp_top_5_openai_api_key' );
-	    if ( empty( $api_key ) ) {
-	        error_log('API key is missing'); // Log missing API key
-	        wp_send_json_error( 'API key is missing.' );
-	        exit;
-	    }
-
-	    // Set up the OpenAI API call.
-	    $url            = 'https://api.openai.com/v1/chat/completions';
-	    $headers        = array(
-	        'Content-Type'  => 'application/json',
-	        'Authorization' => "Bearer $api_key",
-	    );
-	    $system_message = 'You are a helpful assistant that analyzes an article and identifies its top five points. Return these points in an array format.';
-
-	    $data = array(
-	        'model'    => $model,
-	        'messages' => array(
-	            array(
-	                'role'    => 'system',
-	                'content' => $system_message,
-	            ),
-	            array(
-	                'role'    => 'user',
-	                'content' => "Please analyze the following article and identify its top five points:\n\nTitle: {$title}\nTags: {$tags}\nContent: {$content}",
-	            ),
-	        ),
-	    );
-	    $args = array(
-	        'headers'   => $headers,
-	        'body'      => wp_json_encode( $data ),
-	        'sslverify' => true, // Enable SSL verification.
-	        'timeout'   => 120,  // Set the timeout value to 120 seconds.
-	    );
-
-	    // Log the data being sent to the API for debugging
-	    error_log("OpenAI API Request Data: " . print_r($data, true));
-
-	    // Make the API call.
-	    $response = wp_remote_post( $url, $args );
-
-	    if ( is_wp_error( $response ) ) {
-	        error_log("OpenAI API Error: " . $response->get_error_message());
-	        wp_send_json_error( $response->get_error_message() );
-	        exit;
-	    }
-
-	    $body = wp_remote_retrieve_body( $response );
-	    $json = json_decode( $body, true );
-
-	    // Log the API response for debugging
-	    error_log("OpenAI API Response: " . print_r($json, true));
-
-	    if ( empty( $json ) || isset( $json['error'] ) ) {
-	        $error_message = isset( $json['error']['message'] ) ? $json['error']['message'] : 'Unknown error';
-	        error_log("OpenAI API Error: " . $error_message);
-	        wp_send_json_error( $error_message );
-	        exit;
-	    }
-
-	    $article_points_string = $json['choices'][0]['message']['content'] ?? '';
-	    error_log("Article Points String: " . $article_points_string); // Log the article points string
-
-	    // Remove the JSON code block markers
-	    $article_points_string = trim($article_points_string, "```json \n```");
-	    error_log("Cleaned Article Points String: " . $article_points_string); // Log the cleaned article points string
-
-	    // Decode the JSON string
-	    $article_points_array = json_decode($article_points_string, true);
-	    error_log("Article Points Array: " . print_r($article_points_array, true)); // Log the decoded points array
-
-	    if ( json_last_error() === JSON_ERROR_NONE && is_array($article_points_array) ) {
-	        wp_send_json_success( $article_points_array );
-	    } else {
-	        error_log('Failed to generate top 5 points.'); // Log failure to generate points
-	        wp_send_json_error( 'Failed to generate top 5 points.' );
-	    }
-	    exit;
-	}
-
-
-	/**
-	 * Display top 5 points on the front-end.
-	 *
-	 * @since 1.0.0
-	 * @return string HTML output of the top 5 points.
-	 */
-	public function wp_top_5_display_points() {
-		global $post;
-
-		$top_5_points = get_post_meta( $post->ID, 'wp_top_5_points', true );
-
-		if ( ! is_array( $top_5_points ) || empty( $top_5_points ) ) {
-			return '<p>' . esc_html__( 'No top 5 points available.', 'wp-top-5' ) . '</p>';
+			++$attempts;
 		}
 
-		$output  = '<div class="wp-top-5-wrapper">';
-		$output .= '<div class="wp-top-5-header">' . esc_html__( 'View Key Points &#9650;', 'wp-top-5' ) . '</div>';
-		$output .= '<div class="container">';
-		$output .= '<ul class="wp-top-5-list hidden">';
-
-		foreach ( $top_5_points as $point ) {
-			$output .= '<li class="wp-top-5-point">' . esc_html( $point ) . '</li>';
-		}
-
-		$output .= '</ul>';
-		$output .= '</div>';
-		$output .= '</div>';
-
-		return $output;
+		return 'Run did not complete in expected time.';
 	}
 
 	/**
-	 * Register shortcodes for the plugin.
+	 * Handle required actions for the run.
 	 *
-	 * @since 1.0.0
+	 * @param string $api_key         The OpenAI API key.
+	 * @param string $run_id          The run ID.
+	 * @param string $thread_id       The thread ID.
+	 * @param array  $required_action The required action details.
+	 * @return mixed The run result or an error message.
 	 */
-	public function register_shortcodes() {
-		add_shortcode( 'wp_top_5', array( $this, 'wp_top_5_display_points' ) );
+	private function handle_requires_action( $api_key, $run_id, $thread_id, $required_action ) {
+		if ( 'submit_tool_outputs' === $required_action['type'] ) {
+			$tool_calls   = $required_action['submit_tool_outputs']['tool_calls'];
+			$tool_outputs = array();
+
+			foreach ( $tool_calls as $tool_call ) {
+				$output = '';
+				if ( 'function' === $tool_call['type'] ) {
+					switch ( $tool_call['function']['name'] ) {
+						case 'extract_key_points':
+							$output = wp_json_encode(
+								array(
+									'points' => array(
+										array(
+											'index' => 1,
+											'text'  => 'Point 1',
+										),
+										array(
+											'index' => 2,
+											'text'  => 'Point 2',
+										),
+										array(
+											'index' => 3,
+											'text'  => 'Point 3',
+										),
+										array(
+											'index' => 4,
+											'text'  => 'Point 4',
+										),
+										array(
+											'index' => 5,
+											'text'  => 'Point 5',
+										),
+									),
+								)
+							);
+							break;
+
+						default:
+							$output = wp_json_encode( array( 'success' => 'true' ) );
+							break;
+					}
+
+					$tool_outputs[] = array(
+						'tool_call_id' => $tool_call['id'],
+						'output'       => $output,
+					);
+				}
+			}
+
+			$submit_tool_outputs_url = "https://api.openai.com/v1/threads/{$thread_id}/runs/{$run_id}/submit_tool_outputs";
+			$response                = wp_remote_post(
+				$submit_tool_outputs_url,
+				array(
+					'headers' => array(
+						'Authorization' => 'Bearer ' . $api_key,
+						'OpenAI-Beta'   => 'assistants=v2',
+						'Content-Type'  => 'application/json',
+					),
+					'body'    => wp_json_encode( array( 'tool_outputs' => $tool_outputs ) ),
+				)
+			);
+
+			if ( is_wp_error( $response ) ) {
+				return 'Failed to submit tool outputs.';
+			}
+
+			return $this->wait_for_run_completion( $api_key, $run_id, $thread_id );
+		}
+
+		return 'Unhandled requires_action.';
+	}
+
+	/**
+	 * Fetch messages from the thread.
+	 *
+	 * @param string $api_key   The OpenAI API key.
+	 * @param string $thread_id The thread ID.
+	 * @return mixed The messages from the thread or an error message.
+	 */
+	private function fetch_messages_from_thread( $api_key, $thread_id ) {
+		$messages_url = "https://api.openai.com/v1/threads/{$thread_id}/messages";
+
+		$response = wp_remote_get(
+			$messages_url,
+			array(
+				'headers' => array(
+					'Authorization' => 'Bearer ' . $api_key,
+					'Content-Type'  => 'application/json',
+					'OpenAI-Beta'   => 'assistants=v2',
+				),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return 'Failed to fetch messages.';
+		}
+
+		$response_body    = wp_remote_retrieve_body( $response );
+		$decoded_response = json_decode( $response_body, true );
+
+		if ( ! isset( $decoded_response['data'] ) ) {
+			return 'No messages found.';
+		}
+
+		$messages = array_map(
+			function ( $message ) {
+				foreach ( $message['content'] as $content ) {
+					if ( 'text' === $content['type'] ) {
+						return json_decode( $content['text']['value'], true );
+					}
+				}
+				return 'No text content.';
+			},
+			$decoded_response['data']
+		);
+
+		return $messages[0];
 	}
 }

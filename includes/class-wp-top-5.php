@@ -115,9 +115,14 @@ class Wp_Top_5 {
 		require_once plugin_dir_path( __DIR__ ) . 'admin/class-wp-top-5-admin.php';
 
 		/**
-		 * The class responsible for defining all actions that occur in the admin area.
+		 * The class responsible for defining all settings for the plugin.
 		 */
 		require_once plugin_dir_path( __DIR__ ) . 'admin/class-wp-top-5-admin-settings.php';
+
+		/**
+		 * The class responsible for defining all metabox items.
+		 */
+		require_once plugin_dir_path( __DIR__ ) . 'admin/class-wp-top-5-admin-metabox.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
@@ -159,10 +164,8 @@ class Wp_Top_5 {
 
 		$this->loader->add_action( 'admin_menu', 'Wp_Top_5_Admin_Settings', 'wp_top_5_register_options_page' );
 		$this->loader->add_action( 'admin_menu', 'Wp_Top_5_Admin_Settings', 'wp_top_5_register_settings' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'add_meta_box' );
-
-		$this->loader->add_action( 'save_post', $plugin_admin, 'save_top_5_points' );
-		$this->loader->add_action( 'init', $plugin_admin, 'register_shortcodes' );
+		$this->loader->add_action( 'admin_enqueue_scripts', 'Wp_Top_5_Admin_Metabox', 'add_meta_box' );
+		$this->loader->add_action( 'save_post', 'Wp_Top_5_Admin_Metabox', 'save_top_5_points' );
 		$this->loader->add_action( 'wp_ajax_wp_top_5_gather_content', $plugin_admin, 'wp_top_5_gather_content' );
 	}
 
