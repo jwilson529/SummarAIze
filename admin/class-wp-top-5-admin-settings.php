@@ -50,6 +50,8 @@ class Wp_Top_5_Admin_Settings {
 		register_setting( 'wp_top_5_settings', 'wp_top_5_selected_model' );
 		register_setting( 'wp_top_5_settings', 'wp_top_5_post_types' );
 		register_setting( 'wp_top_5_settings', 'wp_top_5_assistant_id' );
+		register_setting( 'wp_top_5_settings', 'wp_top_5_display_mode' );
+		register_setting( 'wp_top_5_settings', 'wp_top_5_display_position' );
 
 		add_settings_section(
 			'wp_top_5_settings_section',
@@ -91,7 +93,39 @@ class Wp_Top_5_Admin_Settings {
 			'wp_top_5_settings_section',
 			array( 'label_for' => 'wp_top_5_assistant_id' )
 		);
+
+		add_settings_field(
+			'wp_top_5_display_mode',
+			__( 'Display Mode', 'wp-top-5' ),
+			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_display_mode_callback' ),
+			'wp_top_5_settings',
+			'wp_top_5_settings_section'
+		);
+
+		add_settings_field(
+			'wp_top_5_display_position',
+			__( 'Display Position', 'wp-top-5' ),
+			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_display_position_callback' ),
+			'wp_top_5_settings',
+			'wp_top_5_settings_section'
+		);
 	}
+
+	/**
+	 * Callback for the display position field.
+	 */
+	public static function wp_top_5_display_position_callback() {
+		$selected_position = get_option( 'wp_top_5_display_position', 'above' );
+		?>
+		<select name="wp_top_5_display_position" id="wp_top_5_display_position">
+			<option value="above" <?php selected( $selected_position, 'above' ); ?>>Above Content</option>
+			<option value="below" <?php selected( $selected_position, 'below' ); ?>>Below Content</option>
+			<option value="popup" <?php selected( $selected_position, 'popup' ); ?>>Popup</option>
+		</select>
+		<p class="description">Choose where to display the top 5 points.</p>
+		<?php
+	}
+
 
 	/**
 	 * Callback for the post types field.
@@ -180,6 +214,21 @@ class Wp_Top_5_Admin_Settings {
 		echo '</div>';
 		echo '</div>';
 	}
+
+	/**
+	 * Callback for the Display Mode field.
+	 */
+	public static function wp_top_5_display_mode_callback() {
+		$value = get_option( 'wp_top_5_display_mode', 'light' );
+		?>
+		<select id="wp_top_5_display_mode" name="wp_top_5_display_mode">
+			<option value="light" <?php selected( $value, 'light' ); ?>><?php esc_html_e( 'Light', 'wp-top-5' ); ?></option>
+			<option value="dark" <?php selected( $value, 'dark' ); ?>><?php esc_html_e( 'Dark', 'wp-top-5' ); ?></option>
+		</select>
+		<p class="description"><?php esc_html_e( 'Choose the display mode for the top 5 points.', 'wp-top-5' ); ?></p>
+		<?php
+	}
+
 
 	/**
 	 * Callback for the Assistant ID field.
