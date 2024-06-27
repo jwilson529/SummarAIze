@@ -171,15 +171,15 @@ class Wp_Top_5_Public {
 	 */
 	public function append_top_5_to_content_automatically( $content ) {
 		if ( has_shortcode( $content, 'wp_top_5' ) ) {
-		    return $content;
+			return $content;
 		}
 
 		$post_id      = get_the_ID();
 		$top_5_points = get_post_meta( $post_id, 'wp_top_5_points', true );
 
 		// Check if $top_5_points is an array and filter out empty values.
-		if ( !is_array( $top_5_points ) || empty( array_filter( $top_5_points ) ) ) {
-		    return $content;
+		if ( ! is_array( $top_5_points ) || empty( array_filter( $top_5_points ) ) ) {
+			return $content;
 		}
 
 		ob_start();
