@@ -68,15 +68,15 @@
                         response.data.points.forEach(function(point, index) {
                             var inputSelector = '#wp_top_5_points_' + (index + 1);
                             var inputField = $(inputSelector);
-                            console.log("Setting point", index + 1, "to", point, "using selector", inputSelector);
+                            console.log("Setting point", index + 1, "to", point.text, "using selector", inputSelector);
 
                             if (inputField.length) {
-                                inputField.val(point).change();
+                                inputField.val(point.text).change();
                                 console.log('Input field found and set for point', index + 1);
 
                                 // Force re-render with a delay
                                 setTimeout(function() {
-                                    inputField.val(point).trigger('change');
+                                    inputField.val(point.text).trigger('change');
                                 }, 100);
                             } else {
                                 console.log('Input field not found for point', index + 1);
