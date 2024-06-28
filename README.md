@@ -18,6 +18,12 @@ WP Top 5 Pro is a WordPress plugin that allows you to automatically generate and
 1. Upload the plugin files to the `/wp-content/plugins/wp-top-5-pro` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
 3. Use the Settings->WP Top 5 Pro screen to configure the plugin.
+4. Use your own Open AI API key.
+5. Use the default Assistant ID or configure your own.
+
+## Important Note
+
+The Assistant ID configures the behavior and responses of the WP Top 5 Pro assistant. Users must use their own OpenAI API key for authentication and billing.
 
 ## Frequently Asked Questions
 

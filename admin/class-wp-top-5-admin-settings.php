@@ -230,10 +230,16 @@ class Wp_Top_5_Admin_Settings {
 
 	/**
 	 * Callback for the Assistant ID field.
+	 * 
+	 * Default assistant id is: asst_L4j2SowCX4dFnz8Vn6GZ4bp0
 	 */
 	public static function wp_top_5_assistant_id_callback() {
-		$value = get_option( 'wp_top_5_assistant_id', '' );
-		echo '<input type="text" name="wp_top_5_assistant_id" value="' . esc_attr( $value ) . '" />';
-		echo '<p class="description">' . esc_html__( 'Enter the Assistant ID provided by OpenAI.', 'wp-top-5' ) . '</p>';
+	    // Get the current value from the options table, or use the default value if none is set.
+	    $default_assistant_id = 'asst_L4j2SowCX4dFnz8Vn6GZ4bp0';
+	    $value = get_option( 'wp_top_5_assistant_id', $default_assistant_id );
+
+	    echo '<input type="text" name="wp_top_5_assistant_id" value="' . esc_attr( $value ) . '" />';
+	    echo '<p class="description">' . esc_html__( 'Enter the Assistant ID provided by OpenAI. The default ID is asst_L4j2SowCX4dFnz8Vn6GZ4bp0.', 'wp-top-5' ) . '</p>';
 	}
+
 }
