@@ -31,8 +31,7 @@ class Wp_Top_5_Admin_Settings {
 	 */
 	public static function wp_top_5_options_page() {
 		?>
-		<div class="wrap">
-			<h2><?php esc_html_e( 'WP Top 5 Pro Settings', 'wp-top-5' ); ?></h2>
+		<div id="wp-top-5" class="wrap">
 			<form method="post" action="options.php">
 				<?php settings_fields( 'wp_top_5_settings' ); ?>
 				<?php do_settings_sections( 'wp_top_5_settings' ); ?>

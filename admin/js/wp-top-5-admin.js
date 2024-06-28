@@ -33,8 +33,19 @@
     $(document).on('click', '#generate-top-5-button', function(event) {
         event.preventDefault();
 
-        // Show loading icon
-        $('#loading-icon').show();
+        // Show loading icon and countdown
+        $('#loading-icon').html('<div class="spinner"></div>Generating key points...').show();
+
+        var countdown = 10;
+        var countdownInterval = setInterval(function() {
+            if (countdown > 0) {
+                $('#loading-icon').html('<div class="spinner"></div>Generating key points... ' + countdown + ' seconds remaining');
+                countdown--;
+            } else {
+                clearInterval(countdownInterval);
+                $('#loading-icon').html('<div class="spinner"></div>Generating key points...');
+            }
+        }, 1000);
 
         var editorData = getEditorData();
         console.log("Editor Data:", editorData);
@@ -58,6 +69,7 @@
             })
             .done(function(response) {
                 // Hide loading icon
+                clearInterval(countdownInterval);
                 $('#loading-icon').hide();
                 console.log("AJAX Response:", response);
 
@@ -65,21 +77,21 @@
                     console.log("Success:", response.data);
                     // Set the response data to input fields
                     if (response.data && response.data.points && Array.isArray(response.data.points)) {
-                        response.data.points.forEach(function(point, index) {
-                            var inputSelector = '#wp_top_5_points_' + (index + 1);
+                        response.data.points.forEach(function(point) {
+                            var inputSelector = '#wp_top_5_points_' + point.index;
                             var inputField = $(inputSelector);
-                            console.log("Setting point", index + 1, "to", point.text, "using selector", inputSelector);
+                            console.log("Setting point", point.index, "to", point.text, "using selector", inputSelector);
 
                             if (inputField.length) {
                                 inputField.val(point.text).change();
-                                console.log('Input field found and set for point', index + 1);
+                                console.log('Input field found and set for point', point.index);
 
                                 // Force re-render with a delay
                                 setTimeout(function() {
                                     inputField.val(point.text).trigger('change');
                                 }, 100);
                             } else {
-                                console.log('Input field not found for point', index + 1);
+                                console.log('Input field not found for point', point.index);
                             }
                         });
                     }
@@ -89,6 +101,7 @@
             })
             .fail(function(response) {
                 // Hide loading icon
+                clearInterval(countdownInterval);
                 $('#loading-icon').hide();
                 console.log("Error:", response);
             })
