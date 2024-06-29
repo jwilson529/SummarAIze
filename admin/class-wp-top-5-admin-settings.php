@@ -51,6 +51,7 @@ class Wp_Top_5_Admin_Settings {
 		register_setting( 'wp_top_5_settings', 'wp_top_5_assistant_id' );
 		register_setting( 'wp_top_5_settings', 'wp_top_5_display_mode' );
 		register_setting( 'wp_top_5_settings', 'wp_top_5_display_position' );
+		register_setting( 'wp_top_5_settings', 'wp_top_5_version' ); // Add version setting
 
 		add_settings_section(
 			'wp_top_5_settings_section',
@@ -108,6 +109,15 @@ class Wp_Top_5_Admin_Settings {
 			'wp_top_5_settings',
 			'wp_top_5_settings_section'
 		);
+
+		add_settings_field(
+			'wp_top_5_version',
+			__( 'Plugin Version', 'wp-top-5' ),
+			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_version_callback' ),
+			'wp_top_5_settings',
+			'wp_top_5_settings_section',
+			array( 'label_for' => 'wp_top_5_version' )
+		);
 	}
 
 	/**
@@ -124,7 +134,6 @@ class Wp_Top_5_Admin_Settings {
 		<p class="description">Choose where to display the top 5 points.</p>
 		<?php
 	}
-
 
 	/**
 	 * Callback for the post types field.
@@ -227,19 +236,61 @@ class Wp_Top_5_Admin_Settings {
 		<?php
 	}
 
-
 	/**
-	 * Callback for the Assistant ID field.
-	 * 
-	 * Default assistant id is: asst_L4j2SowCX4dFnz8Vn6GZ4bp0
+	 * Callback for the version field.
 	 */
-	public static function wp_top_5_assistant_id_callback() {
-	    // Get the current value from the options table, or use the default value if none is set.
-	    $default_assistant_id = 'asst_L4j2SowCX4dFnz8Vn6GZ4bp0';
-	    $value = get_option( 'wp_top_5_assistant_id', $default_assistant_id );
-
-	    echo '<input type="text" name="wp_top_5_assistant_id" value="' . esc_attr( $value ) . '" />';
-	    echo '<p class="description">' . esc_html__( 'Enter the Assistant ID provided by OpenAI. The default ID is asst_L4j2SowCX4dFnz8Vn6GZ4bp0.', 'wp-top-5' ) . '</p>';
+	public static function wp_top_5_version_callback() {
+		$value = get_option( 'wp_top_5_version', '1.0.0' );
+		echo '<input type="text" name="wp_top_5_version" value="' . esc_attr( $value ) . '" />';
+		echo '<p class="description">' . esc_html__( 'Current version of the plugin.', 'wp-top-5' ) . '</p>';
 	}
 
+/**
+	 * Check for plugin updates.
+	 */
+	public static function wp_top_5_check_for_updates() {
+		$current_version = get_option( 'wp_top_5_version', '1.0.0' );
+		$response = wp_remote_get( 'https://oneclickcontent.com/wp-json/wptop5/v1/update-wp5', array(
+			'body' => array(
+				'version' => $current_version
+			)
+		));
+
+		if ( is_wp_error( $response ) ) {
+			return;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
+
+		if ( version_compare( $current_version, $data['new_version'], '<' ) ) {
+			// New version available
+			$file_url = $data['download_url'];
+			self::wp_top_5_download_new_version( $file_url, $data['new_version'] );
+		}
+	}
+
+	/**
+	 * Download and install new version of the plugin.
+	 */
+	public static function wp_top_5_download_new_version( $file_url, $new_version ) {
+		$tmp_file = download_url( $file_url );
+
+		if ( is_wp_error( $tmp_file ) ) {
+			return;
+		}
+
+		$plugin_dir = WP_PLUGIN_DIR . '/wp-top-5';
+		unzip_file( $tmp_file, $plugin_dir );
+		unlink( $tmp_file );
+
+		// Update the version number in the settings
+		update_option( 'wp_top_5_version', $new_version );
+	}
+
+
 }
+
+// Hook to check for updates
+add_action( 'admin_init', array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_check_for_updates' ) );
+
