@@ -193,9 +193,9 @@ class Wp_Top_5_Admin_Settings {
 		$selected_position = get_option( 'wp_top_5_display_position', 'above' );
 		?>
 		<select name="wp_top_5_display_position" id="wp_top_5_display_position">
-			<option value="above" <?php selected( $selected_position, 'above' ); ?>>Above Content</option>
-			<option value="below" <?php selected( $selected_position, 'below' ); ?>>Below Content</option>
-			<option value="popup" <?php selected( $selected_position, 'popup' ); ?>>Popup</option>
+			<option value="above" <?php selected( $selected_position, 'above' ); ?>><?php esc_html_e( 'Above Content', 'wp-top-5' ); ?></option>
+			<option value="below" <?php selected( $selected_position, 'below' ); ?>><?php esc_html_e( 'Below Content', 'wp-top-5' ); ?></option>
+			<option value="popup" <?php selected( $selected_position, 'popup' ); ?>><?php esc_html_e( 'Popup', 'wp-top-5' ); ?></option>
 		</select>
 		<p class="description"><?php esc_html_e( 'Choose where to display the top 5 points.', 'wp-top-5' ); ?></p>
 		<?php
@@ -214,13 +214,13 @@ class Wp_Top_5_Admin_Settings {
 
 		$post_types = get_post_types( array( 'public' => true ), 'names', 'and' );
 
-		echo '<p>' . esc_html__( 'Select which post types WP Top 5 Pro should be enabled on:', 'wp-top-5' ) . '</p>';
+		echo '<p>' . esc_html__( 'Select which post types WP Top 5 should be enabled on:', 'wp-top-5' ) . '</p>';
 		echo '<p><em>' . esc_html__( 'Custom post types must have titles enabled.', 'wp-top-5' ) . '</em></p>';
 
 		foreach ( $post_types as $post_type ) {
 			$checked         = in_array( $post_type, $selected_post_types, true ) ? 'checked' : '';
 			$post_type_label = str_replace( '_', ' ', ucwords( $post_type ) );
-			echo '<input type="checkbox" name="wp_top_5_post_types[]" value="' . esc_attr( $post_type ) . '" ' . esc_attr( $checked ) . '> ' . esc_html( $post_type_label ) . '<br>';
+			echo '<input type="checkbox" name="wp_top_5_post_types[]" value="' . esc_attr( $post_type ) . '" class="wp-top-5-settings-checkbox" ' . esc_attr( $checked ) . '> ' . esc_html( $post_type_label ) . '<br>';
 		}
 	}
 
@@ -421,25 +421,39 @@ class Wp_Top_5_Admin_Settings {
 	 * @since 1.0.0
 	 */
 	public static function wp_top_5_auto_save() {
-		// Check AJAX nonce for security.
-		check_ajax_referer( 'wp_top_5_ajax_nonce', 'nonce' );
+	    // Check AJAX nonce for security.
+	    check_ajax_referer( 'wp_top_5_ajax_nonce', 'nonce' );
 
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-top-5' ) ) );
-		}
+	    if ( ! current_user_can( 'manage_options' ) ) {
+	        wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-top-5' ) ) );
+	    }
 
-		if ( isset( $_POST['field_name'], $_POST['field_value'] ) ) {
-			$field_name  = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
-			$field_value = sanitize_text_field( wp_unslash( $_POST['field_value'] ) );
+	    if ( isset( $_POST['field_name'], $_POST['field_value'] ) ) {
+	        $field_name  = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
+	        $field_value = $_POST['field_value'];
 
-			if ( update_option( $field_name, $field_value ) ) {
-				wp_send_json_success( array( 'message' => __( 'Option saved.', 'wp-top-5' ) ) );
-			} else {
-				wp_send_json_error( array( 'message' => __( 'Failed to save option.', 'wp-top-5' ) ) );
-			}
-		} else {
-			wp_send_json_error( array( 'message' => __( 'Invalid data.', 'wp-top-5' ) ) );
-		}
+	        // Handle array values (like checkboxes)
+	        if ( is_array( $field_value ) ) {
+	            $field_value = array_map( 'sanitize_text_field', wp_unslash( $field_value ) );
+	        } else {
+	            $field_value = sanitize_text_field( wp_unslash( $field_value ) );
+	        }
+
+	        // Use `update_option` with a proper option key
+	        $option_key = str_replace( '[]', '', $field_name ); // Ensure correct option key format
+
+	        if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {
+	            if ( $field_name === 'wp_top_5_openai_api_key' ) {
+	                wp_send_json_success( array( 'message' => __( 'API key saved. Page will refresh.', 'wp-top-5' ), 'refresh' => true ) );
+	            } else {
+	                wp_send_json_success( array( 'message' => __( 'Option saved.', 'wp-top-5' ) ) );
+	            }
+	        } else {
+	            wp_send_json_error( array( 'message' => __( 'Failed to save option.', 'wp-top-5' ) ) );
+	        }
+	    } else {
+	        wp_send_json_error( array( 'message' => __( 'Invalid data.', 'wp-top-5' ) ) );
+	    }
 	}
 
 	/**

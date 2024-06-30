@@ -74,39 +74,54 @@
          * @param {Object} $field The jQuery object for the field.
          */
         function autoSaveField($field) {
-            var fieldValue = $field.val();
+            var fieldValue;
             var fieldName = $field.attr('name');
+
+            // Handle checkboxes
+            if ($field.attr('type') === 'checkbox') {
+                // Collect all selected checkboxes with the same name
+                fieldValue = [];
+                $('input[name="' + fieldName + '"]:checked').each(function() {
+                    fieldValue.push($(this).val());
+                });
+            } else {
+                fieldValue = $field.val();
+            }
+
             console.log('Auto-saving field', fieldName, 'with value', fieldValue);
 
             $.ajax({
-                    url: wp_top_5_admin_vars.ajax_url,
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'wp_top_5_auto_save',
-                        nonce: wp_top_5_admin_vars.wp_top_5_ajax_nonce,
-                        field_name: fieldName,
-                        field_value: fieldValue
-                    },
-                    beforeSend: function() {
-                        console.log('Sending AJAX request for field', fieldName, 'with value', fieldValue);
+                url: wp_top_5_admin_vars.ajax_url,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'wp_top_5_auto_save',
+                    nonce: wp_top_5_admin_vars.wp_top_5_ajax_nonce,
+                    field_name: fieldName,
+                    field_value: fieldValue
+                },
+                beforeSend: function() {
+                    console.log('Sending AJAX request for field', fieldName, 'with value', fieldValue);
+                }
+            })
+            .done(function(response) {
+                if (response.success) {
+                    console.log("Auto-save success:", response.data);
+                    showNotification('Field saved successfully.');
+                    if (response.data.refresh) {
+                        location.reload();
                     }
-                })
-                .done(function(response) {
-                    if (response.success) {
-                        console.log("Auto-save success:", response.data);
-                        showNotification('Field saved successfully.');
-                        // showWpSettingsSavedNotification();
-                    } else {
-                        console.log("Auto-save failed:", response.data);
-                        showNotification('Failed to save field.', 'error');
-                    }
-                })
-                .fail(function(response) {
-                    console.log("Auto-save error:", response);
-                    showNotification('Error saving field.', 'error');
-                });
+                } else {
+                    console.log("Auto-save failed:", response.data);
+                    showNotification('Failed to save field.', 'error');
+                }
+            })
+            .fail(function(response) {
+                console.log("Auto-save error:", response);
+                showNotification('Error saving field.', 'error');
+            });
         }
+
 
         /**
          * Debounce function to limit the rate at which a function can fire.
@@ -241,6 +256,15 @@
         // Toggle fields on change
         $('#wp_top_5_display_position').change(function() {
             toggleSettingsFields();
+        });
+
+        $(document).on('change', '.wp-top-5-settings-field', function() {
+            autoSaveField($(this));
+        });
+
+        // Additional handler for checkbox changes
+        $(document).on('change', '.wp-top-5-settings-checkbox', function() {
+            autoSaveField($(this));
         });
 
     });
