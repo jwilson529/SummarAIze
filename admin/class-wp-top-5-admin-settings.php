@@ -18,8 +18,8 @@ class Wp_Top_5_Admin_Settings {
 	 */
 	public static function wp_top_5_register_options_page() {
 		add_options_page(
-			__( 'WP Top 5 Pro Settings', 'wp-top-5' ),
-			__( 'WP Top 5 Pro', 'wp-top-5' ),
+			__( 'WP Top 5 Settings', 'wp-top-5' ),
+			__( 'WP Top 5', 'wp-top-5' ),
 			'manage_options',
 			'wp-top-5-settings',
 			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_options_page' )

@@ -35,7 +35,7 @@ class Wp_Top_5_Admin_Metabox {
 			if ( post_type_exists( $post_type ) ) {
 				add_meta_box(
 					'wp_top_5_meta_box',
-					__( 'WP Top 5 Pro', 'wp-top-5' ),
+					__( 'WP Top 5', 'wp-top-5' ),
 					array( 'Wp_Top_5_Admin_Metabox', 'render_meta_box' ),
 					$post_type,
 					'side',

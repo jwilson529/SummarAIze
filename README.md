@@ -1,4 +1,4 @@
-# WP Top 5 Pro
+# WP Top 5 - Generate Key Takeaways with AI
 
 ![Plugin Banner](assets/banner-772x250.png)
 
