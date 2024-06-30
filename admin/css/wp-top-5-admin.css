@@ -154,7 +154,7 @@
 
 /* Hide the Save Changes Button */
 .wp-top-5-settings-form .submit {
-/*    display: none;*/
+    display: none;
 }
 
 /* Loading Icon Styles */

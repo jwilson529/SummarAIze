@@ -45,15 +45,7 @@ class Wp_Top_5_Admin_Settings {
 	 * Register the plugin settings.
 	 */
 	public static function wp_top_5_register_settings() {
-		register_setting( 'wp_top_5_settings', 'wp_top_5_openai_api_key' );
-		register_setting( 'wp_top_5_settings', 'wp_top_5_selected_model' );
-		register_setting( 'wp_top_5_settings', 'wp_top_5_post_types' );
-		register_setting( 'wp_top_5_settings', 'wp_top_5_assistant_id' );
-		register_setting( 'wp_top_5_settings', 'wp_top_5_widget_title' );
-		register_setting( 'wp_top_5_settings', 'wp_top_5_display_position' );
-		register_setting( 'wp_top_5_settings', 'wp_top_5_display_mode' );
-		register_setting( 'wp_top_5_settings', 'wp_top_5_button_style' );
-		register_setting( 'wp_top_5_settings', 'wp_top_5_button_color' );
+		register_setting( 'wp_top_5_settings', 'wp_top_5_openai_api_key', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 
 		add_settings_section(
 			'wp_top_5_settings_section',
@@ -71,71 +63,92 @@ class Wp_Top_5_Admin_Settings {
 			array( 'label_for' => 'wp_top_5_openai_api_key' )
 		);
 
-		add_settings_field(
-			'wp_top_5_selected_model',
-			__( 'Selected Model', 'wp-top-5' ),
-			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_selected_model_callback' ),
-			'wp_top_5_settings',
-			'wp_top_5_settings_section'
-		);
+		$api_key = get_option( 'wp_top_5_openai_api_key' );
 
-		add_settings_field(
-			'wp_top_5_post_types',
-			__( 'Post Types', 'wp-top-5' ),
-			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_post_types_callback' ),
-			'wp_top_5_settings',
-			'wp_top_5_settings_section'
-		);
+		if ( ! empty( $api_key ) && self::validate_openai_api_key( $api_key ) ) {
+			register_setting( 'wp_top_5_settings', 'wp_top_5_selected_model' );
+			register_setting( 'wp_top_5_settings', 'wp_top_5_post_types' );
+			register_setting( 'wp_top_5_settings', 'wp_top_5_assistant_id' );
+			register_setting( 'wp_top_5_settings', 'wp_top_5_widget_title' );
+			register_setting( 'wp_top_5_settings', 'wp_top_5_display_position' );
+			register_setting( 'wp_top_5_settings', 'wp_top_5_display_mode' );
+			register_setting( 'wp_top_5_settings', 'wp_top_5_button_style' );
+			register_setting( 'wp_top_5_settings', 'wp_top_5_button_color' );
 
-		add_settings_field(
-			'wp_top_5_assistant_id',
-			__( 'Assistant ID', 'wp-top-5' ),
-			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_assistant_id_callback' ),
-			'wp_top_5_settings',
-			'wp_top_5_settings_section',
-			array( 'label_for' => 'wp_top_5_assistant_id' )
-		);
+			add_settings_field(
+				'wp_top_5_selected_model',
+				__( 'Selected Model', 'wp-top-5' ),
+				array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_selected_model_callback' ),
+				'wp_top_5_settings',
+				'wp_top_5_settings_section'
+			);
 
-		add_settings_field(
-			'wp_top_5_widget_title',
-			__( 'Widget Title', 'wp-top-5' ),
-			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_widget_title_callback' ),
-			'wp_top_5_settings',
-			'wp_top_5_settings_section'
-		);
+			add_settings_field(
+				'wp_top_5_post_types',
+				__( 'Post Types', 'wp-top-5' ),
+				array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_post_types_callback' ),
+				'wp_top_5_settings',
+				'wp_top_5_settings_section'
+			);
 
-		add_settings_field(
-			'wp_top_5_display_position',
-			__( 'Display Position', 'wp-top-5' ),
-			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_display_position_callback' ),
-			'wp_top_5_settings',
-			'wp_top_5_settings_section'
-		);
+			add_settings_field(
+				'wp_top_5_assistant_id',
+				__( 'Assistant ID', 'wp-top-5' ),
+				array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_assistant_id_callback' ),
+				'wp_top_5_settings',
+				'wp_top_5_settings_section',
+				array( 'label_for' => 'wp_top_5_assistant_id' )
+			);
 
-		add_settings_field(
-			'wp_top_5_display_mode',
-			__( 'Display Mode', 'wp-top-5' ),
-			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_display_mode_callback' ),
-			'wp_top_5_settings',
-			'wp_top_5_settings_section'
-		);
+			add_settings_field(
+				'wp_top_5_widget_title',
+				__( 'Widget Title', 'wp-top-5' ),
+				array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_widget_title_callback' ),
+				'wp_top_5_settings',
+				'wp_top_5_settings_section'
+			);
 
-		add_settings_field(
-			'wp_top_5_button_style',
-			__( 'Button Style', 'wp-top-5' ),
-			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_button_style_callback' ),
-			'wp_top_5_settings',
-			'wp_top_5_settings_section'
-		);
+			add_settings_field(
+				'wp_top_5_display_position',
+				__( 'Display Position', 'wp-top-5' ),
+				array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_display_position_callback' ),
+				'wp_top_5_settings',
+				'wp_top_5_settings_section'
+			);
 
-		add_settings_field(
-			'wp_top_5_button_color',
-			__( 'Button Color', 'wp-top-5' ),
-			array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_button_color_callback' ),
-			'wp_top_5_settings',
-			'wp_top_5_settings_section'
-		);
+			add_settings_field(
+				'wp_top_5_display_mode',
+				__( 'Display Mode', 'wp-top-5' ),
+				array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_display_mode_callback' ),
+				'wp_top_5_settings',
+				'wp_top_5_settings_section'
+			);
+
+			add_settings_field(
+				'wp_top_5_button_style',
+				__( 'Button Style', 'wp-top-5' ),
+				array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_button_style_callback' ),
+				'wp_top_5_settings',
+				'wp_top_5_settings_section'
+			);
+
+			add_settings_field(
+				'wp_top_5_button_color',
+				__( 'Button Color', 'wp-top-5' ),
+				array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_button_color_callback' ),
+				'wp_top_5_settings',
+				'wp_top_5_settings_section'
+			);
+		} else {
+			add_settings_error(
+				'wp_top_5_openai_api_key',
+				'invalid-api-key',
+				__( 'The OpenAI API key is invalid. Please enter a valid API key.', 'wp-top-5' ),
+				'error'
+			);
+		}
 	}
+
 
 	/**
 	 * Callback for the widget title field.
@@ -421,40 +434,55 @@ class Wp_Top_5_Admin_Settings {
 	 * @since 1.0.0
 	 */
 	public static function wp_top_5_auto_save() {
-	    // Check AJAX nonce for security.
-	    check_ajax_referer( 'wp_top_5_ajax_nonce', 'nonce' );
+		// Check AJAX nonce for security.
+		check_ajax_referer( 'wp_top_5_ajax_nonce', 'nonce' );
 
-	    if ( ! current_user_can( 'manage_options' ) ) {
-	        wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-top-5' ) ) );
-	    }
+		// Verify the user has the appropriate capability.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-top-5' ) ) );
+		}
 
-	    if ( isset( $_POST['field_name'], $_POST['field_value'] ) ) {
-	        $field_name  = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
-	        $field_value = $_POST['field_value'];
+		if ( isset( $_POST['field_name'], $_POST['field_value'] ) ) {
+			$field_name = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
 
-	        // Handle array values (like checkboxes)
-	        if ( is_array( $field_value ) ) {
-	            $field_value = array_map( 'sanitize_text_field', wp_unslash( $field_value ) );
-	        } else {
-	            $field_value = sanitize_text_field( wp_unslash( $field_value ) );
-	        }
+	        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$field_value = wp_unslash( $_POST['field_value'] );
 
-	        // Use `update_option` with a proper option key
-	        $option_key = str_replace( '[]', '', $field_name ); // Ensure correct option key format
+			// Handle array values (like checkboxes).
+			if ( is_array( $field_value ) ) {
+				$field_value = array_map( 'sanitize_text_field', $field_value );
+			} else {
+				$field_value = sanitize_text_field( $field_value );
+			}
 
-	        if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {
-	            if ( $field_name === 'wp_top_5_openai_api_key' ) {
-	                wp_send_json_success( array( 'message' => __( 'API key saved. Page will refresh.', 'wp-top-5' ), 'refresh' => true ) );
-	            } else {
-	                wp_send_json_success( array( 'message' => __( 'Option saved.', 'wp-top-5' ) ) );
-	            }
-	        } else {
-	            wp_send_json_error( array( 'message' => __( 'Failed to save option.', 'wp-top-5' ) ) );
-	        }
-	    } else {
-	        wp_send_json_error( array( 'message' => __( 'Invalid data.', 'wp-top-5' ) ) );
-	    }
+			// Use `update_option` with a proper option key.
+			$option_key = str_replace( '[]', '', $field_name ); // Ensure correct option key format.
+
+			// Use Yoda condition checks.
+			if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {
+				// Validate the API key if it's the API key field.
+				if ( 'wp_top_5_openai_api_key' === $field_name && ! self::validate_openai_api_key( $field_value ) ) {
+					wp_send_json_error(
+						array(
+							'message' => __( 'Invalid API key. Please enter a valid API key.', 'wp-top-5' ),
+						)
+					);
+				} else {
+					wp_send_json_success(
+						array(
+							'message' => __( 'Option saved.', 'wp-top-5' ),
+						)
+					);
+				}
+			} else {
+				wp_send_json_error( array( 'message' => __( 'Failed to save option.', 'wp-top-5' ) ) );
+			}
+		} else {
+			wp_send_json_error( array( 'message' => __( 'Invalid data.', 'wp-top-5' ) ) );
+		}
 	}
+
+
 
 	/**
 	 * Callback for the Assistant ID field.
@@ -465,5 +493,32 @@ class Wp_Top_5_Admin_Settings {
 
 		echo '<input type="text" name="wp_top_5_assistant_id" value="' . esc_attr( $value ) . '" />';
 		echo '<p class="description">' . esc_html__( 'Enter the Assistant ID provided by OpenAI. The default ID is asst_L4j2SowCX4dFnz8Vn6GZ4bp0.', 'wp-top-5' ) . '</p>';
+	}
+
+	/**
+	 * Validate the OpenAI API key.
+	 *
+	 * @param string $api_key The OpenAI API key to validate.
+	 * @return bool True if the API key is valid, false otherwise.
+	 */
+	public static function validate_openai_api_key( $api_key ) {
+		$response = wp_remote_get(
+			'https://api.openai.com/v1/models',
+			array(
+				'headers' => array(
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . $api_key,
+				),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
+
+		return isset( $data['data'] ) && is_array( $data['data'] );
 	}
 }

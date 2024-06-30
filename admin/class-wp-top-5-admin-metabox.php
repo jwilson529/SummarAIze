@@ -19,31 +19,29 @@ class Wp_Top_5_Admin_Metabox {
 	 * @since 1.0.0
 	 */
 	public static function add_meta_box() {
-		// Get selected post types from the plugin settings.
-		$post_types = get_option( 'wp_top_5_post_types', array() );
+		// Get the OpenAI API key from the plugin settings.
+		$api_key = get_option( 'wp_top_5_openai_api_key' );
 
-		// Include The Events Calendar and WooCommerce post types for testing purposes.
-		$custom_post_types = array( 'tribe_events', 'product' );
+		// Validate the API key.
+		if ( ! empty( $api_key ) && Wp_Top_5_Admin_Settings::validate_openai_api_key( $api_key ) ) {
+			// Get selected post types from the plugin settings.
+			$post_types = get_option( 'wp_top_5_post_types', array() );
 
-		foreach ( $custom_post_types as $custom_post_type ) {
-			if ( ! in_array( $custom_post_type, $post_types, true ) ) {
-				$post_types[] = $custom_post_type;
-			}
-		}
-
-		foreach ( $post_types as $post_type ) {
-			if ( post_type_exists( $post_type ) ) {
-				add_meta_box(
-					'wp_top_5_meta_box',
-					__( 'WP Top 5', 'wp-top-5' ),
-					array( 'Wp_Top_5_Admin_Metabox', 'render_meta_box' ),
-					$post_type,
-					'side',
-					'default'
-				);
+			foreach ( $post_types as $post_type ) {
+				if ( post_type_exists( $post_type ) ) {
+					add_meta_box(
+						'wp_top_5_meta_box',
+						__( 'WP Top 5', 'wp-top-5' ),
+						array( 'Wp_Top_5_Admin_Metabox', 'render_meta_box' ),
+						$post_type,
+						'side',
+						'default'
+					);
+				}
 			}
 		}
 	}
+
 
 	/**
 	 * Initialize hooks for adding meta boxes.
@@ -86,7 +84,7 @@ class Wp_Top_5_Admin_Metabox {
 	}
 
 	/**
-	 * Save the meta box data.
+	 * Save the meta box data. Not in use in favor of AJAX save. Only CSS hiding the submit.
 	 *
 	 * @since 1.0.0
 	 *

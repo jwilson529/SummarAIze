@@ -27,8 +27,17 @@
             return { title, content, tags };
         }
 
+        /**
+         * Initialize auto-save for all fields in the settings form.
+         */
+        function initializeAutoSave() {
+            $('.wp-top-5-settings-form').find('input, select, textarea').on('input change', debounce(function() {
+                autoSaveField($(this));
+            }, 500));
+        }
 
         initializeAutoSave();
+
         /**
          * Show a popup notification.
          * 
@@ -88,8 +97,6 @@
                 fieldValue = $field.val();
             }
 
-            console.log('Auto-saving field', fieldName, 'with value', fieldValue);
-
             $.ajax({
                 url: wp_top_5_admin_vars.ajax_url,
                 type: 'POST',
@@ -99,29 +106,22 @@
                     nonce: wp_top_5_admin_vars.wp_top_5_ajax_nonce,
                     field_name: fieldName,
                     field_value: fieldValue
-                },
-                beforeSend: function() {
-                    console.log('Sending AJAX request for field', fieldName, 'with value', fieldValue);
                 }
             })
             .done(function(response) {
                 if (response.success) {
-                    console.log("Auto-save success:", response.data);
                     showNotification('Field saved successfully.');
                     if (response.data.refresh) {
                         location.reload();
                     }
                 } else {
-                    console.log("Auto-save failed:", response.data);
                     showNotification('Failed to save field.', 'error');
                 }
             })
             .fail(function(response) {
-                console.log("Auto-save error:", response);
                 showNotification('Error saving field.', 'error');
             });
         }
-
 
         /**
          * Debounce function to limit the rate at which a function can fire.
@@ -139,18 +139,6 @@
                 timeout = setTimeout(() => func.apply(context, args), wait);
             };
         }
-
-        /**
-         * Initialize auto-save for all fields in the settings form.
-         */
-        function initializeAutoSave() {
-            console.log('Initializing auto-save for all fields');
-            $('.wp-top-5-settings-form').find('input, select, textarea').on('input change', debounce(function() {
-                console.log('Field changed:', $(this).attr('name'));
-                autoSaveField($(this));
-            }, 500));
-        }
-
 
         /**
          * Event handler for the Generate Top 5 Points button click.
@@ -175,68 +163,57 @@
             }, 1000);
 
             var editorData = getEditorData();
-            console.log("Editor Data:", editorData);
 
             // Get the selected model from the options.
             var selectedModel = wp_top_5_admin_vars.selected_model;
-            console.log("Selected Model:", selectedModel);
 
             $.ajax({
-                    url: wp_top_5_admin_vars.ajax_url,
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'wp_top_5_gather_content',
-                        nonce: wp_top_5_admin_vars.wp_top_5_ajax_nonce,
-                        title: editorData.title,
-                        tags: editorData.tags || '',
-                        content: editorData.content,
-                        model: selectedModel
-                    },
-                })
-                .done(function(response) {
-                    // Hide loading icon
-                    clearInterval(countdownInterval);
-                    $('#loading-icon').hide();
-                    console.log("AJAX Response:", response);
+                url: wp_top_5_admin_vars.ajax_url,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'wp_top_5_gather_content',
+                    nonce: wp_top_5_admin_vars.wp_top_5_ajax_nonce,
+                    title: editorData.title,
+                    tags: editorData.tags || '',
+                    content: editorData.content,
+                    model: selectedModel
+                }
+            })
+            .done(function(response) {
+                // Hide loading icon
+                clearInterval(countdownInterval);
+                $('#loading-icon').hide();
 
-                    if (response.success) {
-                        console.log("Success:", response.data);
-                        // Set the response data to input fields
-                        if (response.data && response.data.points && Array.isArray(response.data.points)) {
-                            response.data.points.forEach(function(point) {
-                                var inputSelector = '#wp_top_5_points_' + point.index;
-                                var inputField = $(inputSelector);
-                                console.log("Setting point", point.index, "to", point.text, "using selector", inputSelector);
+                if (response.success) {
+                    // Set the response data to input fields
+                    if (response.data && response.data.points && Array.isArray(response.data.points)) {
+                        response.data.points.forEach(function(point) {
+                            var inputSelector = '#wp_top_5_points_' + point.index;
+                            var inputField = $(inputSelector);
 
-                                if (inputField.length) {
-                                    inputField.val(point.text).change();
-                                    console.log('Input field found and set for point', point.index);
+                            if (inputField.length) {
+                                inputField.val(point.text).change();
 
-                                    // Force re-render with a delay
-                                    setTimeout(function() {
-                                        inputField.val(point.text).trigger('change');
-                                    }, 100);
-                                } else {
-                                    console.log('Input field not found for point', point.index);
-                                }
-                            });
-                        }
-                    } else {
-                        console.log("Failed:", response.data);
+                                // Force re-render with a delay
+                                setTimeout(function() {
+                                    inputField.val(point.text).trigger('change');
+                                }, 100);
+                            }
+                        });
                     }
-                })
-                .fail(function(response) {
-                    // Hide loading icon
-                    clearInterval(countdownInterval);
-                    $('#loading-icon').hide();
-                    console.log("Error:", response);
-                })
-                .always(function(response) {
-                    console.log("Complete:", response);
-                });
+                }
+            })
+            .fail(function(response) {
+                // Hide loading icon
+                clearInterval(countdownInterval);
+                $('#loading-icon').hide();
+            });
         });
 
+        /**
+         * Toggle visibility of settings fields based on display mode.
+         */
         function toggleSettingsFields() {
             var displayMode = $('#wp_top_5_display_position').val();
             if (displayMode === 'popup') {
@@ -258,6 +235,19 @@
             toggleSettingsFields();
         });
 
+        // Monitor the API key field for input and paste events
+        const apiKeyField = $('input[name="wp_top_5_openai_api_key"]');
+        apiKeyField.on('input paste', debounce(function() {
+            const apiKey = $(this).val();
+            if (apiKey.length === 51) { // OpenAI API key length is 51 characters
+                autoSaveField($(this));
+                setTimeout(function() {
+                    location.reload();
+                }, 1000); // Give some time for auto-save to complete before refreshing
+            }
+        }, 500));
+
+        // Additional handler for checkbox changes
         $(document).on('change', '.wp-top-5-settings-field', function() {
             autoSaveField($(this));
         });
@@ -268,8 +258,5 @@
         });
 
     });
-
-
-
 
 })(jQuery);
