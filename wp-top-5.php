@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       WP Top 5
  * Plugin URI:        https://oneclickcontent.com
- * Description:       WP Top 5
+ * Description:       WP Top 5 - Generate Key Takeaways with AI
  * Version:           1.1.0
  * Author:            James Wilson
  * Author URI:        https://oneclickcontent.com/
