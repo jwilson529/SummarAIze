@@ -101,10 +101,95 @@
     top: 10px;
 }
 
-.wp-top-5-popup-close:hover,
-.wp-top-5-popup-close:focus {
-    color: black;
-    text-decoration: none;
+/* General button styles */
+.wp-top-5-popup-btn {
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Flat button style */
+.wp-top-5-popup-btn.flat {
+    box-shadow: none;
+}
+
+/* Rounded button style */
+.wp-top-5-popup-btn.rounded {
+    border-radius: 25px;
+}
+
+/* Angled button style */
+.wp-top-5-popup-btn.angled {
+    border-top-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+
+/* Apple button style */
+.wp-top-5-popup-btn.apple {
+    background: linear-gradient(to bottom, #f9f9f9, #e3e3e3);
+    border: 1px solid #d5d5d5;
+    border-radius: 10px;
+    color: #333;
+    text-shadow: 0 1px rgba(255, 255, 255, 0.9);
+}
+
+/* Google button style */
+.wp-top-5-popup-btn.google {
+    background: linear-gradient(to bottom, #4285f4, #2a56c6);
+    border-radius: 2px;
+}
+
+/* Bubbly button style */
+.wp-top-5-popup-btn.bubbly {
+    background: linear-gradient(to bottom, #ff7f50, #ff6347);
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Material button style */
+.wp-top-5-popup-btn.material {
+    background: #6200ea;
+    color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Windows button style */
+.wp-top-5-popup-btn.windows {
+    background: #0078d7;
+    color: #fff;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* Neumorphism button style */
+.wp-top-5-popup-btn.neumorphism {
+    background: #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 7px 7px 15px #bebebe, -7px -7px 15px #ffffff;
+    color: #333;
+}
+
+/* 3D button style */
+.wp-top-5-popup-btn.3d {
+    background: linear-gradient(to bottom, #ececec, #d1d1d1);
+    border: 1px solid #a1a1a1;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    color: #333;
+}
+
+/* Additional styles for hover and active states */
+.wp-top-5-popup-btn:hover {
+    transform: scale(1.05);
+}
+
+.wp-top-5-popup-btn:active {
+    transform: scale(0.95);
 }
 
 

@@ -61,9 +61,9 @@ class Wp_Top_5_Public {
 	}
 
 	/**
-	 * Register the JavaScript for the public area.
+	 * Register the JavaScript for the public-facing side of the site.
 	 *
-	 * @since 1.0.0
+	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-top-5-public.js', array( 'jquery' ), $this->version, false );
@@ -72,8 +72,9 @@ class Wp_Top_5_Public {
 	/**
 	 * Shortcode to display the top 5 points.
 	 *
-	 * @param array $atts Shortcode attributes.
-	 * @return string HTML content to display.
+	 * @since    1.0.0
+	 * @param    array $atts Shortcode attributes.
+	 * @return   string HTML content to display.
 	 */
 	public function wp_top_5_shortcode( $atts ) {
 		// Parse shortcode attributes.
@@ -97,17 +98,22 @@ class Wp_Top_5_Public {
 			return '<p>No top 5 points have been set for this post.</p>';
 		}
 
+		// Get widget title, button style, and button color from settings.
+		$widget_title = get_option( 'wp_top_5_widget_title', 'Key Takeaways' );
+		$button_style = get_option( 'wp_top_5_button_style', 'flat' );
+		$button_color = get_option( 'wp_top_5_button_color', '#0073aa' );
+
 		// Start the output buffer.
 		ob_start();
 
 		// Display based on the view.
 		if ( 'popup' === $atts['view'] ) {
 			$mode_class = 'dark' === $atts['mode'] ? 'dark' : 'light';
-			echo '<button class="wp-top-5-popup-btn ' . esc_attr( $mode_class ) . '">View Key Takeaways</button>';
+			echo '<button class="wp-top-5-popup-btn ' . esc_attr( $mode_class ) . ' ' . esc_attr( $button_style ) . '" style="background-color: ' . esc_attr( $button_color ) . ';">View ' . esc_html( $widget_title ) . '</button>';
 			echo '<div class="wp-top-5-popup-modal" style="display:none;">';
 			echo '<div class="wp-top-5-popup-content">';
 			echo '<span class="wp-top-5-popup-close">&times;</span>';
-			echo '<h2>Key Takeaways</h2>';
+			echo '<h2>' . esc_html( $widget_title ) . '</h2>';
 			echo '<ol>';
 			foreach ( $top_5_points as $point ) {
 				echo '<li>' . esc_html( $point ) . '</li>';
@@ -118,7 +124,7 @@ class Wp_Top_5_Public {
 		} else {
 			$mode_class = 'dark' === $atts['mode'] ? 'dark' : 'light';
 			echo '<div class="wp-top-5 ' . esc_attr( $mode_class ) . '">';
-			echo '<h2>Key Takeaways</h2>';
+			echo '<h2>' . esc_html( $widget_title ) . '</h2>';
 			echo '<ol>';
 			foreach ( $top_5_points as $point ) {
 				echo '<li>' . esc_html( $point ) . '</li>';
@@ -150,8 +156,6 @@ class Wp_Top_5_Public {
 
 		return ''; // Shortcode itself does not return content, content is modified by the filter.
 	}
-
-
 
 	/**
 	 * Registers the shortcodes.
@@ -188,12 +192,17 @@ class Wp_Top_5_Public {
 		$mode_class = get_option( 'wp_top_5_display_mode', 'light' );
 		$position   = get_option( 'wp_top_5_display_position', 'above' );
 
+		// Get widget title, button style, and button color from settings.
+		$widget_title = get_option( 'wp_top_5_widget_title', 'Key Takeaways' );
+		$button_style = get_option( 'wp_top_5_button_style', 'flat' );
+		$button_color = get_option( 'wp_top_5_button_color', '#0073aa' );
+
 		if ( 'popup' === $position ) {
-			echo '<button class="wp-top-5-popup-btn ' . esc_attr( $mode_class ) . '">View Key Takeaways</button>';
+			echo '<button class="wp-top-5-popup-btn ' . esc_attr( $mode_class ) . ' ' . esc_attr( $button_style ) . '" style="background-color: ' . esc_attr( $button_color ) . ';">View ' . esc_html( $widget_title ) . '</button>';
 			echo '<div class="wp-top-5-popup-modal" style="display:none;">';
 			echo '<div class="wp-top-5-popup-content">';
 			echo '<span class="wp-top-5-popup-close">&times;</span>';
-			echo '<h2>Key Takeaways</h2>';
+			echo '<h2>' . esc_html( $widget_title ) . '</h2>';
 			echo '<ol>';
 			foreach ( $top_5_points as $point ) {
 				echo '<li>' . esc_html( $point ) . '</li>';
@@ -203,7 +212,7 @@ class Wp_Top_5_Public {
 			echo '</div>';
 		} else {
 			echo '<div class="wp-top-5 ' . esc_attr( $mode_class ) . '">';
-			echo '<h2>Key Takeaways</h2>';
+			echo '<h2>' . esc_html( $widget_title ) . '</h2>';
 			echo '<ol>';
 			foreach ( $top_5_points as $point ) {
 				echo '<li>' . esc_html( $point ) . '</li>';

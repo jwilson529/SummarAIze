@@ -164,9 +164,12 @@ class Wp_Top_5 {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_menu', 'Wp_Top_5_Admin_Settings', 'wp_top_5_register_options_page' );
 		$this->loader->add_action( 'admin_menu', 'Wp_Top_5_Admin_Settings', 'wp_top_5_register_settings' );
-		$this->loader->add_action( 'admin_enqueue_scripts', 'Wp_Top_5_Admin_Metabox', 'add_meta_box' );
+		$this->loader->add_action( 'init', 'Wp_Top_5_Admin_Metabox', 'init_hooks', 20 );
+
 		$this->loader->add_action( 'save_post', 'Wp_Top_5_Admin_Metabox', 'save_top_5_points' );
 		$this->loader->add_action( 'wp_ajax_wp_top_5_gather_content', $plugin_admin, 'wp_top_5_gather_content' );
+		$this->loader->add_action( 'wp_ajax_wp_top_5_auto_save', 'Wp_Top_5_Admin_Settings', 'wp_top_5_auto_save' );
+		$this->loader->add_action( 'admin_init', 'Wp_Top_5_Admin_Settings', 'wp_top_5_init_update_checker' );
 	}
 
 	/**

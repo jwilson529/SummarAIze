@@ -1,4 +1,4 @@
-/* Style the admin settings table */
+/* General Styles for the Settings Page */
 .settings_page_wp-top-5-settings .form-table {
     width: 100%;
     max-width: 800px;
@@ -40,6 +40,7 @@
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+/* Selected Model Wrapper Styles */
 .settings_page_wp-top-5-settings .form-table .wp-top-5-selected-model-wrapper {
     display: flex;
     flex-direction: column;
@@ -63,6 +64,7 @@
     text-decoration: underline;
 }
 
+/* Form Control Styles */
 .settings_page_wp-top-5-settings .form-table .form-control {
     display: block;
     width: 100%;
@@ -131,6 +133,31 @@
     border-radius: 4px;
 }
 
+/* Notification Styles */
+.wp-top-5-notification {
+    position: fixed;
+    top: 40px;
+    right: 20px;
+    z-index: 1000;
+    background-color: #0073aa;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    display: none;
+    font-size: 14px;
+}
+
+.wp-top-5-notification.error {
+    background-color: #dc3232;
+}
+
+/* Hide the Save Changes Button */
+.wp-top-5-settings-form .submit {
+    display: none;
+}
+
+/* Loading Icon Styles */
 #loading-icon {
     display: none;
     font-size: 16px;
@@ -154,6 +181,3 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-
-
-

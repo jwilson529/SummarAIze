@@ -22,16 +22,36 @@ class Wp_Top_5_Admin_Metabox {
 		// Get selected post types from the plugin settings.
 		$post_types = get_option( 'wp_top_5_post_types', array() );
 
-		foreach ( $post_types as $post_type ) {
-			add_meta_box(
-				'wp_top_5_meta_box',
-				__( 'WP Top 5 Pro', 'wp-top-5' ),
-				array( 'Wp_Top_5_Admin_Metabox', 'render_meta_box' ),
-				$post_type,
-				'side',
-				'default'
-			);
+		// Include The Events Calendar and WooCommerce post types for testing purposes.
+		$custom_post_types = array( 'tribe_events', 'product' );
+
+		foreach ( $custom_post_types as $custom_post_type ) {
+			if ( ! in_array( $custom_post_type, $post_types, true ) ) {
+				$post_types[] = $custom_post_type;
+			}
 		}
+
+		foreach ( $post_types as $post_type ) {
+			if ( post_type_exists( $post_type ) ) {
+				add_meta_box(
+					'wp_top_5_meta_box',
+					__( 'WP Top 5 Pro', 'wp-top-5' ),
+					array( 'Wp_Top_5_Admin_Metabox', 'render_meta_box' ),
+					$post_type,
+					'side',
+					'default'
+				);
+			}
+		}
+	}
+
+	/**
+	 * Initialize hooks for adding meta boxes.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function init_hooks() {
+		add_action( 'add_meta_boxes', array( 'Wp_Top_5_Admin_Metabox', 'add_meta_box' ) );
 	}
 
 	/**
