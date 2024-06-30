@@ -17,7 +17,8 @@
 }
 
 .wp-top-5.light ol {
-    list-style-type: decimal;
+    list-style-type: none;
+    counter-reset: item;
     padding-left: 20px;
     margin: 0;
 }
@@ -26,6 +27,18 @@
     margin-bottom: 10px;
     font-size: 1.1em;
     color: #555;
+    position: relative;
+    padding-left: 30px;
+}
+
+.wp-top-5.light ol li:before {
+    content: counter(item) ".";
+    counter-increment: item;
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #a9a9a9;
+    font-weight: bold;
 }
 
 .wp-top-5.light ol li:hover {
@@ -49,7 +62,8 @@
 }
 
 .wp-top-5.dark ol {
-    list-style-type: decimal;
+    list-style-type: none;
+    counter-reset: item;
     padding-left: 20px;
     margin: 0;
 }
@@ -58,12 +72,23 @@
     margin-bottom: 10px;
     font-size: 1.1em;
     color: #ddd;
+    position: relative;
+    padding-left: 30px;
+}
+
+.wp-top-5.dark ol li:before {
+    content: counter(item) ".";
+    counter-increment: item;
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #a9a9a9;
+    font-weight: bold;
 }
 
 .wp-top-5.dark ol li:hover {
     color: #fff;
 }
-
 
 .wp-top-5-popup-modal {
     display: none;
@@ -74,20 +99,33 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.8); /* Darker background */
+    backdrop-filter: blur(5px); /* Blur effect */
 }
 
 .wp-top-5-popup-content {
     color: #000;
-    background-color: #fefefe;
-    margin: 15% auto;
+    background-color: #fff;
+    margin: 10% auto; /* Adjusted margin for better centering */
     padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
+    border-radius: 10px;
+    width: 90%;
     max-width: 600px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     position: relative;
     z-index: 1001;
+    animation: slide-down 0.5s ease; /* Slide down effect */
+}
+
+@keyframes slide-down {
+    from {
+        transform: translateY(-50%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .wp-top-5-popup-close {
@@ -99,6 +137,11 @@
     position: absolute;
     right: 10px;
     top: 10px;
+    transition: color 0.3s ease;
+}
+
+.wp-top-5-popup-close:hover {
+    color: #000;
 }
 
 /* General button styles */
@@ -126,7 +169,6 @@
     border-top-left-radius: 20px;
     border-bottom-right-radius: 20px;
 }
-
 
 /* Apple button style */
 .wp-top-5-popup-btn.apple {
@@ -191,5 +233,3 @@
 .wp-top-5-popup-btn:active {
     transform: scale(0.95);
 }
-
-
