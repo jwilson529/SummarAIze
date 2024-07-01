@@ -146,77 +146,90 @@
          * @param {Event} event The click event.
          */
         $(document).on('click', '#generate-summaraize-button', function(event) {
-            event.preventDefault();
+               event.preventDefault();
+               console.log('Button clicked');
 
-            // Change button text and show spinner
-            var $button = $(this);
-            $button.prop('disabled', true);
-            
-            // Apply inline styles to ensure visibility
-            var $spinner = $button.find('.summaraize-spinner');
-            $spinner.css({
-                display: 'inline-block',
-                width: '16px',
-                height: '16px',
-                border: '2px solid #f3f3f3',
-                borderTop: '2px solid #0073aa',
-                borderRadius: '50%',
-                animation: 'summaraize-spin 1s linear infinite',
-                marginRight: '8px'
-            });
+               // Change button text and show spinner
+               var $button = $(this);
+               $button.prop('disabled', true);
+               console.log('Button disabled');
 
-            var originalText = 'Generate Top 5 Points';
-            $button.contents().filter(function() {
-                return this.nodeType === 3;
-            }).remove();
-            $button.append(' Generating...');
+               // Apply inline styles to ensure visibility
+               var $spinner = $button.find('.summaraize-spinner');
+               $spinner.css({
+                   display: 'inline-block',
+                   width: '16px',
+                   height: '16px',
+                   border: '2px solid #f3f3f3',
+                   borderTop: '2px solid #0073aa',
+                   borderRadius: '50%',
+                   animation: 'summaraize-spin 1s linear infinite',
+                   marginRight: '8px'
+               });
+               console.log('Spinner displayed');
 
-            var editorData = getEditorData();
+               var originalText = 'Generate Top 5 Points';
+               $button.contents().filter(function() {
+                   return this.nodeType === 3;
+               }).remove();
+               $button.append(' Generating...');
+               console.log('Button text changed to "Generating..."');
 
-            $.ajax({
-                url: summaraize_admin_vars.ajax_url,
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    action: 'summaraize_gather_content',
-                    nonce: summaraize_admin_vars.summaraize_ajax_nonce,
-                    title: editorData.title,
-                    tags: editorData.tags || '',
-                    content: editorData.content,
-                }
-            })
-            .done(function(response) {
-                // Restore button text and hide spinner
-                $button.prop('disabled', false);
-                $spinner.hide();
-                $button.text(originalText);
+               var editorData = getEditorData();
+               console.log('Editor data:', editorData);
 
-                if (response.success) {
-                    // Set the response data to input fields
-                    if (response.data && response.data.points && Array.isArray(response.data.points)) {
-                        response.data.points.forEach(function(point) {
-                            var inputSelector = '#summaraize_points_' + point.index;
-                            var inputField = $(inputSelector);
+               $.ajax({
+                   url: summaraize_admin_vars.ajax_url,
+                   type: 'POST',
+                   dataType: 'json',
+                   data: {
+                       action: 'summaraize_gather_content',
+                       nonce: summaraize_admin_vars.summaraize_ajax_nonce,
+                       title: editorData.title,
+                       tags: editorData.tags || '',
+                       content: editorData.content,
+                   }
+               })
+               .done(function(response) {
+                   console.log('AJAX request successful', response);
+                   // Restore button text and hide spinner
+                   $button.prop('disabled', false);
+                   $spinner.hide();
+                   $button.text(originalText);
 
-                            if (inputField.length) {
-                                inputField.val(point.text).change();
+                   if (response.success) {
+                       // Set the response data to input fields
+                       if (response.data && response.data.points && Array.isArray(response.data.points)) {
+                           response.data.points.forEach(function(point) {
+                               var inputSelector = '#summaraize_points_' + point.index;
+                               var inputField = $(inputSelector);
 
-                                // Force re-render with a delay
-                                setTimeout(function() {
-                                    inputField.val(point.text).trigger('change');
-                                }, 100);
-                            }
-                        });
-                    }
-                }
-            })
-            .fail(function(response) {
-                // Restore button text and hide spinner
-                $button.prop('disabled', false);
-                $spinner.hide();
-                $button.text(originalText);
-            });
-        });
+                               if (inputField.length) {
+                                   inputField.val(point.text).change();
+
+                                   // Force re-render with a delay
+                                   setTimeout(function() {
+                                       inputField.val(point.text).trigger('change');
+                                   }, 100);
+                               }
+                           });
+                       }
+                   } else {
+                       // Check for specific error message and show alert
+                       if (response.data && response.data.data === 'Assistant ID is not configured.') {
+                           alert('Assistant ID is not configured. Please set it in the plugin settings.');
+                       }
+                   }
+               })
+               .fail(function(response) {
+                   console.log('AJAX request failed', response);
+                   // Restore button text and hide spinner
+                   $button.prop('disabled', false);
+                   $spinner.hide();
+                   $button.text(originalText);
+               });
+           });
+
         /**
          * Toggle visibility of settings fields based on display mode.
          */

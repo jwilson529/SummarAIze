@@ -132,10 +132,13 @@ class Summaraize_Admin_Settings {
 			);
 		} else {
 			add_settings_error(
-				'summaraize_openai_api_key',
-				'invalid-api-key',
-				__( 'The OpenAI API key is invalid. Please enter a valid API key.', 'summaraize' ),
-				'error'
+			    'summaraize_openai_api_key',
+			    'invalid-api-key',
+			    sprintf(
+			        __( 'The OpenAI API key is invalid. Please enter a valid API key in the <a href="%s">SummarAIze settings</a> to use SummarAIze.', 'summaraize' ),
+			        admin_url( 'options-general.php?page=summaraize-settings' )
+			    ),
+			    'error'
 			);
 		}
 	}
@@ -419,12 +422,18 @@ class Summaraize_Admin_Settings {
 	 * Callback for the Assistant ID field.
 	 */
 	public static function summaraize_assistant_id_callback() {
-		$default_assistant_id = 'asst_L4j2SowCX4dFnz8Vn6GZ4bp0';
-		$value                = get_option( 'summaraize_assistant_id', $default_assistant_id );
+	    $default_assistant_id = 'asst_L4j2SowCX4dFnz8Vn6GZ4bp0';
+	    $value = get_option('summaraize_assistant_id', $default_assistant_id);
 
-		echo '<input type="text" name="summaraize_assistant_id" value="' . esc_attr( $value ) . '" />';
-		echo '<p class="description">' . esc_html__( 'Enter the Assistant ID provided by OpenAI. The default ID is asst_L4j2SowCX4dFnz8Vn6GZ4bp0.', 'summaraize' ) . '</p>';
+	    // If the option is not set, update it with the default value.
+	    if ($value === $default_assistant_id && get_option('summaraize_assistant_id') === false) {
+	        update_option('summaraize_assistant_id', $default_assistant_id);
+	    }
+
+	    echo '<input type="text" id="summaraize_assistant_id" name="summaraize_assistant_id" value="' . esc_attr($value) . '" />';
+	    echo '<p class="description">' . esc_html__('Enter the Assistant ID provided by OpenAI. The default ID is asst_L4j2SowCX4dFnz8Vn6GZ4bp0.', 'summaraize') . '</p>';
 	}
+
 
 	/**
 	 * Validate the OpenAI API key.
