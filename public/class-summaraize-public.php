@@ -5,8 +5,8 @@
  * @link       https://oneclickcontent.com
  * @since      1.0.0
  *
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/public
+ * @package    Summaraize
+ * @subpackage Summaraize/public
  */
 
 /**
@@ -15,11 +15,11 @@
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the public-facing stylesheet and JavaScript.
  *
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/public
+ * @package    Summaraize
+ * @subpackage Summaraize/public
  * @author     James Wilson <james@middletnwebdesign.com>
  */
-class Wp_Top_5_Public {
+class Summaraize_Public {
 
 	/**
 	 * The ID of this plugin.
@@ -57,7 +57,7 @@ class Wp_Top_5_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wp-top-5-public.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/summaraize-public.css', array(), $this->version, 'all' );
 	}
 
 	/**
@@ -66,7 +66,7 @@ class Wp_Top_5_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-top-5-public.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/summaraize-public.js', array( 'jquery' ), $this->version, false );
 	}
 
 	/**
@@ -76,32 +76,32 @@ class Wp_Top_5_Public {
 	 * @param    array $atts Shortcode attributes.
 	 * @return   string HTML content to display.
 	 */
-	public function wp_top_5_shortcode( $atts ) {
+	public function summaraize_shortcode( $atts ) {
 		// Parse shortcode attributes.
 		$atts = shortcode_atts(
 			array(
-				'view' => get_option( 'wp_top_5_display_position', 'above' ), // Use the setting as the default value.
-				'mode' => get_option( 'wp_top_5_display_mode', 'light' ), // Default to light mode if not set.
+				'view' => get_option( 'summaraize_display_position', 'above' ), // Use the setting as the default value.
+				'mode' => get_option( 'summaraize_display_mode', 'light' ), // Default to light mode if not set.
 			),
 			$atts,
-			'wp_top_5'
+			'summaraize'
 		);
 
 		// Get the current post ID.
 		$post_id = get_the_ID();
 
 		// Fetch the top 5 points.
-		$top_5_points = get_post_meta( $post_id, 'wp_top_5_points', true );
+		$summaraize_points = get_post_meta( $post_id, 'summaraize_points', true );
 
 		// If no points are set, display a message.
-		if ( empty( $top_5_points ) ) {
-			return '<p>No top 5 points have been set for this post.</p>';
+		if ( empty( $summaraize_points ) ) {
+			return '<p>No key points have been set for this post.</p>';
 		}
 
 		// Get widget title, button style, and button color from settings.
-		$widget_title = get_option( 'wp_top_5_widget_title', 'Key Takeaways' );
-		$button_style = get_option( 'wp_top_5_button_style', 'flat' );
-		$button_color = get_option( 'wp_top_5_button_color', '#0073aa' );
+		$widget_title = get_option( 'summaraize_widget_title', 'Key Takeaways' );
+		$button_style = get_option( 'summaraize_button_style', 'flat' );
+		$button_color = get_option( 'summaraize_button_color', '#0073aa' );
 
 		// Start the output buffer.
 		ob_start();
@@ -109,13 +109,13 @@ class Wp_Top_5_Public {
 		// Display based on the view.
 		if ( 'popup' === $atts['view'] ) {
 			$mode_class = 'dark' === $atts['mode'] ? 'dark' : 'light';
-			echo '<button class="wp-top-5-popup-btn ' . esc_attr( $mode_class ) . ' ' . esc_attr( $button_style ) . '" style="background-color: ' . esc_attr( $button_color ) . ';">View ' . esc_html( $widget_title ) . '</button>';
-			echo '<div class="wp-top-5-popup-modal" style="display:none;">';
-			echo '<div class="wp-top-5-popup-content">';
-			echo '<span class="wp-top-5-popup-close">&times;</span>';
+			echo '<button class="summaraize-popup-btn ' . esc_attr( $mode_class ) . ' ' . esc_attr( $button_style ) . '" style="background-color: ' . esc_attr( $button_color ) . ';">View ' . esc_html( $widget_title ) . '</button>';
+			echo '<div class="summaraize-popup-modal" style="display:none;">';
+			echo '<div class="summaraize-popup-content">';
+			echo '<span class="summaraize-popup-close">&times;</span>';
 			echo '<h2>' . esc_html( $widget_title ) . '</h2>';
 			echo '<ol>';
-			foreach ( $top_5_points as $point ) {
+			foreach ( $summaraize_points as $point ) {
 				echo '<li>' . esc_html( $point ) . '</li>';
 			}
 			echo '</ol>';
@@ -123,10 +123,10 @@ class Wp_Top_5_Public {
 			echo '</div>';
 		} else {
 			$mode_class = 'dark' === $atts['mode'] ? 'dark' : 'light';
-			echo '<div class="wp-top-5 ' . esc_attr( $mode_class ) . '">';
+			echo '<div class="summaraize ' . esc_attr( $mode_class ) . '">';
 			echo '<h2>' . esc_html( $widget_title ) . '</h2>';
 			echo '<ol>';
-			foreach ( $top_5_points as $point ) {
+			foreach ( $summaraize_points as $point ) {
 				echo '<li>' . esc_html( $point ) . '</li>';
 			}
 			echo '</ol>';
@@ -163,7 +163,7 @@ class Wp_Top_5_Public {
 	 * @since 1.0.0
 	 */
 	public function register_shortcodes() {
-		add_shortcode( 'wp_top_5', array( $this, 'wp_top_5_shortcode' ) );
+		add_shortcode( 'summaraize', array( $this, 'summaraize_shortcode' ) );
 	}
 
 	/**
@@ -173,62 +173,62 @@ class Wp_Top_5_Public {
 	 * @param string $content The post content.
 	 * @return string Modified post content.
 	 */
-	public function append_top_5_to_content_automatically( $content ) {
-		if ( has_shortcode( $content, 'wp_top_5' ) ) {
+	public function append_summaraize_to_content_automatically( $content ) {
+		if ( has_shortcode( $content, 'summaraize' ) ) {
 			return $content;
 		}
 
 		$post_id      = get_the_ID();
-		$top_5_points = get_post_meta( $post_id, 'wp_top_5_points', true );
+		$summaraize_points = get_post_meta( $post_id, 'summaraize_points', true );
 
-		// Check if $top_5_points is an array and filter out empty values.
-		if ( ! is_array( $top_5_points ) || empty( array_filter( $top_5_points ) ) ) {
+		// Check if $summaraize_points is an array and filter out empty values.
+		if ( ! is_array( $summaraize_points ) || empty( array_filter( $summaraize_points ) ) ) {
 			return $content;
 		}
 
 		ob_start();
 
 		// Get the default mode and position from settings.
-		$mode_class = get_option( 'wp_top_5_display_mode', 'light' );
-		$position   = get_option( 'wp_top_5_display_position', 'above' );
+		$mode_class = get_option( 'summaraize_display_mode', 'light' );
+		$position   = get_option( 'summaraize_display_position', 'above' );
 
 		// Get widget title, button style, and button color from settings.
-		$widget_title = get_option( 'wp_top_5_widget_title', 'Key Takeaways' );
-		$button_style = get_option( 'wp_top_5_button_style', 'flat' );
-		$button_color = get_option( 'wp_top_5_button_color', '#0073aa' );
+		$widget_title = get_option( 'summaraize_widget_title', 'Key Takeaways' );
+		$button_style = get_option( 'summaraize_button_style', 'flat' );
+		$button_color = get_option( 'summaraize_button_color', '#0073aa' );
 
 		if ( 'popup' === $position ) {
-			echo '<button class="wp-top-5-popup-btn ' . esc_attr( $mode_class ) . ' ' . esc_attr( $button_style ) . '" style="background-color: ' . esc_attr( $button_color ) . ';">View ' . esc_html( $widget_title ) . '</button>';
-			echo '<div class="wp-top-5-popup-modal" style="display:none;">';
-			echo '<div class="wp-top-5-popup-content">';
-			echo '<span class="wp-top-5-popup-close">&times;</span>';
+			echo '<button class="summaraize-popup-btn ' . esc_attr( $mode_class ) . ' ' . esc_attr( $button_style ) . '" style="background-color: ' . esc_attr( $button_color ) . ';">View ' . esc_html( $widget_title ) . '</button>';
+			echo '<div class="summaraize-popup-modal" style="display:none;">';
+			echo '<div class="summaraize-popup-content">';
+			echo '<span class="summaraize-popup-close">&times;</span>';
 			echo '<h2>' . esc_html( $widget_title ) . '</h2>';
 			echo '<ol>';
-			foreach ( $top_5_points as $point ) {
+			foreach ( $summaraize_points as $point ) {
 				echo '<li>' . esc_html( $point ) . '</li>';
 			}
 			echo '</ol>';
 			echo '</div>';
 			echo '</div>';
 		} else {
-			echo '<div class="wp-top-5 ' . esc_attr( $mode_class ) . '">';
+			echo '<div class="summaraize ' . esc_attr( $mode_class ) . '">';
 			echo '<h2>' . esc_html( $widget_title ) . '</h2>';
 			echo '<ol>';
-			foreach ( $top_5_points as $point ) {
+			foreach ( $summaraize_points as $point ) {
 				echo '<li>' . esc_html( $point ) . '</li>';
 			}
 			echo '</ol>';
 			echo '</div>';
 		}
 
-		$top_5_html = ob_get_clean();
+		$summaraize_html = ob_get_clean();
 
 		if ( 'below' === $position ) {
-			$content .= $top_5_html;
+			$content .= $summaraize_html;
 		} elseif ( 'popup' === $position ) {
-			$content = $top_5_html . $content;
+			$content = $summaraize_html . $content;
 		} else {
-			$content = $top_5_html . $content;
+			$content = $summaraize_html . $content;
 		}
 
 		return $content;

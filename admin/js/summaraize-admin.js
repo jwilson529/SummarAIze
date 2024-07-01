@@ -31,7 +31,7 @@
          * Initialize auto-save for all fields in the settings form.
          */
         function initializeAutoSave() {
-            $('.wp-top-5-settings-form').find('input, select, textarea').on('input change', debounce(function() {
+            $('.summaraize-settings-form').find('input, select, textarea').on('input change', debounce(function() {
                 autoSaveField($(this));
             }, 500));
         }
@@ -45,7 +45,7 @@
          * @param {String} type The type of notification (success, error).
          */
         function showNotification(message, type = 'success') {
-            var $notification = $('<div class="wp-top-5-notification ' + type + '">' + message + '</div>');
+            var $notification = $('<div class="summaraize-notification ' + type + '">' + message + '</div>');
             $('body').append($notification);
             $notification.fadeIn('fast');
 
@@ -98,12 +98,12 @@
             }
 
             $.ajax({
-                url: wp_top_5_admin_vars.ajax_url,
+                url: summaraize_admin_vars.ajax_url,
                 type: 'POST',
                 dataType: 'json',
                 data: {
-                    action: 'wp_top_5_auto_save',
-                    nonce: wp_top_5_admin_vars.wp_top_5_ajax_nonce,
+                    action: 'summaraize_auto_save',
+                    nonce: summaraize_admin_vars.summaraize_ajax_nonce,
                     field_name: fieldName,
                     field_value: fieldValue
                 }
@@ -145,7 +145,7 @@
          * 
          * @param {Event} event The click event.
          */
-        $(document).on('click', '#generate-top-5-button', function(event) {
+        $(document).on('click', '#generate-summaraize-button', function(event) {
             event.preventDefault();
 
             // Change button text and show spinner
@@ -153,7 +153,7 @@
             $button.prop('disabled', true);
             
             // Apply inline styles to ensure visibility
-            var $spinner = $button.find('.wp-top-5-spinner');
+            var $spinner = $button.find('.summaraize-spinner');
             $spinner.css({
                 display: 'inline-block',
                 width: '16px',
@@ -161,7 +161,7 @@
                 border: '2px solid #f3f3f3',
                 borderTop: '2px solid #0073aa',
                 borderRadius: '50%',
-                animation: 'wp-top-5-spin 1s linear infinite',
+                animation: 'summaraize-spin 1s linear infinite',
                 marginRight: '8px'
             });
 
@@ -174,12 +174,12 @@
             var editorData = getEditorData();
 
             $.ajax({
-                url: wp_top_5_admin_vars.ajax_url,
+                url: summaraize_admin_vars.ajax_url,
                 type: 'POST',
                 dataType: 'json',
                 data: {
-                    action: 'wp_top_5_gather_content',
-                    nonce: wp_top_5_admin_vars.wp_top_5_ajax_nonce,
+                    action: 'summaraize_gather_content',
+                    nonce: summaraize_admin_vars.summaraize_ajax_nonce,
                     title: editorData.title,
                     tags: editorData.tags || '',
                     content: editorData.content,
@@ -195,7 +195,7 @@
                     // Set the response data to input fields
                     if (response.data && response.data.points && Array.isArray(response.data.points)) {
                         response.data.points.forEach(function(point) {
-                            var inputSelector = '#wp_top_5_points_' + point.index;
+                            var inputSelector = '#summaraize_points_' + point.index;
                             var inputField = $(inputSelector);
 
                             if (inputField.length) {
@@ -221,15 +221,15 @@
          * Toggle visibility of settings fields based on display mode.
          */
         function toggleSettingsFields() {
-            var displayMode = $('#wp_top_5_display_position').val();
+            var displayMode = $('#summaraize_display_position').val();
             if (displayMode === 'popup') {
-                $('#wp_top_5_button_style').closest('tr').show();
-                $('#wp_top_5_button_color').closest('tr').show();
-                $('#wp_top_5_display_mode').closest('tr').hide();
+                $('#summaraize_button_style').closest('tr').show();
+                $('#summaraize_button_color').closest('tr').show();
+                $('#summaraize_display_mode').closest('tr').hide();
             } else {
-                $('#wp_top_5_button_style').closest('tr').hide();
-                $('#wp_top_5_button_color').closest('tr').hide();
-                $('#wp_top_5_display_mode').closest('tr').show();
+                $('#summaraize_button_style').closest('tr').hide();
+                $('#summaraize_button_color').closest('tr').hide();
+                $('#summaraize_display_mode').closest('tr').show();
             }
         }
 
@@ -237,12 +237,12 @@
         toggleSettingsFields();
 
         // Toggle fields on change
-        $('#wp_top_5_display_position').change(function() {
+        $('#summaraize_display_position').change(function() {
             toggleSettingsFields();
         });
 
         // Monitor the API key field for input and paste events
-        const apiKeyField = $('input[name="wp_top_5_openai_api_key"]');
+        const apiKeyField = $('input[name="summaraize_openai_api_key"]');
         apiKeyField.on('input paste', debounce(function() {
             const apiKey = $(this).val();
             if (apiKey.length === 51) { // OpenAI API key length is 51 characters
@@ -254,12 +254,12 @@
         }, 500));
 
         // Additional handler for checkbox changes
-        $(document).on('change', '.wp-top-5-settings-field', function() {
+        $(document).on('change', '.summaraize-settings-field', function() {
             autoSaveField($(this));
         });
 
         // Additional handler for checkbox changes
-        $(document).on('change', '.wp-top-5-settings-checkbox', function() {
+        $(document).on('change', '.summaraize-settings-checkbox', function() {
             autoSaveField($(this));
         });
 

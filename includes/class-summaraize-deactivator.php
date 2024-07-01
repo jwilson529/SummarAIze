@@ -5,8 +5,8 @@
  * @link       https://oneclickcontent.com
  * @since      1.0.0
  *
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/includes
+ * @package    Summaraize
+ * @subpackage Summaraize/includes
  */
 
 /**
@@ -15,11 +15,11 @@
  * This class defines all code necessary to run during the plugin's deactivation.
  *
  * @since      1.0.0
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/includes
+ * @package    Summaraize
+ * @subpackage Summaraize/includes
  * @author     James Wilson <james@middletnwebdesign.com>
  */
-class Wp_Top_5_Deactivator {
+class Summaraize_Deactivator {
 
 	/**
 	 * Short Description. (use period)

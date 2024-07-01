@@ -8,8 +8,8 @@
  * @link       https://oneclickcontent.com
  * @since      1.0.0
  *
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/includes
+ * @package    Summaraize
+ * @subpackage Summaraize/includes
  */
 
 /**
@@ -22,11 +22,11 @@
  * version of the plugin.
  *
  * @since      1.0.0
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/includes
+ * @package    Summaraize
+ * @subpackage Summaraize/includes
  * @author     James Wilson <james@middletnwebdesign.com>
  */
-class Wp_Top_5 {
+class Summaraize {
 
 	/**
 	 * The loader that's responsible for maintaining and registering all hooks that power
@@ -34,7 +34,7 @@ class Wp_Top_5 {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      Wp_Top_5_Loader    $loader    Maintains and registers all hooks for the plugin.
+	 * @var      Summaraize_Loader    $loader    Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
 
@@ -66,12 +66,12 @@ class Wp_Top_5 {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		if ( defined( 'WP_TOP_5_VERSION' ) ) {
-			$this->version = WP_TOP_5_VERSION;
+		if ( defined( 'SUMMARAIZE_VERSION' ) ) {
+			$this->version = SUMMARAIZE_VERSION;
 		} else {
 			$this->version = '1.0.0';
 		}
-		$this->plugin_name = 'wp-top-5';
+		$this->plugin_name = 'summaraize';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -84,10 +84,10 @@ class Wp_Top_5 {
 	 *
 	 * Include the following files that make up the plugin:
 	 *
-	 * - Wp_Top_5_Loader. Orchestrates the hooks of the plugin.
-	 * - Wp_Top_5_I18n. Defines internationalization functionality.
-	 * - Wp_Top_5_Admin. Defines all hooks for the admin area.
-	 * - Wp_Top_5_Public. Defines all hooks for the public side of the site.
+	 * - Summaraize_Loader. Orchestrates the hooks of the plugin.
+	 * - Summaraize_I18n. Defines internationalization functionality.
+	 * - Summaraize_Admin. Defines all hooks for the admin area.
+	 * - Summaraize_Public. Defines all hooks for the public side of the site.
 	 *
 	 * Create an instance of the loader which will be used to register the hooks
 	 * with WordPress.
@@ -101,42 +101,42 @@ class Wp_Top_5 {
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( __DIR__ ) . 'includes/class-wp-top-5-loader.php';
+		require_once plugin_dir_path( __DIR__ ) . 'includes/class-summaraize-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( __DIR__ ) . 'includes/class-wp-top-5-i18n.php';
+		require_once plugin_dir_path( __DIR__ ) . 'includes/class-summaraize-i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( __DIR__ ) . 'admin/class-wp-top-5-admin.php';
+		require_once plugin_dir_path( __DIR__ ) . 'admin/class-summaraize-admin.php';
 
 		/**
 		 * The class responsible for defining all settings for the plugin.
 		 */
-		require_once plugin_dir_path( __DIR__ ) . 'admin/class-wp-top-5-admin-settings.php';
+		require_once plugin_dir_path( __DIR__ ) . 'admin/class-summaraize-admin-settings.php';
 
 		/**
 		 * The class responsible for defining all metabox items.
 		 */
-		require_once plugin_dir_path( __DIR__ ) . 'admin/class-wp-top-5-admin-metabox.php';
+		require_once plugin_dir_path( __DIR__ ) . 'admin/class-summaraize-admin-metabox.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( __DIR__ ) . 'public/class-wp-top-5-public.php';
+		require_once plugin_dir_path( __DIR__ ) . 'public/class-summaraize-public.php';
 
-		$this->loader = new Wp_Top_5_Loader();
+		$this->loader = new Summaraize_Loader();
 	}
 
 	/**
 	 * Define the locale for this plugin for internationalization.
 	 *
-	 * Uses the Wp_Top_5_I18n class in order to set the domain and to register the hook
+	 * Uses the Summaraize_I18n class in order to set the domain and to register the hook
 	 * with WordPress.
 	 *
 	 * @since    1.0.0
@@ -144,7 +144,7 @@ class Wp_Top_5 {
 	 */
 	private function set_locale() {
 
-		$plugin_i18n = new Wp_Top_5_I18n();
+		$plugin_i18n = new Summaraize_I18n();
 
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
 	}
@@ -158,18 +158,18 @@ class Wp_Top_5 {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Wp_Top_5_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new Summaraize_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_menu', 'Wp_Top_5_Admin_Settings', 'wp_top_5_register_options_page' );
-		$this->loader->add_action( 'admin_menu', 'Wp_Top_5_Admin_Settings', 'wp_top_5_register_settings' );
-		$this->loader->add_action( 'init', 'Wp_Top_5_Admin_Metabox', 'init_hooks', 20 );
+		$this->loader->add_action( 'admin_menu', 'Summaraize_Admin_Settings', 'summaraize_register_options_page' );
+		$this->loader->add_action( 'admin_menu', 'Summaraize_Admin_Settings', 'summaraize_register_settings' );
+		$this->loader->add_action( 'init', 'Summaraize_Admin_Metabox', 'init_hooks', 20 );
 
-		$this->loader->add_action( 'save_post', 'Wp_Top_5_Admin_Metabox', 'save_top_5_points' );
-		$this->loader->add_action( 'wp_ajax_wp_top_5_gather_content', $plugin_admin, 'wp_top_5_gather_content' );
-		$this->loader->add_action( 'wp_ajax_wp_top_5_auto_save', 'Wp_Top_5_Admin_Settings', 'wp_top_5_auto_save' );
-		$this->loader->add_action( 'admin_init', 'Wp_Top_5_Admin_Settings', 'wp_top_5_init_update_checker' );
+		$this->loader->add_action( 'save_post', 'Summaraize_Admin_Metabox', 'save_summaraize_points' );
+		$this->loader->add_action( 'wp_ajax_summaraize_gather_content', $plugin_admin, 'summaraize_gather_content' );
+		$this->loader->add_action( 'wp_ajax_summaraize_auto_save', 'Summaraize_Admin_Settings', 'summaraize_auto_save' );
+		$this->loader->add_action( 'admin_init', 'Summaraize_Admin_Settings', 'summaraize_init_update_checker' );
 	}
 
 	/**
@@ -180,12 +180,12 @@ class Wp_Top_5 {
 	 * @access   private
 	 */
 	private function define_public_hooks() {
-		$plugin_public = new Wp_Top_5_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Summaraize_Public( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		$this->loader->add_action( 'init', $plugin_public, 'register_shortcodes' );
-		$this->loader->add_action( 'the_content', $plugin_public, 'append_top_5_to_content_automatically' );
+		$this->loader->add_action( 'the_content', $plugin_public, 'append_summaraize_to_content_automatically' );
 	}
 
 	/**
@@ -212,7 +212,7 @@ class Wp_Top_5 {
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
 	 * @since     1.0.0
-	 * @return    Wp_Top_5_Loader    Orchestrates the hooks of the plugin.
+	 * @return    Summaraize_Loader    Orchestrates the hooks of the plugin.
 	 */
 	public function get_loader() {
 		return $this->loader;

@@ -1,10 +1,10 @@
-# WP Top 5 - Generate Key Takeaways with AI
+# SummarAIze - Generate Key Takeaways with AI
 
 ![Plugin Banner](assets/banner-772x250.png)
 
 ## Description
 
-WP Top 5 is a WordPress plugin that allows you to automatically generate and display the top 5 key points of your posts. Enhance your content by providing readers with quick takeaways, making your articles more engaging and accessible.
+SummarAIze is a WordPress plugin that allows you to automatically generate and display the top 5 key points of your posts. Enhance your content by providing readers with quick takeaways, making your articles more engaging and accessible.
 
 ## Features
 
@@ -15,13 +15,13 @@ WP Top 5 is a WordPress plugin that allows you to automatically generate and dis
 
 ## Installation
 
-1. Upload the plugin files to the `/wp-content/plugins/wp-top-5-pro` directory, or install the plugin through the WordPress plugins screen directly.
+1. Upload the plugin files to the `/wp-content/plugins/summaraize-pro` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
-3. Use the Settings->WP Top 5 screen to configure the plugin.
+3. Use the Settings->SummarAIze screen to configure the plugin.
 
 ## Important Note
 
-The Assistant ID configures the behavior and responses of the WP Top 5 assistant. Users must use their own OpenAI API key for authentication and billing.
+The Assistant ID configures the behavior and responses of the SummarAIze assistant. Users must use their own OpenAI API key for authentication and billing.
 
 ## Frequently Asked Questions
 

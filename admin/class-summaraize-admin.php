@@ -5,14 +5,14 @@
  * @link       https://oneclickcontent.com
  * @since      1.0.0
  *
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/public
+ * @package    Summaraize
+ * @subpackage Summaraize/public
  */
 
 /**
  * The public-facing functionality of the plugin.
  */
-class Wp_Top_5_Admin {
+class Summaraize_Admin {
 
 	/**
 	 * The name of the plugin.
@@ -43,7 +43,7 @@ class Wp_Top_5_Admin {
 	 * Enqueue admin styles.
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wp-top-5-admin.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/summaraize-admin.css', array(), $this->version, 'all' );
 	}
 
 
@@ -53,16 +53,16 @@ class Wp_Top_5_Admin {
 	 * @since 1.0.0
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-top-5-admin.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/summaraize-admin.js', array( 'jquery' ), $this->version, false );
 
 		// Localize the script with the necessary nonces.
 		wp_localize_script(
 			$this->plugin_name,
-			'wp_top_5_admin_vars',
+			'summaraize_admin_vars',
 			array(
 				'ajax_url'                => admin_url( 'admin-ajax.php' ),
-				'wp_top_5_ajax_nonce'     => wp_create_nonce( 'wp_top_5_ajax_nonce' ),
-				'wp_top_5_meta_box_nonce' => wp_create_nonce( 'wp_top_5_meta_box' ),
+				'summaraize_ajax_nonce'     => wp_create_nonce( 'summaraize_ajax_nonce' ),
+				'summaraize_meta_box_nonce' => wp_create_nonce( 'summaraize_meta_box' ),
 			)
 		);
 	}
@@ -70,9 +70,9 @@ class Wp_Top_5_Admin {
 	/**
 	 * Handle AJAX request from the front-end.
 	 */
-	public function wp_top_5_gather_content() {
+	public function summaraize_gather_content() {
 		// Verify nonce.
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wp_top_5_ajax_nonce' ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'summaraize_ajax_nonce' ) ) {
 			wp_send_json_error( 'Invalid nonce.' );
 			wp_die();
 		}
@@ -86,8 +86,8 @@ class Wp_Top_5_Admin {
 		$query = sanitize_text_field( wp_unslash( $_POST['content'] ) );
 
 		// Retrieve individual options.
-		$api_key      = get_option( 'wp_top_5_openai_api_key' );
-		$assistant_id = get_option( 'wp_top_5_assistant_id' );
+		$api_key      = get_option( 'summaraize_openai_api_key' );
+		$assistant_id = get_option( 'summaraize_assistant_id' );
 
 		if ( empty( $api_key ) ) {
 			wp_send_json_error( 'API key is not configured.' );

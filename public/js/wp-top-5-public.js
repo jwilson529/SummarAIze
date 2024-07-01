@@ -4,19 +4,19 @@
 
 	jQuery(document).ready(function($) {
 	    // Open the modal
-	    $('.wp-top-5-popup-btn').on('click', function() {
-	        $(this).next('.wp-top-5-popup-modal').fadeIn();
+	    $('.summaraize-popup-btn').on('click', function() {
+	        $(this).next('.summaraize-popup-modal').fadeIn();
 	    });
 
 	    // Close the modal
-	    $('.wp-top-5-popup-close').on('click', function() {
-	        $(this).closest('.wp-top-5-popup-modal').fadeOut();
+	    $('.summaraize-popup-close').on('click', function() {
+	        $(this).closest('.summaraize-popup-modal').fadeOut();
 	    });
 
 	    // Close the modal when clicking outside the content
 	    $(window).on('click', function(event) {
-	        if ($(event.target).hasClass('wp-top-5-popup-modal')) {
-	            $('.wp-top-5-popup-modal').fadeOut();
+	        if ($(event.target).hasClass('summaraize-popup-modal')) {
+	            $('.summaraize-popup-modal').fadeOut();
 	        }
 	    });
 	});

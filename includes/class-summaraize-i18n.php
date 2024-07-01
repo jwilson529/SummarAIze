@@ -8,8 +8,8 @@
  * @link       https://oneclickcontent.com
  * @since      1.0.0
  *
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/includes
+ * @package    Summaraize
+ * @subpackage Summaraize/includes
  */
 
 /**
@@ -19,11 +19,11 @@
  * so that it is ready for translation.
  *
  * @since      1.0.0
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/includes
+ * @package    Summaraize
+ * @subpackage Summaraize/includes
  * @author     James Wilson <james@middletnwebdesign.com>
  */
-class Wp_Top_5_I18n {
+class Summaraize_I18n {
 
 
 	/**
@@ -34,7 +34,7 @@ class Wp_Top_5_I18n {
 	public function load_plugin_textdomain() {
 
 		load_plugin_textdomain(
-			'wp-top-5',
+			'summaraize',
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);

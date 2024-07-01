@@ -21,7 +21,7 @@
  * @link       https://oneclickcontent.com
  * @since      1.0.0
  *
- * @package    Wp_Top_5
+ * @package    Summaraize
  */
 
 // If uninstall not called from WordPress, then exit.

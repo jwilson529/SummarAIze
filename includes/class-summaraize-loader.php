@@ -5,8 +5,8 @@
  * @link       https://oneclickcontent.com
  * @since      1.0.0
  *
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/includes
+ * @package    Summaraize
+ * @subpackage Summaraize/includes
  */
 
 /**
@@ -16,11 +16,11 @@
  * the plugin, and register them with the WordPress API. Call the
  * run function to execute the list of actions and filters.
  *
- * @package    Wp_Top_5
- * @subpackage Wp_Top_5/includes
+ * @package    Summaraize
+ * @subpackage Summaraize/includes
  * @author     James Wilson <james@middletnwebdesign.com>
  */
-class Wp_Top_5_Loader {
+class Summaraize_Loader {
 
 	/**
 	 * The array of actions registered with WordPress.
