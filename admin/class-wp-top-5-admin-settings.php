@@ -66,7 +66,6 @@ class Wp_Top_5_Admin_Settings {
 		$api_key = get_option( 'wp_top_5_openai_api_key' );
 
 		if ( ! empty( $api_key ) && self::validate_openai_api_key( $api_key ) ) {
-			register_setting( 'wp_top_5_settings', 'wp_top_5_selected_model' );
 			register_setting( 'wp_top_5_settings', 'wp_top_5_post_types' );
 			register_setting( 'wp_top_5_settings', 'wp_top_5_assistant_id' );
 			register_setting( 'wp_top_5_settings', 'wp_top_5_widget_title' );
@@ -74,14 +73,6 @@ class Wp_Top_5_Admin_Settings {
 			register_setting( 'wp_top_5_settings', 'wp_top_5_display_mode' );
 			register_setting( 'wp_top_5_settings', 'wp_top_5_button_style' );
 			register_setting( 'wp_top_5_settings', 'wp_top_5_button_color' );
-
-			add_settings_field(
-				'wp_top_5_selected_model',
-				__( 'Selected Model', 'wp-top-5' ),
-				array( 'Wp_Top_5_Admin_Settings', 'wp_top_5_selected_model_callback' ),
-				'wp_top_5_settings',
-				'wp_top_5_settings_section'
-			);
 
 			add_settings_field(
 				'wp_top_5_post_types',
@@ -253,66 +244,6 @@ class Wp_Top_5_Admin_Settings {
 		echo '<p class="description">' . wp_kses_post( __( 'Get your OpenAI API Key <a href="https://beta.openai.com/signup/">here</a>.', 'wp-top-5' ) ) . '</p>';
 	}
 
-	/**
-	 * Callback for the selected model field.
-	 */
-	public static function wp_top_5_selected_model_callback() {
-		$selected_model = get_option( 'wp_top_5_selected_model', 'gpt3.5-turbo' );
-		echo '<div class="wp-top-5-selected-model-wrapper">';
-		echo '<select id="wp_top_5_selected_model" name="wp_top_5_selected_model">';
-
-		// Get API key from options.
-		$api_key = get_option( 'wp_top_5_openai_api_key' );
-		if ( ! empty( $api_key ) ) {
-			// Fetch models from OpenAI API.
-			$response = wp_remote_get(
-				'https://api.openai.com/v1/models',
-				array(
-					'headers' => array(
-						'Content-Type'  => 'application/json',
-						'Authorization' => 'Bearer ' . $api_key,
-					),
-				)
-			);
-
-			// Check for error.
-			if ( is_wp_error( $response ) ) {
-				echo '<option value="">' . esc_html__( 'Error fetching models', 'wp-top-5' ) . '</option>';
-			} else {
-				$body = wp_remote_retrieve_body( $response );
-				$data = json_decode( $body, true );
-
-				if ( isset( $data['data'] ) && is_array( $data['data'] ) ) {
-					$models      = $data['data'];
-					$model_names = array();
-					foreach ( $models as $model ) {
-						$model_names[] = $model['id'];
-					}
-					sort( $model_names, SORT_STRING );
-					foreach ( $model_names as $model_name ) {
-						$model_display_name = ucwords( str_replace( '-', ' ', $model_name ) );
-						echo '<option value="' . esc_attr( $model_name ) . '"' . selected( $model_name, $selected_model, false ) . '>' . esc_html( $model_display_name ) . '</option>';
-					}
-				} else {
-					// Display the error message directly to the user.
-					$error_message = isset( $data['error']['message'] ) ? $data['error']['message'] : esc_html__( 'Unexpected API response', 'wp-top-5' );
-					echo '<option value="">' . esc_html( $error_message ) . '</option>';
-				}
-			}
-		} else {
-			echo '<option value="">' . esc_html__( 'API key required', 'wp-top-5' ) . '</option>';
-		}
-
-		echo '</select>';
-		echo '<div class="wp-top-5-selected-model-description">';
-		if ( ! empty( $selected_model ) && ! is_wp_error( $response ) && isset( $data['data'] ) && is_array( $data['data'] ) ) {
-			echo '<a href="https://platform.openai.com/docs/models/overview" target="_blank">' . esc_html__( 'Learn more about OpenAI models', 'wp-top-5' ) . '</a>';
-		} else {
-			echo esc_html__( 'You can find your API key at ', 'wp-top-5' ) . '<a href="https://platform.openai.com/account/api-keys" target="_blank">' . esc_html__( 'OpenAI API Keys', 'wp-top-5' ) . '</a>.';
-		}
-		echo '</div>';
-		echo '</div>';
-	}
 
 	/**
 	 * Callback for the Display Mode field.

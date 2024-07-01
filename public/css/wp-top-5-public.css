@@ -233,3 +233,28 @@
 .wp-top-5-popup-btn:active {
     transform: scale(0.95);
 }
+
+/* Loading Icon Styles */
+#loading-icon {
+    display: none;
+    font-size: 16px;
+    color: #0073aa;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#loading-icon .spinner {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0073aa;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

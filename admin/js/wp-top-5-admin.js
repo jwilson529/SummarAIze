@@ -148,24 +148,30 @@
         $(document).on('click', '#generate-top-5-button', function(event) {
             event.preventDefault();
 
-            // Show loading icon and countdown
-            $('#loading-icon').html('<div class="spinner"></div>Generating key points...').show();
+            // Change button text and show spinner
+            var $button = $(this);
+            $button.prop('disabled', true);
+            
+            // Apply inline styles to ensure visibility
+            var $spinner = $button.find('.wp-top-5-spinner');
+            $spinner.css({
+                display: 'inline-block',
+                width: '16px',
+                height: '16px',
+                border: '2px solid #f3f3f3',
+                borderTop: '2px solid #0073aa',
+                borderRadius: '50%',
+                animation: 'wp-top-5-spin 1s linear infinite',
+                marginRight: '8px'
+            });
 
-            var countdown = 10;
-            var countdownInterval = setInterval(function() {
-                if (countdown > 0) {
-                    $('#loading-icon').html('<div class="spinner"></div>Generating key points... ' + countdown + ' seconds remaining');
-                    countdown--;
-                } else {
-                    clearInterval(countdownInterval);
-                    $('#loading-icon').html('<div class="spinner"></div>Generating key points...');
-                }
-            }, 1000);
+            var originalText = 'Generate Top 5 Points';
+            $button.contents().filter(function() {
+                return this.nodeType === 3;
+            }).remove();
+            $button.append(' Generating...');
 
             var editorData = getEditorData();
-
-            // Get the selected model from the options.
-            var selectedModel = wp_top_5_admin_vars.selected_model;
 
             $.ajax({
                 url: wp_top_5_admin_vars.ajax_url,
@@ -177,13 +183,13 @@
                     title: editorData.title,
                     tags: editorData.tags || '',
                     content: editorData.content,
-                    model: selectedModel
                 }
             })
             .done(function(response) {
-                // Hide loading icon
-                clearInterval(countdownInterval);
-                $('#loading-icon').hide();
+                // Restore button text and hide spinner
+                $button.prop('disabled', false);
+                $spinner.hide();
+                $button.text(originalText);
 
                 if (response.success) {
                     // Set the response data to input fields
@@ -205,12 +211,12 @@
                 }
             })
             .fail(function(response) {
-                // Hide loading icon
-                clearInterval(countdownInterval);
-                $('#loading-icon').hide();
+                // Restore button text and hide spinner
+                $button.prop('disabled', false);
+                $spinner.hide();
+                $button.text(originalText);
             });
         });
-
         /**
          * Toggle visibility of settings fields based on display mode.
          */

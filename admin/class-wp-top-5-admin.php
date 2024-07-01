@@ -55,9 +55,6 @@ class Wp_Top_5_Admin {
 	public function enqueue_scripts() {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-top-5-admin.js', array( 'jquery' ), $this->version, false );
 
-		// Get the selected model from the options.
-		$selected_model = get_option( 'wp_top_5_selected_model', 'gpt3.5-turbo' );
-
 		// Localize the script with the necessary nonces.
 		wp_localize_script(
 			$this->plugin_name,
@@ -66,7 +63,6 @@ class Wp_Top_5_Admin {
 				'ajax_url'                => admin_url( 'admin-ajax.php' ),
 				'wp_top_5_ajax_nonce'     => wp_create_nonce( 'wp_top_5_ajax_nonce' ),
 				'wp_top_5_meta_box_nonce' => wp_create_nonce( 'wp_top_5_meta_box' ),
-				'selected_model'          => $selected_model,
 			)
 		);
 	}

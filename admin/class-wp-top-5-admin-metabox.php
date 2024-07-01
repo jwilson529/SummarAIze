@@ -65,8 +65,7 @@ class Wp_Top_5_Admin_Metabox {
 		$top_5_points_meta = get_post_meta( $post->ID, 'wp_top_5_points', true );
 		$top_5_points      = ! empty( $top_5_points_meta ) ? $top_5_points_meta : array_fill( 0, 5, '' );
 
-		echo '<button id="generate-top-5-button">Generate Top 5 Points</button>';
-		echo '<div id="loading-icon" style="display:none;">Thinking...</div>';
+		echo '<button id="generate-top-5-button"><div class="wp-top-5-spinner" style="display: none;"></div>Generate Top 5 Points</button>';
 		echo '<div id="top-5-points-list" class="list-group">';
 
 		for ( $i = 1; $i <= 5; $i++ ) {
@@ -82,6 +81,7 @@ class Wp_Top_5_Admin_Metabox {
 
 		echo '</div>';
 	}
+
 
 	/**
 	 * Save the meta box data. Not in use in favor of AJAX save. Only CSS hiding the submit.

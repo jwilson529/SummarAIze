@@ -158,26 +158,18 @@
 }
 
 /* Loading Icon Styles */
-#loading-icon {
-    display: none;
-    font-size: 16px;
-    color: #0073aa;
-    text-align: center;
-    margin-top: 20px;
-}
-
-#loading-icon .spinner {
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #0073aa;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-right: 10px;
-}
-
-@keyframes spin {
+@keyframes wp-top-5-spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+#generate-top-5-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+#generate-top-5-button .wp-top-5-spinner {
+    display: none; /* Initially hidden */
+}
+
