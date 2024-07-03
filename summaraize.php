@@ -20,7 +20,7 @@
  * Author URI:        https://oneclickcontent.com/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       summaraize
+ * Text Domain:       SummarAIze
  * Domain Path:       /languages
  * GitHub Plugin URI: jwilson529/summaraize
  * GitHub Plugin URI: https://github.com/jwilson529/summaraize
