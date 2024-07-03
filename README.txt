@@ -1,6 +1,14 @@
-# SummarAIze - Generate Key Takeaways with AI
+=== SummarAIze - Generate Key Takeaways with AI ===
+Contributors: [your_username]
+Tags: ai, key points, summary, content enhancement
+Requires at least: 5.0
+Tested up to: 6.1
+Stable tag: 1.0.0
+Requires PHP: 7.2
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-![Plugin Banner](assets/banner-772x250.png)
+# SummarAIze - Generate Key Takeaways with AI
 
 ## Description
 
@@ -15,9 +23,11 @@ SummarAIze is a WordPress plugin that allows you to automatically generate and d
 
 ## Installation
 
-1. Upload the plugin files to the `/wp-content/plugins/summaraize-pro` directory, or install the plugin through the WordPress plugins screen directly.
+1. Upload the plugin files to the `/wp-content/plugins/summaraize` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
 3. Use the Settings->SummarAIze screen to configure the plugin.
+4. Use your own Open AI API key.
+5. Use the default Assistant ID or configure your own.
 
 ## Important Note
 
@@ -35,26 +45,13 @@ Yes, you can customize the display mode and position through the plugin settings
 
 ## Screenshots
 
-1. ![Above or Below Content](assets/above-or-below-content.png)
-   *Configure whether the key points appear above or below the content.*
-
-2. ![Dark Mode](assets/dark-mode.png)
-   *Display key points in dark mode for a better visual experience.*
-
-3. ![Select Model](assets/select-model.png)
-   *Choose the AI model to use for generating key points.*
-
-4. ![Shortcode Override](assets/shortcode-override.png)
-   *Use shortcode to override default key points display settings.*
-
-5. ![Classic Editor](assets/classic-editor.png)
-   *Interface for generating and editing key points in the Classic Editor.*
-
-6. ![Popup View](assets/popup-view.png)
-   *Display key points in a popup view.*
-
-7. ![Settings Screen](assets/settings-screen.png)
-   *The settings page for configuring display options.*
+1. Configure whether the key points appear above or below the content.
+2. Display key points in dark mode for a better visual experience.
+3. Choose the AI model to use for generating key points.
+4. Use shortcode to override default key points display settings.
+5. Interface for generating and editing key points in the Classic Editor.
+6. Display key points in a popup view.
+7. The settings page for configuring display options.
 
 ## Changelog
 
