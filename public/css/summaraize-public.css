@@ -187,7 +187,7 @@
 
 /* Bubbly button style */
 .summaraize-popup-btn.bubbly {
-    background: linear-gradient(to bottom, #ff7f50, #ff6347);
+/*    background: linear-gradient(to bottom, #ff7f50, #ff6347);*/
     border-radius: 50px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

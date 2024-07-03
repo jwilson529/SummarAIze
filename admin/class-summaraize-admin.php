@@ -58,11 +58,11 @@ class Summaraize_Admin {
 		// Localize the script with the necessary nonces.
 		wp_localize_script(
 			$this->plugin_name,
-			'summaraize_admin_vars',
+			'wp_top_5_admin_vars',
 			array(
 				'ajax_url'                => admin_url( 'admin-ajax.php' ),
-				'summaraize_ajax_nonce'     => wp_create_nonce( 'summaraize_ajax_nonce' ),
-				'summaraize_meta_box_nonce' => wp_create_nonce( 'summaraize_meta_box' ),
+				'wp_top_5_ajax_nonce'     => wp_create_nonce( 'wp_top_5_ajax_nonce' ),
+				'wp_top_5_meta_box_nonce' => wp_create_nonce( 'wp_top_5_meta_box' ),
 			)
 		);
 	}
@@ -71,53 +71,49 @@ class Summaraize_Admin {
 	 * Handle AJAX request from the front-end.
 	 */
 	public function summaraize_gather_content() {
-	    // Verify nonce.
-	    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'summaraize_ajax_nonce' ) ) {
-	        wp_send_json_error( 'Invalid nonce.' );
-	        wp_die();
-	    }
+		// Verify nonce.
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'summaraize_ajax_nonce' ) ) {
+			wp_send_json_error( 'Invalid nonce.' );
+			wp_die();
+		}
 
-	    // Ensure content is set.
-	    if ( ! isset( $_POST['content'] ) ) {
-	        wp_send_json_error( 'Missing content.' );
-	        wp_die();
-	    }
+		// Ensure content is set.
+		if ( ! isset( $_POST['content'] ) ) {
+			wp_send_json_error( 'Missing content.' );
+			wp_die();
+		}
 
-	    $query = sanitize_text_field( wp_unslash( $_POST['content'] ) );
+		$query = sanitize_text_field( wp_unslash( $_POST['content'] ) );
 
-	    // Retrieve individual options.
-	    $api_key = get_option( 'summaraize_openai_api_key' );
-	    $assistant_id = get_option( 'summaraize_assistant_id' );
+		// Retrieve individual options.
+		$api_key      = get_option( 'summaraize_openai_api_key' );
+		$assistant_id = get_option( 'summaraize_assistant_id' );
 
-	    // Log the values for debugging
-	    error_log( 'API Key: ' . $api_key );
-	    error_log( 'Assistant ID: ' . $assistant_id );
+		if ( empty( $assistant_id ) ) {
+			wp_send_json_error( array( 'data' => 'Assistant ID is not configured.' ) );
+			wp_die();
+		}
 
-	    if ( empty( $assistant_id ) ) {
-	        wp_send_json_error( array( 'data' => 'Assistant ID is not configured.' ) );
-	        wp_die();
-	    }
+		if ( empty( $api_key ) ) {
+			wp_send_json_error( 'API key is not configured.' );
+			wp_die();
+		}
 
-	    if ( empty( $api_key ) ) {
-	        wp_send_json_error( 'API key is not configured.' );
-	        wp_die();
-	    }
+		// Step 2: Create a thread.
+		$thread_id = $this->create_thread( $api_key );
+		if ( ! $thread_id ) {
+			wp_send_json_error( 'Failed to create a thread.' );
+			wp_die();
+		}
 
-	    // Step 2: Create a thread.
-	    $thread_id = $this->create_thread( $api_key );
-	    if ( ! $thread_id ) {
-	        wp_send_json_error( 'Failed to create a thread.' );
-	        wp_die();
-	    }
-
-	    // Step 3: Add a user's message to the thread.
-	    $response = $this->add_message_and_run_thread( $api_key, $thread_id, $assistant_id, $query );
-	    if ( is_string( $response ) ) {
-	        wp_send_json_error( $response );
-	    } else {
-	        wp_send_json_success( $response );
-	    }
-	    wp_die();
+		// Step 3: Add a user's message to the thread.
+		$response = $this->add_message_and_run_thread( $api_key, $thread_id, $assistant_id, $query );
+		if ( is_string( $response ) ) {
+			wp_send_json_error( $response );
+		} else {
+			wp_send_json_success( $response );
+		}
+		wp_die();
 	}
 
 

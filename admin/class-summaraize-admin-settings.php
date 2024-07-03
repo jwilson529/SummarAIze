@@ -132,17 +132,18 @@ class Summaraize_Admin_Settings {
 			);
 		} else {
 			add_settings_error(
-			    'summaraize_openai_api_key',
-			    'invalid-api-key',
-			    sprintf(
-			        __( 'The OpenAI API key is invalid. Please enter a valid API key in the <a href="%s">SummarAIze settings</a> to use SummarAIze.', 'summaraize' ),
-			        admin_url( 'options-general.php?page=summaraize-settings' )
-			    ),
-			    'error'
+				'summaraize_openai_api_key',
+				'invalid-api-key',
+				sprintf(
+					/* translators: %s: URL to SummarAIze settings page */
+					__( 'The OpenAI API key is invalid. Please enter a valid API key in the <a href="%s">SummarAIze settings</a> to use SummarAIze.', 'summaraize' ),
+					esc_url( admin_url( 'options-general.php?page=summaraize-settings' ) )
+				),
+				'error'
 			);
+
 		}
 	}
-
 
 	/**
 	 * Callback for the widget title field.
@@ -214,7 +215,6 @@ class Summaraize_Admin_Settings {
 	public static function summaraize_post_types_callback() {
 		$selected_post_types = get_option( 'summaraize_post_types', array() );
 
-		// Set the default selected post type to 'post' if the option is empty.
 		if ( empty( $selected_post_types ) ) {
 			$selected_post_types = array( 'post' );
 		}
@@ -246,7 +246,6 @@ class Summaraize_Admin_Settings {
 		echo '<input type="password" name="summaraize_openai_api_key" value="' . esc_attr( $value ) . '" />';
 		echo '<p class="description">' . wp_kses_post( __( 'Get your OpenAI API Key <a href="https://beta.openai.com/signup/">here</a>.', 'summaraize' ) ) . '</p>';
 	}
-
 
 	/**
 	 * Callback for the Display Mode field.
@@ -294,7 +293,6 @@ class Summaraize_Admin_Settings {
 			$data = json_decode( $body, true );
 
 			if ( isset( $data['new_version'] ) ) {
-				// Prepare the result object.
 				$result                = new stdClass();
 				$result->name          = 'SummarAIze';
 				$result->slug          = 'summaraize';
@@ -308,7 +306,6 @@ class Summaraize_Admin_Settings {
 					'high' => $data['icons']['2x'],
 				);
 
-				// Add description and changelog from the response.
 				$result->sections = array(
 					'description' => $data['sections']['description'] ?? 'A description of your plugin.',
 					'changelog'   => $data['sections']['changelog'] ?? 'Changelog details here.',
@@ -376,64 +373,57 @@ class Summaraize_Admin_Settings {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'summaraize' ) ) );
 		}
 
-		if ( isset( $_POST['field_name'], $_POST['field_value'] ) ) {
-			$field_name = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
-
-	        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$field_value = wp_unslash( $_POST['field_value'] );
-
-			// Handle array values (like checkboxes).
-			if ( is_array( $field_value ) ) {
-				$field_value = array_map( 'sanitize_text_field', $field_value );
-			} else {
-				$field_value = sanitize_text_field( $field_value );
-			}
-
-			// Use `update_option` with a proper option key.
-			$option_key = str_replace( '[]', '', $field_name ); // Ensure correct option key format.
-
-			// Use Yoda condition checks.
-			if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {
-				// Validate the API key if it's the API key field.
-				if ( 'summaraize_openai_api_key' === $field_name && ! self::validate_openai_api_key( $field_value ) ) {
-					wp_send_json_error(
-						array(
-							'message' => __( 'Invalid API key. Please enter a valid API key.', 'summaraize' ),
-						)
-					);
-				} else {
-					wp_send_json_success(
-						array(
-							'message' => __( 'Option saved.', 'summaraize' ),
-						)
-					);
-				}
-			} else {
-				wp_send_json_error( array( 'message' => __( 'Failed to save option.', 'summaraize' ) ) );
-			}
-		} else {
+		if ( ! isset( $_POST['field_name'] ) || ! isset( $_POST['field_value'] ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid data.', 'summaraize' ) ) );
 		}
-	}
 
+		$field_name = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
+
+		// Unslash and sanitize field_value simultaneously.
+		$field_value = sanitize_text_field( wp_unslash( $_POST['field_value'] ) );
+		$field_value = is_array( $field_value )
+			? array_map( 'sanitize_text_field', $field_value )
+			: sanitize_text_field( $field_value );
+
+		// Use `update_option` with a proper option key.
+		$option_key = str_replace( '[]', '', $field_name ); // Ensure correct option key format.
+
+		// Use Yoda condition checks.
+		if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {
+			// Validate the API key if it's the API key field.
+			if ( 'summaraize_openai_api_key' === $field_name && ! self::validate_openai_api_key( $field_value ) ) {
+				wp_send_json_error(
+					array(
+						'message' => __( 'Invalid API key. Please enter a valid API key.', 'summaraize' ),
+					)
+				);
+			} else {
+				wp_send_json_success(
+					array(
+						'message' => __( 'Option saved.', 'summaraize' ),
+					)
+				);
+			}
+		} else {
+			wp_send_json_error( array( 'message' => __( 'Failed to save option.', 'summaraize' ) ) );
+		}
+	}
 
 
 	/**
 	 * Callback for the Assistant ID field.
 	 */
 	public static function summaraize_assistant_id_callback() {
-	    $default_assistant_id = 'asst_L4j2SowCX4dFnz8Vn6GZ4bp0';
-	    $value = get_option('summaraize_assistant_id', $default_assistant_id);
+		$default_assistant_id = 'asst_L4j2SowCX4dFnz8Vn6GZ4bp0';
+		$value                = get_option( 'summaraize_assistant_id', $default_assistant_id );
 
-	    // If the option is not set, update it with the default value.
-	    if ($value === $default_assistant_id && get_option('summaraize_assistant_id') === false) {
-	        update_option('summaraize_assistant_id', $default_assistant_id);
-	    }
+		if ( $value === $default_assistant_id && get_option( 'summaraize_assistant_id' ) === false ) {
+			update_option( 'summaraize_assistant_id', $default_assistant_id );
+		}
 
-	    echo '<input type="text" id="summaraize_assistant_id" name="summaraize_assistant_id" value="' . esc_attr($value) . '" />';
-	    echo '<p class="description">' . esc_html__('Enter the Assistant ID provided by OpenAI. The default ID is asst_L4j2SowCX4dFnz8Vn6GZ4bp0.', 'summaraize') . '</p>';
+		echo '<input type="text" id="summaraize_assistant_id" name="summaraize_assistant_id" value="' . esc_attr( $value ) . '" />';
+		echo '<p class="description">' . esc_html__( 'Enter the Assistant ID provided by OpenAI. The default ID is asst_L4j2SowCX4dFnz8Vn6GZ4bp0.', 'summaraize' ) . '</p>';
 	}
-
 
 	/**
 	 * Validate the OpenAI API key.
