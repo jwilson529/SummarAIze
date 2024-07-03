@@ -60,7 +60,7 @@ class Summaraize_Admin {
 			$this->plugin_name,
 			'summaraize_admin_vars',
 			array(
-				'ajax_url'                => admin_url( 'admin-ajax.php' ),
+				'ajax_url'                  => admin_url( 'admin-ajax.php' ),
 				'summaraize_ajax_nonce'     => wp_create_nonce( 'summaraize_ajax_nonce' ),
 				'summaraize_meta_box_nonce' => wp_create_nonce( 'summaraize_meta_box' ),
 			)

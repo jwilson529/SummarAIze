@@ -165,11 +165,9 @@ class Summaraize {
 		$this->loader->add_action( 'admin_menu', 'Summaraize_Admin_Settings', 'summaraize_register_options_page' );
 		$this->loader->add_action( 'admin_menu', 'Summaraize_Admin_Settings', 'summaraize_register_settings' );
 		$this->loader->add_action( 'init', 'Summaraize_Admin_Metabox', 'init_hooks', 20 );
-
 		$this->loader->add_action( 'save_post', 'Summaraize_Admin_Metabox', 'save_summaraize_points' );
 		$this->loader->add_action( 'wp_ajax_summaraize_gather_content', $plugin_admin, 'summaraize_gather_content' );
 		$this->loader->add_action( 'wp_ajax_summaraize_auto_save', 'Summaraize_Admin_Settings', 'summaraize_auto_save' );
-		$this->loader->add_action( 'admin_init', 'Summaraize_Admin_Settings', 'summaraize_init_update_checker' );
 	}
 
 	/**
