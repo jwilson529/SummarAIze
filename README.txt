@@ -37,21 +37,13 @@ The Assistant ID configures the behavior and responses of the SummarAIze assista
 
 ### How does the plugin generate key points?
 
-The plugin uses advanced AI algorithms to analyze your post content and extract the top 5 key points.
+The plugin uses and Open AI Assistant that is created specifically for this plugin. It returns 5 key points for any given article in a predictable, repeatable format. This is NOT using Chat-GPT completions. 
 
 ### Can I customize the display of the key points?
 
-Yes, you can customize the display mode and position through the plugin settings.
+Yes, you can customize the display mode and position through the plugin settings. You can choose above or below the content, dark and light mode and a popup version with customizable buttons. 
 
-## Screenshots
-
-1. Configure whether the key points appear above or below the content.
-2. Display key points in dark mode for a better visual experience.
-3. Choose the AI model to use for generating key points.
-4. Use shortcode to override default key points display settings.
-5. Interface for generating and editing key points in the Classic Editor.
-6. Display key points in a popup view.
-7. The settings page for configuring display options.
+You can override the main settings per post or page by checking the Override Settings box and choosing new values for the view and mode.
 
 ## Changelog
 
