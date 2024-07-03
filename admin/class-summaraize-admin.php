@@ -58,11 +58,11 @@ class Summaraize_Admin {
 		// Localize the script with the necessary nonces.
 		wp_localize_script(
 			$this->plugin_name,
-			'wp_top_5_admin_vars',
+			'summaraize_admin_vars',
 			array(
 				'ajax_url'                => admin_url( 'admin-ajax.php' ),
-				'wp_top_5_ajax_nonce'     => wp_create_nonce( 'wp_top_5_ajax_nonce' ),
-				'wp_top_5_meta_box_nonce' => wp_create_nonce( 'wp_top_5_meta_box' ),
+				'summaraize_ajax_nonce'     => wp_create_nonce( 'summaraize_ajax_nonce' ),
+				'summaraize_meta_box_nonce' => wp_create_nonce( 'summaraize_meta_box' ),
 			)
 		);
 	}
