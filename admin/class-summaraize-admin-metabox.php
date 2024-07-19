@@ -18,7 +18,7 @@ class Summaraize_Admin_Metabox {
 	 *
 	 * @since 1.0.0
 	 */
-	public static function add_meta_box() {
+	public function add_meta_box() {
 		$api_key = get_option( 'summaraize_openai_api_key' );
 
 		if ( ! empty( $api_key ) && Summaraize_Admin_Settings::validate_openai_api_key( $api_key ) ) {
@@ -39,15 +39,6 @@ class Summaraize_Admin_Metabox {
 		}
 	}
 
-	/**
-	 * Initialize hooks for adding meta boxes.
-	 *
-	 * @since 1.0.0
-	 */
-	public static function init_hooks() {
-		add_action( 'add_meta_boxes', array( 'Summaraize_Admin_Metabox', 'add_meta_box' ) );
-		add_action( 'save_post', array( 'Summaraize_Admin_Metabox', 'save_summaraize_points' ) );
-	}
 
 	/**
 	 * Render the meta box.
@@ -154,7 +145,7 @@ class Summaraize_Admin_Metabox {
 	 *
 	 * @param int $post_id The ID of the post being saved.
 	 */
-	public static function save_summaraize_points( $post_id ) {
+	public function save_summaraize_points( $post_id ) {
 		if ( ! isset( $_POST['summaraize_meta_box_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['summaraize_meta_box_nonce'] ) ), 'summaraize_meta_box' ) ) {
 			return;
 		}

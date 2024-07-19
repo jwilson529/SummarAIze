@@ -16,7 +16,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Register the plugin settings page.
 	 */
-	public static function summaraize_register_options_page() {
+	public function summaraize_register_options_page() {
 		add_options_page(
 			__( 'SummarAIze Settings', 'summaraize' ),
 			__( 'SummarAIze', 'summaraize' ),
@@ -29,7 +29,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Display the options page.
 	 */
-	public static function summaraize_options_page() {
+	public function summaraize_options_page() {
 		?>
 		<div id="summaraize" class="wrap">
 			<form class="summaraize-settings-form" method="post" action="options.php">
@@ -44,7 +44,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Register the plugin settings.
 	 */
-	public static function summaraize_register_settings() {
+	public function summaraize_register_settings() {
 		register_setting( 'summaraize_settings', 'summaraize_openai_api_key', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 
 		add_settings_section(
@@ -148,7 +148,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the widget title field.
 	 */
-	public static function summaraize_widget_title_callback() {
+	public function summaraize_widget_title_callback() {
 		$widget_title = get_option( 'summaraize_widget_title', 'Key Takeaways' );
 		?>
 		<input type="text" name="summaraize_widget_title" id="summaraize_widget_title" value="<?php echo esc_attr( $widget_title ); ?>" />
@@ -159,7 +159,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the button style field.
 	 */
-	public static function summaraize_button_style_callback() {
+	public function summaraize_button_style_callback() {
 		$selected_style = get_option( 'summaraize_button_style', 'flat' );
 		$button_styles  = array(
 			'flat'        => __( 'Flat', 'summaraize' ),
@@ -186,7 +186,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the button color field.
 	 */
-	public static function summaraize_button_color_callback() {
+	public function summaraize_button_color_callback() {
 		$button_color = get_option( 'summaraize_button_color', '#0073aa' );
 		?>
 		<input type="color" name="summaraize_button_color" id="summaraize_button_color" value="<?php echo esc_attr( $button_color ); ?>" />
@@ -197,7 +197,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the display position field.
 	 */
-	public static function summaraize_display_position_callback() {
+	public function summaraize_display_position_callback() {
 		$selected_position = get_option( 'summaraize_display_position', 'above' );
 		?>
 		<select name="summaraize_display_position" id="summaraize_display_position">
@@ -212,7 +212,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the post types field.
 	 */
-	public static function summaraize_post_types_callback() {
+	public function summaraize_post_types_callback() {
 		$selected_post_types = get_option( 'summaraize_post_types', array() );
 
 		if ( empty( $selected_post_types ) ) {
@@ -234,14 +234,14 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the settings section.
 	 */
-	public static function summaraize_settings_section_callback() {
+	public function summaraize_settings_section_callback() {
 		echo '<p>' . esc_html__( 'Configure the settings for the SummarAIze Pro plugin.', 'summaraize' ) . '</p>';
 	}
 
 	/**
 	 * Callback for the OpenAI API key field.
 	 */
-	public static function summaraize_openai_api_key_callback() {
+	public function summaraize_openai_api_key_callback() {
 		$value = get_option( 'summaraize_openai_api_key', '' );
 		echo '<input type="password" name="summaraize_openai_api_key" value="' . esc_attr( $value ) . '" />';
 		echo '<p class="description">' . wp_kses_post( __( 'Get your OpenAI API Key <a href="https://beta.openai.com/signup/">here</a>.', 'summaraize' ) ) . '</p>';
@@ -250,7 +250,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the Display Mode field.
 	 */
-	public static function summaraize_display_mode_callback() {
+	public function summaraize_display_mode_callback() {
 		$value = get_option( 'summaraize_display_mode', 'light' );
 		?>
 		<select id="summaraize_display_mode" name="summaraize_display_mode">
@@ -266,7 +266,7 @@ class Summaraize_Admin_Settings {
 	 *
 	 * @since 1.0.0
 	 */
-	public static function summaraize_auto_save() {
+	public function summaraize_auto_save() {
 		// Check AJAX nonce for security.
 		check_ajax_referer( 'summaraize_ajax_nonce', 'nonce' );
 
@@ -315,7 +315,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the Assistant ID field.
 	 */
-	public static function summaraize_assistant_id_callback() {
+	public function summaraize_assistant_id_callback() {
 		$default_assistant_id = 'asst_L4j2SowCX4dFnz8Vn6GZ4bp0';
 		$value                = get_option( 'summaraize_assistant_id', $default_assistant_id );
 
