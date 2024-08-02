@@ -327,13 +327,15 @@ class Summaraize_Admin_Settings {
 		$field_name = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
 
 		// Unslash and sanitize field_value simultaneously.
-		$field_value = sanitize_text_field( wp_unslash( $_POST['field_value'] ) );
-		$field_value = is_array( $field_value )
-			? array_map( 'sanitize_text_field', $field_value )
-			: sanitize_text_field( $field_value );
+		if ( is_array( $_POST['field_value'] ) ) {
+		    $field_value = array_map( 'sanitize_text_field', wp_unslash( $_POST['field_value'] ) );
+		} else {
+		    $field_value = sanitize_text_field( wp_unslash( $_POST['field_value'] ) );
+		}
 
 		// Use `update_option` with a proper option key.
 		$option_key = str_replace( '[]', '', $field_name ); // Ensure correct option key format.
+
 
 		// Use Yoda condition checks.
 		if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {
