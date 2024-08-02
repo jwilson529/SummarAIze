@@ -22,7 +22,7 @@ class Summaraize_Admin_Settings {
 			__( 'SummarAIze', 'summaraize' ),
 			'manage_options',
 			'summaraize-settings',
-			array( 'Summaraize_Admin_Settings', 'summaraize_options_page' )
+			array( $this, 'summaraize_options_page' )
 		);
 	}
 
@@ -30,16 +30,67 @@ class Summaraize_Admin_Settings {
 	 * Display the options page.
 	 */
 	public function summaraize_options_page() {
-		?>
-		<div id="summaraize" class="wrap">
-			<form class="summaraize-settings-form" method="post" action="options.php">
-				<?php settings_fields( 'summaraize_settings' ); ?>
-				<?php do_settings_sections( 'summaraize_settings' ); ?>
-				<?php submit_button(); ?>
-			</form>
-		</div>
-		<?php
+	    error_log('summaraize_options_page called');
+	    ?>
+	    <div id="summaraize" class="wrap">
+	        <form class="summaraize-settings-form" method="post" action="">
+	            <?php settings_fields('summaraize_settings'); ?>
+	            <?php do_settings_sections('summaraize_settings'); ?>
+	            <?php submit_button(); ?>
+	            
+	            <h2><?php esc_html_e('Assistant Settings', 'summaraize'); ?></h2>
+	            <input type="hidden" name="summaraize_create_assistant_nonce" value="<?php echo esc_attr( wp_create_nonce( 'summaraize_ajax_nonce' ) ); ?>" />
+	            <input type="submit" name="create_assistant" class="button button-secondary" value="<?php esc_attr_e('Create Assistant', 'summaraize'); ?>" />
+	        </form>
+	    </div>
+	    <?php
+	    // Make sure the function isn't called here by accident
+	    // $this->summaraize_handle_assistant_creation(); // Commented out to prevent multiple calls
 	}
+
+
+
+	// Display admin notices for settings
+	public function display_admin_notices() {
+	    settings_errors();
+	}
+
+	/**
+	 * Hook to handle the assistant creation.
+	 */
+	public function summaraize_handle_assistant_creation() {
+	    // Log that the function was called
+	    error_log('summaraize_handle_assistant_creation called');
+
+	    // Check if the create assistant button was clicked
+	    if (isset($_POST['create_assistant'])) {
+	        error_log('Create Assistant button was clicked');
+
+	        // Check nonce for security
+	        if (check_admin_referer('summaraize_ajax_nonce', 'summaraize_create_assistant_nonce')) {
+	            error_log('Nonce verification passed');
+
+	            // Attempt to create the assistant
+	            $assistant_id = $this->summaraize_create_assistant();
+
+	            if ($assistant_id) {
+	                error_log('Assistant successfully created with ID: ' . $assistant_id);
+	                update_option('summaraize_assistant_id', $assistant_id);
+	                add_settings_error('summaraize_assistant_id', 'assistant-created', __('Assistant successfully created.', 'summaraize'), 'updated');
+	            } else {
+	                error_log('Failed to create assistant');
+	                add_settings_error('summaraize_assistant_id', 'assistant-creation-failed', __('Failed to create assistant.', 'summaraize'), 'error');
+	            }
+	        } else {
+	            error_log('Nonce verification failed');
+	            add_settings_error('summaraize_assistant_id', 'nonce-failed', __('Nonce verification failed.', 'summaraize'), 'error');
+	        }
+	    } else {
+	        error_log('Create Assistant button was not clicked');
+	    }
+	}
+
+
 
 	/**
 	 * Register the plugin settings.
@@ -50,14 +101,14 @@ class Summaraize_Admin_Settings {
 		add_settings_section(
 			'summaraize_settings_section',
 			__( 'SummarAIze Settings', 'summaraize' ),
-			array( 'Summaraize_Admin_Settings', 'summaraize_settings_section_callback' ),
+			array( $this, 'summaraize_settings_section_callback' ),
 			'summaraize_settings'
 		);
 
 		add_settings_field(
 			'summaraize_openai_api_key',
 			__( 'OpenAI API Key', 'summaraize' ),
-			array( 'Summaraize_Admin_Settings', 'summaraize_openai_api_key_callback' ),
+			array( $this, 'summaraize_openai_api_key_callback' ),
 			'summaraize_settings',
 			'summaraize_settings_section',
 			array( 'label_for' => 'summaraize_openai_api_key' )
@@ -77,7 +128,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_post_types',
 				__( 'Post Types', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_post_types_callback' ),
+				array( $this, 'summaraize_post_types_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -85,7 +136,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_assistant_id',
 				__( 'Assistant ID', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_assistant_id_callback' ),
+				array( $this, 'summaraize_assistant_id_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section',
 				array( 'label_for' => 'summaraize_assistant_id' )
@@ -94,7 +145,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_widget_title',
 				__( 'Widget Title', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_widget_title_callback' ),
+				array( $this, 'summaraize_widget_title_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -102,7 +153,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_display_position',
 				__( 'Display Position', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_display_position_callback' ),
+				array( $this, 'summaraize_display_position_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -110,7 +161,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_display_mode',
 				__( 'Display Mode', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_display_mode_callback' ),
+				array( $this, 'summaraize_display_mode_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -118,7 +169,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_button_style',
 				__( 'Button Style', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_button_style_callback' ),
+				array( $this, 'summaraize_button_style_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -126,7 +177,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_button_color',
 				__( 'Button Color', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_button_color_callback' ),
+				array( $this, 'summaraize_button_color_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -316,15 +367,117 @@ class Summaraize_Admin_Settings {
 	 * Callback for the Assistant ID field.
 	 */
 	public function summaraize_assistant_id_callback() {
-		$default_assistant_id = 'asst_L4j2SowCX4dFnz8Vn6GZ4bp0';
-		$value                = get_option( 'summaraize_assistant_id', $default_assistant_id );
+	    $value = get_option('summaraize_assistant_id', '');
 
-		if ( $value === $default_assistant_id && get_option( 'summaraize_assistant_id' ) === false ) {
-			update_option( 'summaraize_assistant_id', $default_assistant_id );
-		}
+	    if (empty($value)) {
+	        // Attempt to create a new assistant if none exists
+	        $assistant_id = $this->summaraize_create_assistant();
+	        $value = $assistant_id ? $assistant_id : 'Failed to create assistant';
+	        update_option('summaraize_assistant_id', $value);
+	    }
 
-		echo '<input type="text" id="summaraize_assistant_id" name="summaraize_assistant_id" value="' . esc_attr( $value ) . '" />';
-		echo '<p class="description">' . esc_html__( 'Enter the Assistant ID provided by OpenAI. The default ID is asst_L4j2SowCX4dFnz8Vn6GZ4bp0.', 'summaraize' ) . '</p>';
+	    echo '<input type="text" id="summaraize_assistant_id" name="summaraize_assistant_id" value="' . esc_attr($value) . '" />';
+	    echo '<p class="description">' . esc_html__('Enter the Assistant ID provided by OpenAI or leave as is to use the auto-generated one.', 'summaraize') . '</p>';
+	}
+
+	/**
+	 * Create the OpenAI assistant.
+	 *
+	 * @since 1.0.0
+	 */
+	/**
+	 * Create the OpenAI assistant.
+	 *
+	 * @since 1.0.0
+	 */
+	private function summaraize_create_assistant() {
+	    $api_key = get_option('summaraize_openai_api_key');
+	    if (empty($api_key)) {
+	        error_log('API Key is missing.');
+	        return false;
+	    }
+
+	    $initial_prompt = [
+	        "description" => "This Assistant extracts the top 5 key points from a given article and returns them in a JSON format being sure to use the `extract_key_points` function.",
+	        "behavior" => [
+	            [
+	                "trigger" => "message",
+	                "instruction" => "When provided with a message containing the content of an article, analyze the article and identify the top 5 key points. Call the `extract_key_points` function to return these points in a JSON format. The expected JSON format is:\n[\n  { \"index\": 1, \"text\": \"Point 1 content\" },\n  { \"index\": 2, \"text\": \"Point 2 content\" },\n  { \"index\": 3, \"text\": \"Point 3 content\" },\n  { \"index\": 4, \"text\": \"Point 4 content\" },\n  { \"index\": 5, \"text\": \"Point 5 content\" }\n]"
+	            ]
+	        ]
+	    ];
+
+
+	    $function_definition = [
+	        "name" => "extract_key_points",
+	        "description" => "Extract the top 5 key points from the provided article content and return them in a specific JSON format.",
+	        "parameters" => [
+	            "type" => "object",
+	            "properties" => [
+	                "points" => [
+	                    "type" => "array",
+	                    "items" => [
+	                        "type" => "object",
+	                        "properties" => [
+	                            "index" => [
+	                                "type" => "integer",
+	                                "description" => "The index of the key point."
+	                            ],
+	                            "text" => [
+	                                "type" => "string",
+	                                "description" => "The content of the key point."
+	                            ]
+	                        ],
+	                        "required" => ["index", "text"]
+	                    ]
+	                ]
+	            ],
+	            "required" => ["points"]
+	        ]
+	    ];
+
+
+	    $payload = [
+	        "description" => "Assistant for generating concise content summaries.",
+	        "instructions" => json_encode($initial_prompt),
+	        "name" => 'SummarAIze Assistant',
+	        "tools" => [
+	            [
+	                "type" => "function",
+	                "function" => $function_definition
+	            ]
+	        ],
+	        "model" => 'gpt-4o',
+	        "response_format" => ["type" => "json_object"]
+	    ];
+
+	    $response = wp_remote_post(
+	        'https://api.openai.com/v1/assistants',
+	        array(
+	            'headers' => array(
+	                'Content-Type' => 'application/json',
+	                'Authorization' => 'Bearer ' . $api_key,
+	                'OpenAI-Beta' => 'assistants=v2',
+	            ),
+	            'body' => json_encode($payload),
+	        )
+	    );
+
+	    if (is_wp_error($response)) {
+	        error_log('Assistant creation failed: ' . $response->get_error_message());
+	        return false;
+	    }
+
+	    $response_body = wp_remote_retrieve_body($response);
+	    $assistant_data = json_decode($response_body, true);
+
+	    if (isset($assistant_data['id'])) {
+	        return $assistant_data['id'];
+	    } else {
+	        error_log('Failed to retrieve assistant ID from response: ' . print_r($assistant_data, true));
+	    }
+
+	    return false;
 	}
 
 	/**
@@ -353,4 +506,6 @@ class Summaraize_Admin_Settings {
 
 		return isset( $data['data'] ) && is_array( $data['data'] );
 	}
+
+
 }

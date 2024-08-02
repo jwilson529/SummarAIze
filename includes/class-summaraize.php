@@ -158,23 +158,25 @@ class Summaraize {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Summaraize_Admin( $this->get_plugin_name(), $this->get_version() );
-		$plugin_settings = new Summaraize_Admin_Settings();
-		$plugin_metabox = new Summaraize_Admin_Metabox();
+	    $plugin_admin = new Summaraize_Admin( $this->get_plugin_name(), $this->get_version() );
+	    $plugin_settings = new Summaraize_Admin_Settings();
+	    $plugin_metabox = new Summaraize_Admin_Metabox();
 
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_menu', $plugin_settings, 'summaraize_register_options_page' );
-		$this->loader->add_action( 'admin_menu', $plugin_settings, 'summaraize_register_settings' );
-		$this->loader->add_action( 'save_post', $plugin_metabox, 'save_summaraize_points' );
-		$this->loader->add_action( 'wp_ajax_summaraize_gather_content', $plugin_admin, 'summaraize_gather_content' );
-		$this->loader->add_action( 'wp_ajax_summaraize_auto_save', $plugin_settings, 'summaraize_auto_save' );
-		$this->loader->add_action( 'add_meta_boxes', $plugin_metabox, 'add_meta_box' );
-		$this->loader->add_action( 'save_post', $plugin_metabox, 'save_summaraize_points' );
+	    $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+	    $this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
+	    $this->loader->add_action( 'admin_menu', $plugin_settings, 'summaraize_register_options_page' );
+	    $this->loader->add_action( 'admin_init', $plugin_settings, 'summaraize_register_settings' );
+	    $this->loader->add_action( 'save_post', $plugin_metabox, 'save_summaraize_points' );
+	    $this->loader->add_action( 'wp_ajax_summaraize_gather_content', $plugin_admin, 'summaraize_gather_content' );
+	    $this->loader->add_action( 'wp_ajax_summaraize_auto_save', $plugin_settings, 'summaraize_auto_save' );
+	    $this->loader->add_action( 'add_meta_boxes', $plugin_metabox, 'add_meta_box' );
+	    $this->loader->add_action( 'save_post', $plugin_metabox, 'save_summaraize_points' );
 
-
-
+	    // Add this action to handle the assistant creation form submission
+	    $this->loader->add_action( 'admin_notices', $plugin_settings, 'display_admin_notices' );
+	    // $this->loader->add_action( 'admin_init', $plugin_settings, 'summaraize_handle_assistant_creation' );
 	}
+
 
 	/**
 	 * Register all of the hooks related to the public-facing functionality
