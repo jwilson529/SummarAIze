@@ -3,7 +3,7 @@
 
     $(document).ready(function() {
 
-        $(document).on('click', '#create_assistant', function(event) {
+        $(document).on('click', '#summariaze_create_assistant', function(event) {
             event.preventDefault();
             console.log('Button clicked'); // Debugging line
             $('#summaraize_assistant_id').val('');

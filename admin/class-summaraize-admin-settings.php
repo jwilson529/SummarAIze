@@ -39,7 +39,7 @@ class Summaraize_Admin_Settings {
 				<?php submit_button(); ?>
 				
 				<h2><?php esc_html_e( 'Assistant Settings', 'summaraize' ); ?></h2>
-				<button type="submit" id="create_assistant" class="button button-secondary">Create Assistant</button>
+				<button type="submit" id="summariaze_create_assistant" class="button button-secondary">Create Assistant</button>
 			</form>
 		</div>
 		<?php
@@ -61,7 +61,7 @@ class Summaraize_Admin_Settings {
 		// Log that the function was called.
 
 		// Check if the create assistant button was clicked.
-		if ( isset( $_POST['create_assistant'] ) ) {
+		if ( isset( $_POST['summariaze_create_assistant'] ) ) {
 
 			// Check nonce for security.
 			if ( check_admin_referer( 'summaraize_ajax_nonce', 'summaraize_create_assistant_nonce' ) ) {
