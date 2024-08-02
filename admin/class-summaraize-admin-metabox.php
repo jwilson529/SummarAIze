@@ -24,6 +24,11 @@ class Summaraize_Admin_Metabox {
 		if ( ! empty( $api_key ) && Summaraize_Admin_Settings::validate_openai_api_key( $api_key ) ) {
 			$post_types = get_option( 'summaraize_post_types', array() );
 
+			// Ensure $post_types is an array.
+			if ( ! is_array( $post_types ) ) {
+				$post_types = array( $post_types );
+			}
+
 			foreach ( $post_types as $post_type ) {
 				if ( post_type_exists( $post_type ) ) {
 					add_meta_box(
@@ -38,6 +43,7 @@ class Summaraize_Admin_Metabox {
 			}
 		}
 	}
+
 
 
 	/**

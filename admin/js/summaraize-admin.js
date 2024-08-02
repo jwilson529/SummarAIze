@@ -117,7 +117,7 @@
                     data: {
                         action: 'summaraize_auto_save',
                         nonce: summaraize_admin_vars.summaraize_ajax_nonce,
-                        field_name: fieldName,
+                        field_name: fieldName.replace('[]', ''), // Remove [] for the option name
                         field_value: fieldValue
                     }
                 })
