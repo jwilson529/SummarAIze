@@ -95,6 +95,9 @@ class Summaraize_Public {
 		$post_id           = get_the_ID();
 		$summaraize_points = get_post_meta( $post_id, 'summaraize_points', true );
 
+		// Filter out empty points.
+		$summaraize_points = array_filter( $summaraize_points );
+
 		if ( empty( $summaraize_points ) ) {
 			return '<p>' . esc_html__( 'No key points have been set for this post.', 'summaraize' ) . '</p>';
 		}
@@ -164,10 +167,8 @@ class Summaraize_Public {
 		$output = ob_get_clean();
 
 		if ( 'below' === $view ) {
-
 			return $content . $output;
 		} else {
-
 			return $output . $content;
 		}
 	}

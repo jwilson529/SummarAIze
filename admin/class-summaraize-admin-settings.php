@@ -16,48 +16,93 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Register the plugin settings page.
 	 */
-	public static function summaraize_register_options_page() {
+	public function summaraize_register_options_page() {
 		add_options_page(
 			__( 'SummarAIze Settings', 'summaraize' ),
 			__( 'SummarAIze', 'summaraize' ),
 			'manage_options',
 			'summaraize-settings',
-			array( 'Summaraize_Admin_Settings', 'summaraize_options_page' )
+			array( $this, 'summaraize_options_page' )
 		);
 	}
 
 	/**
 	 * Display the options page.
 	 */
-	public static function summaraize_options_page() {
+	public function summaraize_options_page() {
+
 		?>
 		<div id="summaraize" class="wrap">
-			<form class="summaraize-settings-form" method="post" action="options.php">
+			<form class="summaraize-settings-form" method="post" action="">
 				<?php settings_fields( 'summaraize_settings' ); ?>
 				<?php do_settings_sections( 'summaraize_settings' ); ?>
 				<?php submit_button(); ?>
+				
+				<h2><?php esc_html_e( 'Assistant Settings', 'summaraize' ); ?></h2>
+				<button type="submit" id="summariaze_create_assistant" class="button button-secondary">Create Assistant</button>
 			</form>
 		</div>
 		<?php
 	}
 
+
+
+	/**
+	 * Display admin notices for settings.
+	 */
+	public function display_admin_notices() {
+		settings_errors();
+	}
+
+	/**
+	 * Hook to handle the assistant creation.
+	 */
+	public function summaraize_handle_assistant_creation() {
+		// Log that the function was called.
+
+		// Check if the create assistant button was clicked.
+		if ( isset( $_POST['summariaze_create_assistant'] ) ) {
+
+			// Check nonce for security.
+			if ( check_admin_referer( 'summaraize_ajax_nonce', 'summaraize_create_assistant_nonce' ) ) {
+
+				// Attempt to create the assistant.
+				$assistant_id = $this->summaraize_create_assistant();
+
+				if ( $assistant_id ) {
+
+					update_option( 'summaraize_assistant_id', $assistant_id );
+					add_settings_error( 'summaraize_assistant_id', 'assistant-created', __( 'Assistant successfully created.', 'summaraize' ), 'updated' );
+				} else {
+
+					add_settings_error( 'summaraize_assistant_id', 'assistant-creation-failed', __( 'Failed to create assistant.', 'summaraize' ), 'error' );
+				}
+			} else {
+
+				add_settings_error( 'summaraize_assistant_id', 'nonce-failed', __( 'Nonce verification failed.', 'summaraize' ), 'error' );
+			}
+		}
+	}
+
+
+
 	/**
 	 * Register the plugin settings.
 	 */
-	public static function summaraize_register_settings() {
+	public function summaraize_register_settings() {
 		register_setting( 'summaraize_settings', 'summaraize_openai_api_key', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 
 		add_settings_section(
 			'summaraize_settings_section',
 			__( 'SummarAIze Settings', 'summaraize' ),
-			array( 'Summaraize_Admin_Settings', 'summaraize_settings_section_callback' ),
+			array( $this, 'summaraize_settings_section_callback' ),
 			'summaraize_settings'
 		);
 
 		add_settings_field(
 			'summaraize_openai_api_key',
 			__( 'OpenAI API Key', 'summaraize' ),
-			array( 'Summaraize_Admin_Settings', 'summaraize_openai_api_key_callback' ),
+			array( $this, 'summaraize_openai_api_key_callback' ),
 			'summaraize_settings',
 			'summaraize_settings_section',
 			array( 'label_for' => 'summaraize_openai_api_key' )
@@ -77,7 +122,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_post_types',
 				__( 'Post Types', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_post_types_callback' ),
+				array( $this, 'summaraize_post_types_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -85,7 +130,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_assistant_id',
 				__( 'Assistant ID', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_assistant_id_callback' ),
+				array( $this, 'summaraize_assistant_id_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section',
 				array( 'label_for' => 'summaraize_assistant_id' )
@@ -94,7 +139,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_widget_title',
 				__( 'Widget Title', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_widget_title_callback' ),
+				array( $this, 'summaraize_widget_title_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -102,7 +147,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_display_position',
 				__( 'Display Position', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_display_position_callback' ),
+				array( $this, 'summaraize_display_position_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -110,7 +155,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_display_mode',
 				__( 'Display Mode', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_display_mode_callback' ),
+				array( $this, 'summaraize_display_mode_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -118,7 +163,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_button_style',
 				__( 'Button Style', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_button_style_callback' ),
+				array( $this, 'summaraize_button_style_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -126,7 +171,7 @@ class Summaraize_Admin_Settings {
 			add_settings_field(
 				'summaraize_button_color',
 				__( 'Button Color', 'summaraize' ),
-				array( 'Summaraize_Admin_Settings', 'summaraize_button_color_callback' ),
+				array( $this, 'summaraize_button_color_callback' ),
 				'summaraize_settings',
 				'summaraize_settings_section'
 			);
@@ -148,7 +193,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the widget title field.
 	 */
-	public static function summaraize_widget_title_callback() {
+	public function summaraize_widget_title_callback() {
 		$widget_title = get_option( 'summaraize_widget_title', 'Key Takeaways' );
 		?>
 		<input type="text" name="summaraize_widget_title" id="summaraize_widget_title" value="<?php echo esc_attr( $widget_title ); ?>" />
@@ -159,7 +204,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the button style field.
 	 */
-	public static function summaraize_button_style_callback() {
+	public function summaraize_button_style_callback() {
 		$selected_style = get_option( 'summaraize_button_style', 'flat' );
 		$button_styles  = array(
 			'flat'        => __( 'Flat', 'summaraize' ),
@@ -186,7 +231,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the button color field.
 	 */
-	public static function summaraize_button_color_callback() {
+	public function summaraize_button_color_callback() {
 		$button_color = get_option( 'summaraize_button_color', '#0073aa' );
 		?>
 		<input type="color" name="summaraize_button_color" id="summaraize_button_color" value="<?php echo esc_attr( $button_color ); ?>" />
@@ -197,7 +242,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the display position field.
 	 */
-	public static function summaraize_display_position_callback() {
+	public function summaraize_display_position_callback() {
 		$selected_position = get_option( 'summaraize_display_position', 'above' );
 		?>
 		<select name="summaraize_display_position" id="summaraize_display_position">
@@ -212,7 +257,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the post types field.
 	 */
-	public static function summaraize_post_types_callback() {
+	public function summaraize_post_types_callback() {
 		$selected_post_types = get_option( 'summaraize_post_types', array() );
 
 		if ( empty( $selected_post_types ) ) {
@@ -234,14 +279,14 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the settings section.
 	 */
-	public static function summaraize_settings_section_callback() {
+	public function summaraize_settings_section_callback() {
 		echo '<p>' . esc_html__( 'Configure the settings for the SummarAIze Pro plugin.', 'summaraize' ) . '</p>';
 	}
 
 	/**
 	 * Callback for the OpenAI API key field.
 	 */
-	public static function summaraize_openai_api_key_callback() {
+	public function summaraize_openai_api_key_callback() {
 		$value = get_option( 'summaraize_openai_api_key', '' );
 		echo '<input type="password" name="summaraize_openai_api_key" value="' . esc_attr( $value ) . '" />';
 		echo '<p class="description">' . wp_kses_post( __( 'Get your OpenAI API Key <a href="https://beta.openai.com/signup/">here</a>.', 'summaraize' ) ) . '</p>';
@@ -250,7 +295,7 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the Display Mode field.
 	 */
-	public static function summaraize_display_mode_callback() {
+	public function summaraize_display_mode_callback() {
 		$value = get_option( 'summaraize_display_mode', 'light' );
 		?>
 		<select id="summaraize_display_mode" name="summaraize_display_mode">
@@ -262,109 +307,11 @@ class Summaraize_Admin_Settings {
 	}
 
 	/**
-	 * Initialize the update checker.
-	 */
-	public static function summaraize_init_update_checker() {
-		add_filter( 'plugins_api', array( 'Summaraize_Admin_Settings', 'summaraize_plugins_api_handler' ), 10, 3 );
-		add_filter( 'site_transient_update_plugins', array( 'Summaraize_Admin_Settings', 'summaraize_update_checker' ) );
-		add_filter( 'pre_set_site_transient_update_plugins', array( 'Summaraize_Admin_Settings', 'summaraize_update_checker' ) );
-	}
-
-	/**
-	 * Handle the plugin information request.
-	 *
-	 * @param false|object|array $result The result object or array. Default false.
-	 * @param string             $action The type of information being requested from the Plugin Install API.
-	 * @param object             $args   Plugin API arguments.
-	 * @return false|object|array
-	 */
-	public static function summaraize_plugins_api_handler( $result, $action, $args ) {
-		if ( 'plugin_information' !== $action ) {
-			return $result;
-		}
-
-		if ( isset( $args->slug ) && 'summaraize' === $args->slug ) {
-			$response = wp_remote_get( 'https://oneclickcontent.com/wp-json/summaraize/v1/update-wp5?version=' . SUMMARAIZE_VERSION );
-			if ( is_wp_error( $response ) ) {
-				return $result;
-			}
-
-			$body = wp_remote_retrieve_body( $response );
-			$data = json_decode( $body, true );
-
-			if ( isset( $data['new_version'] ) ) {
-				$result                = new stdClass();
-				$result->name          = 'SummarAIze';
-				$result->slug          = 'summaraize';
-				$result->plugin_name   = 'SummarAIze';
-				$result->version       = $data['new_version'];
-				$result->author        = 'OneClickContent';
-				$result->homepage      = 'https://oneclickcontent.com';
-				$result->download_link = $data['download_url'];
-				$result->banners       = array(
-					'low'  => $data['icons']['1x'],
-					'high' => $data['icons']['2x'],
-				);
-
-				$result->sections = array(
-					'description' => $data['sections']['description'] ?? 'A description of your plugin.',
-					'changelog'   => $data['sections']['changelog'] ?? 'Changelog details here.',
-				);
-
-				return $result;
-			}
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Check for plugin updates.
-	 *
-	 * @param object $transient The update transient.
-	 * @return object The modified transient.
-	 */
-	public static function summaraize_update_checker( $transient ) {
-		if ( empty( $transient->checked ) ) {
-			return $transient;
-		}
-
-		$plugin_file = 'summaraize/summaraize.php'; // Adjust this to the correct path.
-		if ( isset( $transient->response[ $plugin_file ] ) ) {
-			return $transient;
-		}
-
-		$response = wp_remote_get( 'https://oneclickcontent.com/wp-json/summaraize/v1/update-wp5?version=' . SUMMARAIZE_VERSION );
-		if ( is_wp_error( $response ) ) {
-			return $transient;
-		}
-
-		$body = wp_remote_retrieve_body( $response );
-		$data = json_decode( $body, true );
-
-		if ( isset( $data['new_version'] ) && version_compare( SUMMARAIZE_VERSION, $data['new_version'], '<' ) ) {
-			$update_data = array(
-				'new_version'   => $data['new_version'],
-				'package'       => $data['download_url'],
-				'slug'          => 'summaraize',
-				'plugin'        => $plugin_file,
-				'url'           => $data['url'],
-				'icons'         => $data['icons'],
-				'changelog_url' => $data['changelog_url'],
-			);
-
-			$transient->response[ $plugin_file ] = (object) $update_data;
-		}
-
-		return $transient;
-	}
-
-	/**
 	 * Auto-save settings via AJAX.
 	 *
 	 * @since 1.0.0
 	 */
-	public static function summaraize_auto_save() {
+	public function summaraize_auto_save() {
 		// Check AJAX nonce for security.
 		check_ajax_referer( 'summaraize_ajax_nonce', 'nonce' );
 
@@ -413,16 +360,113 @@ class Summaraize_Admin_Settings {
 	/**
 	 * Callback for the Assistant ID field.
 	 */
-	public static function summaraize_assistant_id_callback() {
-		$default_assistant_id = 'asst_L4j2SowCX4dFnz8Vn6GZ4bp0';
-		$value                = get_option( 'summaraize_assistant_id', $default_assistant_id );
+	public function summaraize_assistant_id_callback() {
+		$value = get_option( 'summaraize_assistant_id', '' );
 
-		if ( $value === $default_assistant_id && get_option( 'summaraize_assistant_id' ) === false ) {
-			update_option( 'summaraize_assistant_id', $default_assistant_id );
+		if ( empty( $value ) ) {
+			// Attempt to create a new assistant if none exists.
+			$assistant_id = $this->summaraize_create_assistant();
+			$value        = $assistant_id ? $assistant_id : 'Failed to create assistant';
+			update_option( 'summaraize_assistant_id', $value );
 		}
 
 		echo '<input type="text" id="summaraize_assistant_id" name="summaraize_assistant_id" value="' . esc_attr( $value ) . '" />';
-		echo '<p class="description">' . esc_html__( 'Enter the Assistant ID provided by OpenAI. The default ID is asst_L4j2SowCX4dFnz8Vn6GZ4bp0.', 'summaraize' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Enter the Assistant ID provided by OpenAI or leave as is to use the auto-generated one.', 'summaraize' ) . '</p>';
+	}
+
+	/**
+	 * Create the OpenAI assistant.
+	 *
+	 * @since 1.0.0
+	 */
+	/**
+	 * Create the OpenAI assistant.
+	 *
+	 * @since 1.0.0
+	 */
+	private function summaraize_create_assistant() {
+		$api_key = get_option( 'summaraize_openai_api_key' );
+		if ( empty( $api_key ) ) {
+
+			return false;
+		}
+
+		$initial_prompt = array(
+			'description' => 'This Assistant extracts the top 5 key points from a given article and returns them in a JSON format being sure to use the `extract_key_points` function.',
+			'behavior'    => array(
+				array(
+					'trigger'     => 'message',
+					'instruction' => "When provided with a message containing the content of an article, analyze the article and identify the top 5 key points. Call the `extract_key_points` function to return these points in a JSON format. The expected JSON format is:\n[\n  { \"index\": 1, \"text\": \"Point 1 content\" },\n  { \"index\": 2, \"text\": \"Point 2 content\" },\n  { \"index\": 3, \"text\": \"Point 3 content\" },\n  { \"index\": 4, \"text\": \"Point 4 content\" },\n  { \"index\": 5, \"text\": \"Point 5 content\" }\n]",
+				),
+			),
+		);
+
+		$function_definition = array(
+			'name'        => 'extract_key_points',
+			'description' => 'Extract the top 5 key points from the provided article content and return them in a specific JSON format.',
+			'parameters'  => array(
+				'type'       => 'object',
+				'properties' => array(
+					'points' => array(
+						'type'  => 'array',
+						'items' => array(
+							'type'       => 'object',
+							'properties' => array(
+								'index' => array(
+									'type'        => 'integer',
+									'description' => 'The index of the key point.',
+								),
+								'text'  => array(
+									'type'        => 'string',
+									'description' => 'The content of the key point.',
+								),
+							),
+							'required'   => array( 'index', 'text' ),
+						),
+					),
+				),
+				'required'   => array( 'points' ),
+			),
+		);
+
+		$payload = array(
+			'description'     => 'Assistant for generating concise content summaries.',
+			'instructions'    => wp_json_encode( $initial_prompt ),
+			'name'            => 'SummarAIze Assistant',
+			'tools'           => array(
+				array(
+					'type'     => 'function',
+					'function' => $function_definition,
+				),
+			),
+			'model'           => 'gpt-4o',
+			'response_format' => array( 'type' => 'json_object' ),
+		);
+
+		$response = wp_remote_post(
+			'https://api.openai.com/v1/assistants',
+			array(
+				'headers' => array(
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . $api_key,
+					'OpenAI-Beta'   => 'assistants=v2',
+				),
+				'body'    => wp_json_encode( $payload ),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		$response_body  = wp_remote_retrieve_body( $response );
+		$assistant_data = json_decode( $response_body, true );
+
+		if ( isset( $assistant_data['id'] ) ) {
+			return $assistant_data['id'];
+		}
+
+		return false;
 	}
 
 	/**
