@@ -3,6 +3,20 @@
 
     $(document).ready(function() {
 
+        $(document).on('click', '#create_assistant', function(event) {
+            event.preventDefault();
+            console.log('Button clicked'); // Debugging line
+            $('#summaraize_assistant_id').val('');
+            
+            // Manually trigger auto-save for the Assistant ID field
+            autoSaveField($('#summaraize_assistant_id'));
+
+            // Refresh the page after a short delay to ensure auto-save completes
+            setTimeout(function() {
+                window.location.reload();
+            }, 1000);
+        });
+
         /**
          * Get the editor data from either the Gutenberg or Classic editor.
          * 

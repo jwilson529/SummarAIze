@@ -39,8 +39,7 @@ class Summaraize_Admin_Settings {
 				<?php submit_button(); ?>
 				
 				<h2><?php esc_html_e( 'Assistant Settings', 'summaraize' ); ?></h2>
-				<input type="hidden" name="summaraize_create_assistant_nonce" value="<?php echo esc_attr( wp_create_nonce( 'summaraize_ajax_nonce' ) ); ?>" />
-				<input type="submit" name="create_assistant" class="button button-secondary" value="<?php esc_attr_e( 'Create Assistant', 'summaraize' ); ?>" />
+				<button type="submit" id="create_assistant" class="button button-secondary">Create Assistant</button>
 			</form>
 		</div>
 		<?php
