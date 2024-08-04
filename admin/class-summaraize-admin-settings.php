@@ -265,6 +265,7 @@ class Summaraize_Admin_Settings {
 		}
 
 		$post_types = get_post_types( array( 'public' => true ), 'names', 'and' );
+		unset( $post_types['attachment'] );
 
 		echo '<p>' . esc_html__( 'Select which post types SummarAIze should be enabled on:', 'summaraize' ) . '</p>';
 		echo '<p><em>' . esc_html__( 'Custom post types must have titles enabled.', 'summaraize' ) . '</em></p>';
@@ -275,6 +276,7 @@ class Summaraize_Admin_Settings {
 			echo '<input type="checkbox" name="summaraize_post_types[]" value="' . esc_attr( $post_type ) . '" class="summaraize-settings-checkbox" ' . esc_attr( $checked ) . '> ' . esc_html( $post_type_label ) . '<br>';
 		}
 	}
+
 
 	/**
 	 * Callback for the settings section.
@@ -328,14 +330,13 @@ class Summaraize_Admin_Settings {
 
 		// Unslash and sanitize field_value simultaneously.
 		if ( is_array( $_POST['field_value'] ) ) {
-		    $field_value = array_map( 'sanitize_text_field', wp_unslash( $_POST['field_value'] ) );
+			$field_value = array_map( 'sanitize_text_field', wp_unslash( $_POST['field_value'] ) );
 		} else {
-		    $field_value = sanitize_text_field( wp_unslash( $_POST['field_value'] ) );
+			$field_value = sanitize_text_field( wp_unslash( $_POST['field_value'] ) );
 		}
 
 		// Use `update_option` with a proper option key.
 		$option_key = str_replace( '[]', '', $field_name ); // Ensure correct option key format.
-
 
 		// Use Yoda condition checks.
 		if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {

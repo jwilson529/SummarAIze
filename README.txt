@@ -2,8 +2,8 @@
 Contributors: [your_username]
 Tags: ai, key points, summary, content enhancement
 Requires at least: 5.0
-Tested up to: 6.1
-Stable tag: 1.1.2
+Tested up to: 6.6.1
+Stable tag: 1.1.3
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
