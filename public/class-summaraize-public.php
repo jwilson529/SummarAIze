@@ -95,6 +95,10 @@ class Summaraize_Public {
 		$post_id           = get_the_ID();
 		$summaraize_points = get_post_meta( $post_id, 'summaraize_points', true );
 
+		if ( ! is_array( $summaraize_points ) ) {
+			$summaraize_points = array();
+		}
+
 		// Filter out empty points.
 		$summaraize_points = array_filter( $summaraize_points );
 
@@ -121,6 +125,7 @@ class Summaraize_Public {
 
 		return $output;
 	}
+
 
 	/**
 	 * Build the view based on the provided attributes.

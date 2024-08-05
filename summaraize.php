@@ -45,6 +45,13 @@ define( 'SUMMARAIZE_VERSION', '1.1.4' );
 function summaraize_activate() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-summaraize-activator.php';
 	Summaraize_Activator::activate();
+
+	// Ensure default post types are set during activation.
+	$selected_post_types = get_option( 'summaraize_post_types', false );
+
+	if ( false === $selected_post_types ) {
+		update_option( 'summaraize_post_types', array( 'post' ) );
+	}
 }
 
 /**

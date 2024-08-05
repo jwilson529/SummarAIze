@@ -31,6 +31,8 @@ class Summaraize_Admin_Settings {
 	 */
 	public function summaraize_options_page() {
 
+		$api_key = get_option( 'summaraize_openai_api_key' );
+
 		?>
 		<div id="summaraize" class="wrap">
 			<form class="summaraize-settings-form" method="post" action="">
@@ -38,8 +40,10 @@ class Summaraize_Admin_Settings {
 				<?php do_settings_sections( 'summaraize_settings' ); ?>
 				<?php submit_button(); ?>
 				
-				<h2><?php esc_html_e( 'Assistant Settings', 'summaraize' ); ?></h2>
-				<button type="submit" id="summariaze_create_assistant" class="button button-secondary">Create Assistant</button>
+				<?php if ( ! empty( $api_key ) && self::validate_openai_api_key( $api_key ) ) : ?>
+					<h2><?php esc_html_e( 'Assistant Settings', 'summaraize' ); ?></h2>
+					<button type="submit" id="summariaze_create_assistant" class="button button-secondary"><?php esc_html_e( 'Create Assistant', 'summaraize' ); ?></button>
+				<?php endif; ?>
 			</form>
 		</div>
 		<?php
@@ -258,24 +262,25 @@ class Summaraize_Admin_Settings {
 	 * Callback for the post types field.
 	 */
 	public function summaraize_post_types_callback() {
-		$selected_post_types = get_option( 'summaraize_post_types', array() );
+		// Get the selected post types from the options table, or set the default to 'post'.
+		$selected_post_types = get_option( 'summaraize_post_types', array( 'post' ) );
 
-		if ( empty( $selected_post_types ) ) {
-			$selected_post_types = array( 'post' );
-		}
-
+		// Retrieve all public post types, excluding 'attachment'.
 		$post_types = get_post_types( array( 'public' => true ), 'names', 'and' );
 		unset( $post_types['attachment'] );
 
+		// Output the instructions for selecting post types.
 		echo '<p>' . esc_html__( 'Select which post types SummarAIze should be enabled on:', 'summaraize' ) . '</p>';
 		echo '<p><em>' . esc_html__( 'Custom post types must have titles enabled.', 'summaraize' ) . '</em></p>';
 
+		// Loop through each public post type and create a checkbox.
 		foreach ( $post_types as $post_type ) {
 			$checked         = in_array( $post_type, $selected_post_types, true ) ? 'checked' : '';
 			$post_type_label = str_replace( '_', ' ', ucwords( $post_type ) );
 			echo '<input type="checkbox" name="summaraize_post_types[]" value="' . esc_attr( $post_type ) . '" class="summaraize-settings-checkbox" ' . esc_attr( $checked ) . '> ' . esc_html( $post_type_label ) . '<br>';
 		}
 	}
+
 
 
 	/**
