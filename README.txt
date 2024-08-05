@@ -1,9 +1,9 @@
 === SummarAIze - Generate Key Takeaways with AI ===
-Contributors: [your_username]
+Contributors: jwilson529
 Tags: ai, key points, summary, content enhancement
 Requires at least: 5.0
 Tested up to: 6.6.1
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -13,6 +13,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 ## Description
 
 SummarAIze is a WordPress plugin that allows you to automatically generate and display the top 5 key points of your posts. Enhance your content by providing readers with quick takeaways, making your articles more engaging and accessible.
+
+### Important Information
+
+SummarAIze relies on the OpenAI API to generate key takeaways. This means that data from your site will be sent to OpenAI's servers for processing, and results will be returned to your site. By using this plugin, you agree to OpenAI's [Terms of Use](https://openai.com/terms) and [Privacy Policy](https://openai.com/privacy).
+
+### API Endpoints Used
+- **https://api.openai.com/v1/threads/{thread_id}/messages**: Used to manage messages within the AI assistant.
+- **https://api.openai.com/v1/threads/{thread_id}/runs**: Used to manage execution runs for generating content.
+- **https://api.openai.com/v1/threads/{thread_id}/runs/{run_id}/submit_tool_outputs**: Used to submit and manage tool outputs related to the assistant.
+- **https://api.openai.com/v1/models**: Used to retrieve available models for the assistant.
+
+You must provide your own OpenAI API key to use this plugin. Please ensure that you understand the data handling implications and have proper legal coverage for transmitting data.
 
 ## Features
 
@@ -37,20 +49,26 @@ The Assistant ID configures the behavior and responses of the SummarAIze assista
 
 ### How does the plugin generate key points?
 
-The plugin uses and Open AI Assistant that is created specifically for this plugin. It returns 5 key points for any given article in a predictable, repeatable format. This is NOT using Chat-GPT completions. 
+The plugin uses an Open AI Assistant that is created specifically for this plugin. It returns 5 key points for any given article in a predictable, repeatable format. This is NOT using Chat-GPT completions.
 
 ### Can I customize the display of the key points?
 
-Yes, you can customize the display mode and position through the plugin settings. You can choose above or below the content, dark and light mode and a popup version with customizable buttons. 
+Yes, you can customize the display mode and position through the plugin settings. You can choose above or below the content, dark and light mode, and a popup version with customizable buttons.
 
 You can override the main settings per post or page by checking the Override Settings box and choosing new values for the view and mode.
 
 ## Changelog
 
+### 1.1.0
+* Changed from using a static Assistant to generating the Assistant via the API.
+
 ### 1.0.0
 * Initial release
 
 ## Upgrade Notice
+
+### 1.1.0
+* Please update your readme file to include the details of the 3rd party services being used.
 
 ### 1.0.0
 * Initial release

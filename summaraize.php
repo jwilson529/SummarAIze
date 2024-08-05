@@ -15,7 +15,7 @@
  * Plugin Name:       SummarAIze
  * Plugin URI:        https://oneclickcontent.com
  * Description:       SummarAIze - Generate Key Takeaways with AI
- * Version:           1.1.3
+ * Version:           1.1.4
  * Author:            James Wilson
  * Author URI:        https://oneclickcontent.com/
  * License:           GPL-2.0+
@@ -36,13 +36,13 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'SUMMARAIZE_VERSION', '1.1.3' );
+define( 'SUMMARAIZE_VERSION', '1.1.4' );
 
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-summaraize-activator.php
  */
-function activate_summaraize() {
+function summaraize_activate() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-summaraize-activator.php';
 	Summaraize_Activator::activate();
 }
@@ -51,13 +51,13 @@ function activate_summaraize() {
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-summaraize-deactivator.php
  */
-function deactivate_summaraize() {
+function summaraize_deactivate() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-summaraize-deactivator.php';
 	Summaraize_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_summaraize' );
-register_deactivation_hook( __FILE__, 'deactivate_summaraize' );
+register_activation_hook( __FILE__, 'summaraize_activate' );
+register_deactivation_hook( __FILE__, 'summaraize_deactivate' );
 
 /**
  * The core plugin class that is used to define internationalization,
@@ -74,9 +74,9 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-summaraize.php';
  *
  * @since    1.0.0
  */
-function run_summaraize() {
+function summaraize_run() {
 
 	$plugin = new Summaraize();
 	$plugin->run();
 }
-run_summaraize();
+summaraize_run();

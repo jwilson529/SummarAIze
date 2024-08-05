@@ -1,0 +1,11 @@
+node_modules/
+assets/
+.git/
+.gitignore
+.DS_Store
+check.txt
+phpmd.txt
+package.json
+package-lock.json
+phpmd.xml
+README.md

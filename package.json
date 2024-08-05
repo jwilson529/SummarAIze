@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "fix": "phpcbf -d error_reporting=\"E_ALL&~E_DEPRECATED\" --ignore=*/vendor/*,*/node_modules/*  --standard=WordPress --extensions=php .",
     "check": "phpcs -d error_reporting=\"E_ALL&~E_DEPRECATED\" --ignore=*/vendor/*,*/node_modules/*  --standard=WordPress --extensions=php . > check.txt",
-    "phpmd": "phpmd . text phpmd.xml --exclude vendor,node_modules > phpmd.txt"
+    "phpmd": "phpmd . text phpmd.xml --exclude vendor,node_modules > phpmd.txt",
+    "dist": "zip -r summaraize.zip . -x@.zipignore"
   },
   "repository": {
     "type": "git",
@@ -18,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/jwilson529/summaraize/issues"
   },
-  "homepage": "https://github.com/jwilson529/summaraize#readme"
+  "homepage": "https://github.com/jwilson529/summaraize#readme",
+  "devDependencies": {
+    "zip-cli": "^0.0.0"
+  }
 }
