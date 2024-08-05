@@ -9,7 +9,6 @@
     "check": "phpcs -d error_reporting=\"E_ALL&~E_DEPRECATED\" --ignore=*/vendor/*,*/node_modules/*  --standard=WordPress --extensions=php . > check.txt",
     "phpmd": "phpmd . text phpmd.xml --exclude vendor,node_modules > phpmd.txt",
     "dist": "zip -r summaraize.zip . -x \"node_modules/*\" \"assets/*\" \"*.git/*\" \"*.gitignore\" \".DS_Store\" \"check.txt\" \"phpmd.txt\" \"package.json\" \"package-lock.json\" \"phpmd.xml\" \"README.md\""
-
   },
   "repository": {
     "type": "git",
@@ -20,8 +19,5 @@
   "bugs": {
     "url": "https://github.com/jwilson529/summaraize/issues"
   },
-  "homepage": "https://github.com/jwilson529/summaraize#readme",
-  "devDependencies": {
-    "zip-cli": "^0.0.0"
-  }
+  "homepage": "https://github.com/jwilson529/summaraize#readme"
 }
