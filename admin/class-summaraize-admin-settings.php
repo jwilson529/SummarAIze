@@ -318,6 +318,11 @@ class Summaraize_Admin_Settings {
 	 *
 	 * @since 1.0.0
 	 */
+	/**
+	 * Auto-save settings via AJAX.
+	 *
+	 * @since 1.0.0
+	 */
 	public function summaraize_auto_save() {
 		// Check AJAX nonce for security.
 		check_ajax_referer( 'summaraize_ajax_nonce', 'nonce' );
@@ -331,7 +336,24 @@ class Summaraize_Admin_Settings {
 			wp_send_json_error( array( 'message' => __( 'Invalid data.', 'summaraize' ) ) );
 		}
 
+		// Define allowed option keys.
+		$allowed_options = array(
+			'summaraize_openai_api_key',
+			'summaraize_post_types',
+			'summaraize_assistant_id',
+			'summaraize_widget_title',
+			'summaraize_display_position',
+			'summaraize_display_mode',
+			'summaraize_button_style',
+			'summaraize_button_color',
+		);
+
 		$field_name = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
+
+		// Check if the field name is in the allowed options.
+		if ( ! in_array( $field_name, $allowed_options, true ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid option key.', 'summaraize' ) ) );
+		}
 
 		// Unslash and sanitize field_value simultaneously.
 		if ( is_array( $_POST['field_value'] ) ) {
@@ -340,8 +362,8 @@ class Summaraize_Admin_Settings {
 			$field_value = sanitize_text_field( wp_unslash( $_POST['field_value'] ) );
 		}
 
-		// Use `update_option` with a proper option key.
-		$option_key = str_replace( '[]', '', $field_name ); // Ensure correct option key format.
+		// Use update_option with a proper option key.
+		$option_key = $field_name;
 
 		// Use Yoda condition checks.
 		if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {
@@ -363,6 +385,7 @@ class Summaraize_Admin_Settings {
 			wp_send_json_error( array( 'message' => __( 'Failed to save option.', 'summaraize' ) ) );
 		}
 	}
+
 
 
 	/**
