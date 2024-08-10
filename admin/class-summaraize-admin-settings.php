@@ -271,7 +271,7 @@ class Summaraize_Admin_Settings {
 
 		// Output the instructions for selecting post types.
 		echo '<p>' . esc_html__( 'Select which post types SummarAIze should be enabled on:', 'summaraize' ) . '</p>';
-		echo '<p><em>' . esc_html__( 'Custom post types must have titles enabled.', 'summaraize' ) . '</em></p>';
+		echo '<p><em>' . esc_html__( 'Custom post types must have the editor enabled.', 'summaraize' ) . '</em></p>';
 
 		// Loop through each public post type and create a checkbox.
 		foreach ( $post_types as $post_type ) {
@@ -323,6 +323,11 @@ class Summaraize_Admin_Settings {
 	 *
 	 * @since 1.0.0
 	 */
+	/**
+	 * Auto-save settings via AJAX.
+	 *
+	 * @since 1.0.0
+	 */
 	public function summaraize_auto_save() {
 		// Check AJAX nonce for security.
 		check_ajax_referer( 'summaraize_ajax_nonce', 'nonce' );
@@ -349,9 +354,10 @@ class Summaraize_Admin_Settings {
 		);
 
 		$field_name = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
+		$option_key = sanitize_key( str_replace( '[]', '', $field_name ) ); // Use sanitize_key() for option keys.
 
-		// Check if the field name is in the allowed options.
-		if ( ! in_array( $field_name, $allowed_options, true ) ) {
+		// Check if the option key is in the allowed options.
+		if ( ! in_array( $option_key, $allowed_options, true ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid option key.', 'summaraize' ) ) );
 		}
 
@@ -362,13 +368,10 @@ class Summaraize_Admin_Settings {
 			$field_value = sanitize_text_field( wp_unslash( $_POST['field_value'] ) );
 		}
 
-		// Use update_option with a proper option key.
-		$option_key = $field_name;
-
 		// Use Yoda condition checks.
 		if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {
 			// Validate the API key if it's the API key field.
-			if ( 'summaraize_openai_api_key' === $field_name && ! self::validate_openai_api_key( $field_value ) ) {
+			if ( 'summaraize_openai_api_key' === $option_key && ! self::validate_openai_api_key( $field_value ) ) {
 				wp_send_json_error(
 					array(
 						'message' => __( 'Invalid API key. Please enter a valid API key.', 'summaraize' ),
@@ -385,6 +388,7 @@ class Summaraize_Admin_Settings {
 			wp_send_json_error( array( 'message' => __( 'Failed to save option.', 'summaraize' ) ) );
 		}
 	}
+
 
 
 
