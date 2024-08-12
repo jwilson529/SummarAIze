@@ -259,27 +259,34 @@ class Summaraize_Admin_Settings {
 	}
 
 	/**
-	 * Callback for the post types field.
+	 * Callback function for the Post Types setting field.
+	 *
+	 * @return void
 	 */
 	public function summaraize_post_types_callback() {
-		// Get the selected post types from the options table, or set the default to 'post'.
-		$selected_post_types = get_option( 'summaraize_post_types', array( 'post' ) );
-
-		// Retrieve all public post types, excluding 'attachment'.
-		$post_types = get_post_types( array( 'public' => true ), 'names', 'and' );
+		// Ensure $selected_post_types is always an array.
+		$selected_post_types = (array) get_option( 'summaraize_post_types', array( 'post' ) );
+		$post_types          = get_post_types( array( 'public' => true ), 'names', 'and' );
 		unset( $post_types['attachment'] );
 
-		// Output the instructions for selecting post types.
 		echo '<p>' . esc_html__( 'Select which post types SummarAIze should be enabled on:', 'summaraize' ) . '</p>';
 		echo '<p><em>' . esc_html__( 'Custom post types must have the editor enabled.', 'summaraize' ) . '</em></p>';
 
-		// Loop through each public post type and create a checkbox.
 		foreach ( $post_types as $post_type ) {
 			$checked         = in_array( $post_type, $selected_post_types, true ) ? 'checked' : '';
 			$post_type_label = str_replace( '_', ' ', ucwords( $post_type ) );
-			echo '<input type="checkbox" name="summaraize_post_types[]" value="' . esc_attr( $post_type ) . '" class="summaraize-settings-checkbox" ' . esc_attr( $checked ) . '> ' . esc_html( $post_type_label ) . '<br>';
+
+			echo '<div class="summaraize-toggle-wrapper">';
+			echo '<label class="toggle-switch">';
+			echo '<input type="checkbox" name="summaraize_post_types[]" value="' . esc_attr( $post_type ) . '" ' . esc_attr( $checked ) . '>';
+			echo '<span class="slider"></span>';
+			echo '</label>';
+			echo '<span class="post-type-label">' . esc_html( $post_type_label ) . '</span>';
+			echo '</div>';
 		}
 	}
+
+
 
 
 
@@ -318,16 +325,6 @@ class Summaraize_Admin_Settings {
 	 *
 	 * @since 1.0.0
 	 */
-	/**
-	 * Auto-save settings via AJAX.
-	 *
-	 * @since 1.0.0
-	 */
-	/**
-	 * Auto-save settings via AJAX.
-	 *
-	 * @since 1.0.0
-	 */
 	public function summaraize_auto_save() {
 		// Check AJAX nonce for security.
 		check_ajax_referer( 'summaraize_ajax_nonce', 'nonce' );
@@ -337,8 +334,8 @@ class Summaraize_Admin_Settings {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'summaraize' ) ) );
 		}
 
-		if ( ! isset( $_POST['field_name'] ) || ! isset( $_POST['field_value'] ) ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid data.', 'summaraize' ) ) );
+		if ( ! isset( $_POST['field_name'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Missing field name.', 'summaraize' ) ) );
 		}
 
 		// Define allowed option keys.
@@ -361,14 +358,19 @@ class Summaraize_Admin_Settings {
 			wp_send_json_error( array( 'message' => __( 'Invalid option key.', 'summaraize' ) ) );
 		}
 
-		// Unslash and sanitize field_value simultaneously.
-		if ( is_array( $_POST['field_value'] ) ) {
+		// Unslash and sanitize field_value simultaneously, allow empty values.
+		if ( isset( $_POST['field_value'] ) && is_array( $_POST['field_value'] ) ) {
 			$field_value = array_map( 'sanitize_text_field', wp_unslash( $_POST['field_value'] ) );
 		} else {
-			$field_value = sanitize_text_field( wp_unslash( $_POST['field_value'] ) );
+			$field_value = isset( $_POST['field_value'] ) ? sanitize_text_field( wp_unslash( $_POST['field_value'] ) ) : '';
 		}
 
-		// Use Yoda condition checks.
+		// Ensure field_value is an array if it's supposed to be one (for summaraize_post_types).
+		if ( 'summaraize_post_types' === $option_key && empty( $field_value ) ) {
+			$field_value = array(); // Handle the empty case.
+		}
+
+		// Save the option.
 		if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {
 			// Validate the API key if it's the API key field.
 			if ( 'summaraize_openai_api_key' === $option_key && ! self::validate_openai_api_key( $field_value ) ) {

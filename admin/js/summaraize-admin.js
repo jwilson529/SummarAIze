@@ -7,7 +7,7 @@
             event.preventDefault();
             console.log('Button clicked'); // Debugging line
             $('#summaraize_assistant_id').val('');
-            
+
             // Manually trigger auto-save for the Assistant ID field
             autoSaveField($('#summaraize_assistant_id'));
 
@@ -117,7 +117,7 @@
                     data: {
                         action: 'summaraize_auto_save',
                         nonce: summaraize_admin_vars.summaraize_ajax_nonce,
-                        field_name: fieldName.replace('[]', ''), // Remove [] for the option name
+                        field_name: fieldName, // Keep the [] for the option name
                         field_value: fieldValue
                     }
                 })
@@ -128,7 +128,7 @@
                             location.reload();
                         }
                     } else {
-                        showNotification('Failed to save field.', 'error');
+                        showNotification(response.data.message, 'error');
                     }
                 })
                 .fail(function() {
@@ -311,13 +311,6 @@
          * Additional handler for checkbox changes.
          */
         $(document).on('change', '.summaraize-settings-field', function() {
-            autoSaveField($(this));
-        });
-
-        /**
-         * Additional handler for checkbox changes.
-         */
-        $(document).on('change', '.summaraize-settings-checkbox', function() {
             autoSaveField($(this));
         });
     });
