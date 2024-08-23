@@ -65,6 +65,7 @@ class Summaraize_Admin_Metabox {
 		$widget_title      = get_post_meta( $post->ID, 'summaraize_widget_title', true );
 		$button_style      = get_post_meta( $post->ID, 'summaraize_button_style', true );
 		$button_color      = get_post_meta( $post->ID, 'summaraize_button_color', true );
+		$list_type         = get_post_meta( $post->ID, 'summaraize_list_type', true );
 
 		echo '<button id="generate-summaraize-button"><div class="summaraize-spinner" style="display: none;"></div>' . esc_html__( 'Generate Top 5 Points', 'summaraize' ) . '</button>';
 		echo '<div id="summaraize-points-list" class="list-group">';
@@ -141,8 +142,16 @@ class Summaraize_Admin_Metabox {
 		echo '<input type="color" id="summaraize_button_color" name="summaraize_button_color" value="' . esc_attr( $button_color ) . '" />';
 		echo '<p class="description button-color-description">' . esc_html__( 'Choose the color for the button.', 'summaraize' ) . '</p></p>';
 
+		// List type dropdown.
+		echo '<p><label for="summaraize_list_type">' . esc_html__( 'List Type:', 'summaraize' ) . '</label>';
+		echo '<select id="summaraize_list_type" name="summaraize_list_type">';
+		echo '<option value="unordered"' . selected( 'unordered', $list_type, false ) . '>' . esc_html__( 'Bullet List', 'summaraize' ) . '</option>';
+		echo '<option value="ordered"' . selected( 'ordered', $list_type, false ) . '>' . esc_html__( 'Ordered List', 'summaraize' ) . '</option>';
+		echo '</select></p>';
+
 		echo '</div>';
 	}
+
 
 	/**
 	 * Save the meta box data.
@@ -185,18 +194,21 @@ class Summaraize_Admin_Metabox {
 			$widget_title = isset( $_POST['summaraize_widget_title'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_widget_title'] ) ) : '';
 			$button_style = isset( $_POST['summaraize_button_style'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_button_style'] ) ) : '';
 			$button_color = isset( $_POST['summaraize_button_color'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_button_color'] ) ) : '';
+			$list_type    = isset( $_POST['summaraize_list_type'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_list_type'] ) ) : '';
 
 			update_post_meta( $post_id, 'summaraize_view', $view );
 			update_post_meta( $post_id, 'summaraize_mode', $mode );
 			update_post_meta( $post_id, 'summaraize_widget_title', $widget_title );
 			update_post_meta( $post_id, 'summaraize_button_style', $button_style );
 			update_post_meta( $post_id, 'summaraize_button_color', $button_color );
+			update_post_meta( $post_id, 'summaraize_list_type', $list_type );
 		} else {
 			delete_post_meta( $post_id, 'summaraize_view' );
 			delete_post_meta( $post_id, 'summaraize_mode' );
 			delete_post_meta( $post_id, 'summaraize_widget_title' );
 			delete_post_meta( $post_id, 'summaraize_button_style' );
 			delete_post_meta( $post_id, 'summaraize_button_color' );
+			delete_post_meta( $post_id, 'summaraize_list_type' );
 		}
 	}
 }

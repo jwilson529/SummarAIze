@@ -1,15 +1,15 @@
 === SummarAIze - Generate Key Takeaways with AI ===
 Contributors: jwilson529
 Donate link: https://oneclickcontent.com/donate/
-Tags: ai, key-points, summary, content-summary, content-enhancement
+Tags: ai, summary, content-enhancement, content-summarization
 Requires at least: 5.0
 Tested up to: 6.6.1
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-# SummarAIze - Generate Key Takeaways with AI
+# SummarAIze - Generate Key Takeaways with AI. Distill your posts into 5 key takeaways, enhancing engagement and readability.
 
 ## Description
 
@@ -31,6 +31,7 @@ SummarAIze relies on the OpenAI API to generate key takeaways. This means that d
 
 - **AI-Powered Content Summarization**: Automatically generate top 5 key points from post content using AI.
 - **Customizable Display Options**: Display key points in various styles and positions to suit your theme.
+- **Ordered or Unordered Lists**: Choose between an ordered list (numbered) or an unordered list (bulleted) for displaying key points.
 - **User-Friendly Interface**: Easily manage and customize key points for each post or page.
 - **Flexible API Integration**: Integrate with your own OpenAI API key, allowing for control over usage and billing.
 - **Assistant Configuration**: Use the default Assistant ID or configure your own in the OpenAI Playground.
@@ -59,7 +60,7 @@ The Assistant ID configures the behavior and responses of the SummarAIze assista
 
 After installation and activation:
 1. Go to the SummarAIze settings page and enter your OpenAI API key.
-2. Choose your preferred display options (position, style, etc.).
+2. Choose your preferred display options (position, style, list type, etc.).
 3. Create or edit a post/page.
 4. Use the SummarAIze button in the editor to generate key points.
 5. Publish or update your content to see the summarized points on your site.
@@ -76,7 +77,7 @@ SummarAIze uses advanced AI algorithms to analyze your post content and extract 
 
 ### Can I customize the display of the key points?
 
-Yes! SummarAIze offers several customization options. You can choose to display key points above or below your content, switch between dark and light modes, and even use a popup version with customizable buttons. Additionally, you can override the main settings per post or page by using the provided shortcode.
+Yes! SummarAIze offers several customization options. You can choose to display key points above or below your content, switch between dark and light modes, choose between ordered and unordered lists, and even use a popup version with customizable buttons. Additionally, you can override the main settings per post or page by using the provided shortcode.
 
 ### What happens if I don't provide an API key?
 
@@ -114,7 +115,9 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 ## Changelog
 
 ### 1.1.7
-* Initial release in the WordPress repo.
+* Added option to display key points as ordered or unordered lists.
+* Improved handling of floating images with wrapped and cleared output.
+* Updated documentation and readme.
 
 ### 1.1.4
 * Updated readme file to include the details of the 3rd party services being used.
@@ -128,13 +131,12 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 ## Upgrade Notice
 
 ### 1.1.7
-* Initial release in the WordPress repo. Includes all features and improvements from previous versions.
+* Added ordered/unordered list options for displaying key points. Improved handling of floating images. Ensure you update to benefit from these improvements.
 
 ## Future Plans
 
 We're constantly working to improve SummarAIze. Some features we're considering for future updates include:
 - Integration with more AI providers
-
 
 Stay tuned for these exciting updates!
 

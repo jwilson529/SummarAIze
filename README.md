@@ -16,6 +16,7 @@ SummarAIze relies on the OpenAI API to generate key takeaways. This means that d
 
 - **AI-Powered Content Summarization**: Automatically generate top 5 key points from post content using AI.
 - **Customizable Display Options**: Display key points in various styles and positions to suit your theme.
+- **Ordered or Unordered Lists**: Choose between an ordered list (numbered) or an unordered list (bulleted) for displaying key points.
 - **User-Friendly Interface**: Easily manage and customize key points for each post or page.
 - **Flexible API Integration**: Integrate with your own OpenAI API key, allowing for control over usage and billing.
 - **Assistant Configuration**: Use the default Assistant ID or configure your own in the OpenAI Playground.
@@ -75,7 +76,9 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 ## Changelog
 
 ### 1.1.7
-* Initial release in the WordPress repo.
+* Added option to display key points as ordered or unordered lists.
+* Improved handling of floating images with wrapped and cleared output.
+* Updated documentation and readme.
 
 ### 1.1.4
 * Updated readme file to include the details of the 3rd party services being used.
@@ -89,7 +92,7 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 ## Upgrade Notice
 
 ### 1.1.7
-* Initial release in the WordPress repo.
+* Added ordered/unordered list options for displaying key points. Improved handling of floating images. Ensure you update to benefit from these improvements.
 
 ## License
 
