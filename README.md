@@ -75,7 +75,7 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 
 ## Changelog
 
-### 1.1.7
+### 1.1.8
 * Added option to display key points as ordered or unordered lists.
 * Improved handling of floating images with wrapped and cleared output.
 * Updated documentation and readme.

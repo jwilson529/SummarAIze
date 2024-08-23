@@ -107,7 +107,7 @@ class Summaraize_Public {
 		}
 
 		$override_settings = get_post_meta( $post_id, 'summaraize_override_settings', true );
-		if ( true === $override_settings ) {
+		if ( '1' === $override_settings ) {
 			$view         = get_post_meta( $post_id, 'summaraize_view', true );
 			$mode         = get_post_meta( $post_id, 'summaraize_mode', true );
 			$widget_title = get_post_meta( $post_id, 'summaraize_widget_title', true );
@@ -224,7 +224,7 @@ class Summaraize_Public {
 		}
 
 		$override_settings = get_post_meta( $post_id, 'summaraize_override_settings', true );
-		if ( true === $override_settings ) {
+		if ( '1' === $override_settings ) {
 			$view         = get_post_meta( $post_id, 'summaraize_view', true );
 			$mode         = get_post_meta( $post_id, 'summaraize_mode', true );
 			$widget_title = get_post_meta( $post_id, 'summaraize_widget_title', true );
