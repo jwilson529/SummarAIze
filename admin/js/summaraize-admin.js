@@ -3,6 +3,7 @@
 
     $(document).ready(function() {
 
+        // Regenerate Assistant ID
         $(document).on('click', '#summariaze_create_assistant', function(event) {
             event.preventDefault();
             console.log('Button clicked'); // Debugging line
@@ -17,6 +18,38 @@
             }, 1000);
         });
 
+        // Tab switching
+        $('.nav-tab-wrapper a').click(function(e) {
+            e.preventDefault();
+            $('.nav-tab-wrapper a').removeClass('nav-tab-active');
+            $(this).addClass('nav-tab-active');
+
+            // Hide all tabs and show the selected one
+            $('.tab-content').hide();
+            $($(this).attr('href')).show();
+        });
+
+        // Show the main tab by default and hide the advanced tab
+        $('#main-settings').show();
+        $('#advanced-settings').hide(); 
+
+        // Show/hide custom prompt textarea based on dropdown selection
+        $('#summaraize_prompt_type').on('change', function() {
+            var selectedValue = $(this).val();
+            if (selectedValue === 'custom') {
+                $('#summaraize_custom_prompt_row').show(); // Show the entire row
+                $('#summaraize_custom_prompt_custom').css('display', 'block'); // Ensure the textarea itself is displayed
+            } else {
+                $('#summaraize_custom_prompt_row').hide(); // Hide the entire row
+
+                // Clear the textarea and trigger auto-save
+                $('#summaraize_custom_prompt_custom').val('');
+                autoSaveField($('#summaraize_custom_prompt_custom')); // Explicitly trigger auto-save with the cleared value
+            }
+        });
+
+        // Trigger change on page load to set initial state for custom prompt visibility
+        $('#summaraize_prompt_type').trigger('change');
         /**
          * Get the editor data from either the Gutenberg or Classic editor.
          * 

@@ -30,21 +30,65 @@ class Summaraize_Admin_Settings {
 	 * Display the options page.
 	 */
 	public function summaraize_options_page() {
+	    ?>
+	    <div id="summaraize" class="wrap">
+	        <h1><?php esc_html_e( 'SummarAIze Settings', 'summaraize' ); ?></h1>
+	        
+	        <h2 class="nav-tab-wrapper">
+	            <a href="#main-settings" class="nav-tab nav-tab-active"><?php esc_html_e( 'Main Settings', 'summaraize' ); ?></a>
+	            <a href="#advanced-settings" class="nav-tab"><?php esc_html_e( 'Advanced Settings', 'summaraize' ); ?></a>
+	        </h2>
 
-		$api_key = get_option( 'summaraize_openai_api_key' );
+	        <form class="summaraize-settings-form" method="post" action="options.php">
+	            <?php settings_fields( 'summaraize_settings' ); ?>
+	            
+	            <div id="main-settings" class="tab-content">
+	                <?php do_settings_sections( 'summaraize_settings' ); ?>
+	            </div>
 
-		?>
-		<div id="summaraize" class="wrap">
-			<form class="summaraize-settings-form" method="post" action="">
-				<?php settings_fields( 'summaraize_settings' ); ?>
-				<?php do_settings_sections( 'summaraize_settings' ); ?>
-				<?php submit_button(); ?>
-				
+	            <div id="advanced-settings" class="tab-content" style="display:none;">
+	                <h2><?php esc_html_e( 'Advanced Settings', 'summaraize' ); ?></h2>
 
-			</form>
-		</div>
-		<?php
+	                <h4 class="description summaraize-alert">
+	                    <?php esc_html_e( 'If you modify the Assistant Prompt Type, Custom Instructions, or AI Model, please regenerate the Assistant to apply these changes. If you encounter issues, try reverting to the default settings.', 'summaraize' ); ?>
+	                </h4>
+
+	                <table class="form-table">
+	                    <tr>
+	                        <th scope="row"><?php esc_html_e( 'AI Model', 'summaraize' ); ?></th>
+	                        <td><?php $this->summaraize_ai_model_callback(); ?></td>
+	                    </tr>
+	                    <tr>
+	                        <th scope="row"><?php esc_html_e( 'Assistant Prompt Type', 'summaraize' ); ?></th>
+	                        <td><?php $this->summaraize_prompt_type_callback(); ?></td>
+	                    </tr>
+	                    <tr id="summaraize_custom_prompt_row" style="display: none;">
+	                        <th scope="row"><?php esc_html_e( 'Custom Assistant Instructions', 'summaraize' ); ?></th>
+	                        <td><?php $this->summaraize_custom_prompt_callback(); ?></td>
+	                    </tr>
+	                    <tr>
+	                        <th scope="row"><?php esc_html_e( 'Reset Assistant ID', 'summaraize' ); ?></th>
+	                        <td>
+	                            <button id="summariaze_create_assistant" class="button button-secondary">
+	                                <?php esc_html_e( 'Regenerate Assistant', 'summaraize' ); ?>
+	                            </button>
+	                            <p class="description"><?php esc_html_e( 'This will clear the current Assistant ID and generate a new one.', 'summaraize' ); ?></p>
+	                        </td>
+	                    </tr>
+	                </table>
+	            </div>
+
+
+	            <?php submit_button(); ?>
+	        </form>
+	    </div>
+	    <?php
 	}
+
+
+
+
+
 
 
 
@@ -91,115 +135,170 @@ class Summaraize_Admin_Settings {
 	 * Register the plugin settings.
 	 */
 	public function summaraize_register_settings() {
-		register_setting( 'summaraize_settings', 'summaraize_openai_api_key', array( 'sanitize_callback' => 'sanitize_text_field' ) );
+	    // Register the API key setting with sanitization
+	    register_setting(
+	        'summaraize_settings',
+	        'summaraize_openai_api_key',
+	        array(
+	            'sanitize_callback' => 'sanitize_text_field'
+	        )
+	    );
 
-		add_settings_section(
-			'summaraize_settings_section',
-			__( 'SummarAIze Settings', 'summaraize' ),
-			array( $this, 'summaraize_settings_section_callback' ),
-			'summaraize_settings'
-		);
+	    // Add the main settings section
+	    add_settings_section(
+	        'summaraize_settings_section',
+	        __( 'SummarAIze Settings', 'summaraize' ),
+	        array( $this, 'summaraize_settings_section_callback' ),
+	        'summaraize_settings'
+	    );
 
-		add_settings_field(
-			'summaraize_openai_api_key',
-			__( 'OpenAI API Key', 'summaraize' ),
-			array( $this, 'summaraize_openai_api_key_callback' ),
-			'summaraize_settings',
-			'summaraize_settings_section',
-			array( 'label_for' => 'summaraize_openai_api_key' )
-		);
+	    // Add the OpenAI API key field
+	    add_settings_field(
+	        'summaraize_openai_api_key',
+	        __( 'OpenAI API Key', 'summaraize' ),
+	        array( $this, 'summaraize_openai_api_key_callback' ),
+	        'summaraize_settings',
+	        'summaraize_settings_section',
+	        array( 'label_for' => 'summaraize_openai_api_key' )
+	    );
 
-		$api_key = get_option( 'summaraize_openai_api_key' );
+	    // Retrieve the API key
+	    $api_key = get_option( 'summaraize_openai_api_key' );
 
-		if ( ! empty( $api_key ) && self::validate_openai_api_key( $api_key ) ) {
-			register_setting( 'summaraize_settings', 'summaraize_post_types' );
-			register_setting( 'summaraize_settings', 'summaraize_assistant_id' );
-			register_setting( 'summaraize_settings', 'summaraize_widget_title' );
-			register_setting( 'summaraize_settings', 'summaraize_display_position' );
-			register_setting( 'summaraize_settings', 'summaraize_display_mode' );
-			register_setting( 'summaraize_settings', 'summaraize_button_style' );
-			register_setting( 'summaraize_settings', 'summaraize_button_color' );
-			register_setting( 'summaraize_settings', 'summaraize_list_type' );
-
-			add_settings_field(
-				'summaraize_post_types',
-				__( 'Post Types', 'summaraize' ),
-				array( $this, 'summaraize_post_types_callback' ),
-				'summaraize_settings',
-				'summaraize_settings_section'
-			);
-
-			add_settings_field(
-				'summaraize_assistant_id',
-				__( 'Assistant ID', 'summaraize' ),
-				array( $this, 'summaraize_assistant_id_callback' ),
-				'summaraize_settings',
-				'summaraize_settings_section',
-				array( 'label_for' => 'summaraize_assistant_id' )
-			);
-
-			add_settings_field(
-				'summaraize_widget_title',
-				__( 'Widget Title', 'summaraize' ),
-				array( $this, 'summaraize_widget_title_callback' ),
-				'summaraize_settings',
-				'summaraize_settings_section'
-			);
-
-			add_settings_field(
-				'summaraize_display_position',
-				__( 'Display Position', 'summaraize' ),
-				array( $this, 'summaraize_display_position_callback' ),
-				'summaraize_settings',
-				'summaraize_settings_section'
-			);
-
-			add_settings_field(
-				'summaraize_display_mode',
-				__( 'Display Mode', 'summaraize' ),
-				array( $this, 'summaraize_display_mode_callback' ),
-				'summaraize_settings',
-				'summaraize_settings_section'
-			);
-
-			add_settings_field(
-				'summaraize_button_style',
-				__( 'Button Style', 'summaraize' ),
-				array( $this, 'summaraize_button_style_callback' ),
-				'summaraize_settings',
-				'summaraize_settings_section'
-			);
-
-			add_settings_field(
-				'summaraize_button_color',
-				__( 'Button Color', 'summaraize' ),
-				array( $this, 'summaraize_button_color_callback' ),
-				'summaraize_settings',
-				'summaraize_settings_section'
-			);
-
-			add_settings_field(
-				'summaraize_list_type',
-				__( 'List Type', 'summaraize' ),
-				array( $this, 'summaraize_list_type_callback' ),
-				'summaraize_settings',
-				'summaraize_settings_section'
-			);
-
-		} else {
-			add_settings_error(
-				'summaraize_openai_api_key',
-				'invalid-api-key',
-				sprintf(
-					/* translators: %s: URL to SummarAIze settings page */
-					__( 'The OpenAI API key is invalid. Please enter a valid API key in the <a href="%s">SummarAIze settings</a> to use SummarAIze.', 'summaraize' ),
-					esc_url( admin_url( 'options-general.php?page=summaraize-settings' ) )
-				),
-				'error'
-			);
-
-		}
+	    // Check if the API key is valid
+	    if ( ! empty( $api_key ) && self::validate_openai_api_key( $api_key ) ) {
+	        // Register other settings if the API key is valid
+	        $this->register_summaraize_main_settings_fields();
+	        $this->register_summaraize_advanced_settings_fields();
+	    } else {
+	        // Display an error message if the API key is invalid
+	        add_settings_error(
+	            'summaraize_openai_api_key',
+	            'invalid-api-key',
+	            sprintf(
+	                /* translators: %s: URL to SummarAIze settings page */
+	                __( 'The OpenAI API key is invalid. Please enter a valid API key in the <a href="%s">SummarAIze settings</a> to use SummarAIze.', 'summaraize' ),
+	                esc_url( admin_url( 'options-general.php?page=summaraize-settings' ) )
+	            ),
+	            'error'
+	        );
+	    }
 	}
+
+	/**
+	 * Register the main settings fields if the API key is valid.
+	 */
+	private function register_summaraize_main_settings_fields() {
+	    register_setting( 'summaraize_settings', 'summaraize_post_types' );
+	    register_setting( 'summaraize_settings', 'summaraize_assistant_id' );
+	    register_setting( 'summaraize_settings', 'summaraize_widget_title' );
+	    register_setting( 'summaraize_settings', 'summaraize_display_position' );
+	    register_setting( 'summaraize_settings', 'summaraize_display_mode' );
+	    register_setting( 'summaraize_settings', 'summaraize_button_style' );
+	    register_setting( 'summaraize_settings', 'summaraize_button_color' );
+	    register_setting( 'summaraize_settings', 'summaraize_list_type' );
+
+	    add_settings_field(
+	        'summaraize_post_types',
+	        __( 'Post Types', 'summaraize' ),
+	        array( $this, 'summaraize_post_types_callback' ),
+	        'summaraize_settings',
+	        'summaraize_settings_section'
+	    );
+
+	    add_settings_field(
+	        'summaraize_assistant_id',
+	        __( 'Assistant ID', 'summaraize' ),
+	        array( $this, 'summaraize_assistant_id_callback' ),
+	        'summaraize_settings',
+	        'summaraize_settings_section',
+	        array( 'label_for' => 'summaraize_assistant_id' )
+	    );
+
+	    add_settings_field(
+	        'summaraize_widget_title',
+	        __( 'Widget Title', 'summaraize' ),
+	        array( $this, 'summaraize_widget_title_callback' ),
+	        'summaraize_settings',
+	        'summaraize_settings_section'
+	    );
+
+	    add_settings_field(
+	        'summaraize_display_position',
+	        __( 'Display Position', 'summaraize' ),
+	        array( $this, 'summaraize_display_position_callback' ),
+	        'summaraize_settings',
+	        'summaraize_settings_section'
+	    );
+
+	    add_settings_field(
+	        'summaraize_display_mode',
+	        __( 'Display Mode', 'summaraize' ),
+	        array( $this, 'summaraize_display_mode_callback' ),
+	        'summaraize_settings',
+	        'summaraize_settings_section'
+	    );
+
+	    add_settings_field(
+	        'summaraize_button_style',
+	        __( 'Button Style', 'summaraize' ),
+	        array( $this, 'summaraize_button_style_callback' ),
+	        'summaraize_settings',
+	        'summaraize_settings_section'
+	    );
+
+	    add_settings_field(
+	        'summaraize_button_color',
+	        __( 'Button Color', 'summaraize' ),
+	        array( $this, 'summaraize_button_color_callback' ),
+	        'summaraize_settings',
+	        'summaraize_settings_section'
+	    );
+
+	    add_settings_field(
+	        'summaraize_list_type',
+	        __( 'List Type', 'summaraize' ),
+	        array( $this, 'summaraize_list_type_callback' ),
+	        'summaraize_settings',
+	        'summaraize_settings_section'
+	    );
+
+	}
+
+	/**
+	 * Register the advanced settings fields if the API key is valid.
+	 */
+	private function register_summaraize_advanced_settings_fields() {
+	    register_setting( 'summaraize_settings_advanced', 'summaraize_prompt_type' );
+	    register_setting( 'summaraize_settings_advanced', 'summaraize_custom_prompt' );
+	    register_setting( 'summaraize_settings_advanced', 'summaraize_ai_model' ); // Register under advanced settings
+
+	    add_settings_field(
+	        'summaraize_prompt_type',
+	        __( 'Assistant Prompt Type', 'summaraize' ),
+	        array( $this, 'summaraize_prompt_type_callback' ),
+	        'summaraize_settings_advanced',
+	        'summaraize_advanced_settings_section'
+	    );
+
+	    add_settings_field(
+	        'summaraize_custom_prompt',
+	        __( 'Custom Assistant Instructions', 'summaraize' ),
+	        array( $this, 'summaraize_custom_prompt_callback' ),
+	        'summaraize_settings_advanced',
+	        'summaraize_advanced_settings_section',
+	        array( 'class' => 'summaraize_custom_prompt_field' ) // Add a class for conditional display
+	    );
+
+	    add_settings_field(
+	        'summaraize_ai_model',
+	        __( 'AI Model', 'summaraize' ),
+	        array( $this, 'summaraize_ai_model_callback' ),
+	        'summaraize_settings_advanced', // Ensure it's registered under advanced settings
+	        'summaraize_advanced_settings_section'
+	    );
+	}
+
 
 
 	/**
@@ -221,6 +320,57 @@ class Summaraize_Admin_Settings {
 		</select>
 		<p class="description"><?php esc_html_e( 'Choose the type of list for displaying the key points.', 'summaraize' ); ?></p>
 		<?php
+	}
+
+
+	/**
+	 * Callback for the custom prompt field.
+	 */
+	public function summaraize_custom_prompt_callback() {
+	    $value = get_option('summaraize_custom_prompt', '');
+	    $prompt_type = get_option('summaraize_prompt_type', '');
+
+	    // Debugging to ensure we know the value of $prompt_type
+	    error_log('Prompt Type: ' . $prompt_type);
+
+	    // Generate a unique ID for the custom prompt textarea.
+	    $unique_id = 'summaraize_custom_prompt_custom';
+
+	    // Only display the textarea if 'custom' is selected.
+	    $style = ( 'custom' === $prompt_type ) ? '' : 'style="display:none;"';
+
+	    echo '<textarea id="' . esc_attr($unique_id) . '" name="summaraize_custom_prompt" rows="5" cols="50" ' . $style . '>' . esc_textarea($value) . '</textarea>';
+	    echo '<p class="description">' . esc_html__('Add your custom instructions or description for the Assistant. These will be prepended to the default instructions.', 'summaraize') . '</p>';
+	}
+
+
+
+	/**
+	 * Callback for the custom prompt dropdown.
+	 */
+	public function summaraize_prompt_type_callback() {
+	    $value = get_option( 'summaraize_prompt_type', '' );
+	    $options = array(
+	        '' => 'Default', // Empty value for Default option
+	        'formal' => 'Formal and Professional',
+	        'statistics' => 'Focus on Statistics',
+	        'non_expert' => 'Understandable for Non-Experts',
+	        'summary_first' => 'Include a Summary Sentence',
+	        'concise' => 'Limit to Two Sentences',
+	        'actionable' => 'Highlight Actionable Insights',
+	        'exclude_politics' => 'Avoid Politics',
+	        'spanish' => 'Translate to Spanish',
+	        'explanation' => 'Include Explanation of Importance',
+	        'environment' => 'Relevant to Environmental Sustainability',
+	        'custom' => 'Custom',
+	    );
+
+	    echo '<select id="summaraize_prompt_type" name="summaraize_prompt_type">';
+	    foreach ( $options as $key => $label ) {
+	        echo '<option value="' . esc_attr( $key ) . '" ' . selected( $value, $key, false ) . '>' . esc_html( $label ) . '</option>';
+	    }
+	    echo '</select>';
+	    echo '<p class="description">' . esc_html__( 'Choose a predefined instruction set for the Assistant or select Custom to provide your own.', 'summaraize' ) . '</p>';
 	}
 
 
@@ -370,16 +520,20 @@ class Summaraize_Admin_Settings {
 
 		// Define allowed option keys.
 		$allowed_options = array(
-			'summaraize_openai_api_key',
-			'summaraize_post_types',
-			'summaraize_assistant_id',
-			'summaraize_widget_title',
-			'summaraize_display_position',
-			'summaraize_display_mode',
-			'summaraize_button_style',
-			'summaraize_button_color',
-			'summaraize_list_type',
+		    'summaraize_openai_api_key',
+		    'summaraize_post_types',
+		    'summaraize_assistant_id',
+		    'summaraize_widget_title',
+		    'summaraize_display_position',
+		    'summaraize_display_mode',
+		    'summaraize_button_style',
+		    'summaraize_button_color',
+		    'summaraize_list_type',
+		    'summaraize_prompt_type', // New field
+		    'summaraize_custom_prompt', // New field
+		    'summaraize_ai_model', // AI model field
 		);
+
 
 		$field_name = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
 		$option_key = sanitize_key( str_replace( '[]', '', $field_name ) ); // Use sanitize_key() for option keys.
@@ -425,6 +579,7 @@ class Summaraize_Admin_Settings {
 
 
 
+
 	/**
 	 * Callback for the Assistant ID field.
 	 */
@@ -447,120 +602,207 @@ class Summaraize_Admin_Settings {
 	 *
 	 * @since 1.0.0
 	 */
+	private function summaraize_create_assistant() {
+	    $api_key 		= get_option( 'summaraize_openai_api_key' );
+	    $selected_model = get_option( 'summaraize_ai_model', 'gpt-4o-mini' );
+	    if ( empty( $api_key ) ) {
+	        return false;
+	    }
+
+	    $prompt_type = get_option( 'summaraize_prompt_type', '' );
+	    $custom_prompt = get_option( 'summaraize_custom_prompt', '' );
+
+	    $default_prompt = array(
+	        'description' => 'This Assistant extracts the top 5 key points from a given article and returns them in a JSON format being sure to use the `extract_key_points` function.',
+	        'behavior'    => array(
+	            array(
+	                'trigger'     => 'message',
+	                'instruction' => "When provided with a message containing the content of an article, analyze the article and identify the top 5 key points. Call the `extract_key_points` function to return these points in a JSON format. The expected JSON format is:\n[\n  { \"index\": 1, \"text\": \"Point 1 content\" },\n  { \"index\": 2, \"text\": \"Point 2 content\" },\n  { \"index\": 3, \"text\": \"Point 3 content\" },\n  { \"index\": 4, \"text\": \"Point 4 content\" },\n  { \"index\": 5, \"text\": \"Point 5 content\" }\n]",
+	            ),
+	        ),
+	    );
+
+	    $predefined_prompts = array(
+	        'formal' => 'Ensure the language used in the key points is formal and professional.',
+	        'statistics' => 'Focus on key points that mention data or statistics.',
+	        'non_expert' => 'Summarize the key points in a way that is easily understandable for non-experts.',
+	        'summary_first' => 'Include a short summary sentence before listing the key points.',
+	        'concise' => 'Limit each key point to no more than two sentences.',
+	        'actionable' => 'Highlight actionable insights or recommendations as key points.',
+	        'exclude_politics' => 'Avoid including points that mention politics.',
+	        'spanish' => 'Translate the key points into Spanish before returning the JSON.',
+	        'explanation' => 'Provide a brief explanation of why each key point is important.',
+	        'environment' => 'Extract key points that are relevant to environmental sustainability.',
+	    );
+
+
+	    if ( 'custom' === $prompt_type && ! empty( $custom_prompt ) ) {
+	        $default_prompt['description'] = $custom_prompt . "\n\n" . $default_prompt['description'];
+	    } elseif ( array_key_exists( $prompt_type, $predefined_prompts ) ) {
+	        $default_prompt['description'] = $predefined_prompts[ $prompt_type ] . "\n\n" . $default_prompt['description'];
+	    }
+
+	    $function_definition = array(
+	        'name'        => 'extract_key_points',
+	        'description' => 'Extract the top 5 key points from the provided article content and return them in a specific JSON format.',
+	        'parameters'  => array(
+	            'type'       => 'object',
+	            'properties' => array(
+	                'points' => array(
+	                    'type'  => 'array',
+	                    'items' => array(
+	                        'type'       => 'object',
+	                        'properties' => array(
+	                            'index' => array(
+	                                'type'        => 'integer',
+	                                'description' => 'The index of the key point.',
+	                            ),
+	                            'text'  => array(
+	                                'type'        => 'string',
+	                                'description' => 'The content of the key point.',
+	                            ),
+	                        ),
+	                        'required'   => array( 'index', 'text' ),
+	                    ),
+	                ),
+	            ),
+	            'required'   => array( 'points' ),
+	        ),
+	    );
+
+	    $payload = array(
+	        'description'     => 'Assistant for generating concise content summaries.',
+	        'instructions'    => wp_json_encode( $default_prompt ),
+	        'name'            => 'SummarAIze Assistant',
+	        'tools'           => array(
+	            array(
+	                'type'     => 'function',
+	                'function' => $function_definition,
+	            ),
+	        ),
+	        'model'           => $selected_model,
+	        'response_format' => array( 'type' => 'json_object' ),
+	    );
+
+	    $response = wp_remote_post(
+	        'https://api.openai.com/v1/assistants',
+	        array(
+	            'headers' => array(
+	                'Content-Type'  => 'application/json',
+	                'Authorization' => 'Bearer ' . $api_key,
+	                'OpenAI-Beta'   => 'assistants=v2',
+	            ),
+	            'body'    => wp_json_encode( $payload ),
+	        )
+	    );
+
+	    if ( is_wp_error( $response ) ) {
+	        return false;
+	    }
+
+	    $response_body  = wp_remote_retrieve_body( $response );
+	    $assistant_data = json_decode( $response_body, true );
+
+	    if ( isset( $assistant_data['id'] ) ) {
+	        return $assistant_data['id'];
+	    }
+
+	    return false;
+	}
+
 	/**
-	 * Create the OpenAI assistant.
+	 * Callback function for the AI Model setting field.
 	 *
 	 * @since 1.0.0
+	 * @return void
 	 */
-	private function summaraize_create_assistant() {
-		$api_key = get_option( 'summaraize_openai_api_key' );
-		if ( empty( $api_key ) ) {
+	public function summaraize_ai_model_callback() {
+	    $selected_model = get_option( 'summaraize_ai_model', 'gpt-4o-mini' ); // Set 'gpt-4o-mini' as the default
+	    $api_key        = get_option( 'summaraize_openai_api_key' );
 
-			return false;
-		}
+	    if ( ! empty( $api_key ) ) {
+	        $models = self::validate_openai_api_key( $api_key );
 
-		$initial_prompt = array(
-			'description' => 'This Assistant extracts the top 5 key points from a given article and returns them in a JSON format being sure to use the `extract_key_points` function.',
-			'behavior'    => array(
-				array(
-					'trigger'     => 'message',
-					'instruction' => "When provided with a message containing the content of an article, analyze the article and identify the top 5 key points. Call the `extract_key_points` function to return these points in a JSON format. The expected JSON format is:\n[\n  { \"index\": 1, \"text\": \"Point 1 content\" },\n  { \"index\": 2, \"text\": \"Point 2 content\" },\n  { \"index\": 3, \"text\": \"Point 3 content\" },\n  { \"index\": 4, \"text\": \"Point 4 content\" },\n  { \"index\": 5, \"text\": \"Point 5 content\" }\n]",
-				),
-			),
-		);
+	        if ( $models && is_array( $models ) ) {
+	            echo '<select id="summaraize_ai_model" name="summaraize_ai_model">';
 
-		$function_definition = array(
-			'name'        => 'extract_key_points',
-			'description' => 'Extract the top 5 key points from the provided article content and return them in a specific JSON format.',
-			'parameters'  => array(
-				'type'       => 'object',
-				'properties' => array(
-					'points' => array(
-						'type'  => 'array',
-						'items' => array(
-							'type'       => 'object',
-							'properties' => array(
-								'index' => array(
-									'type'        => 'integer',
-									'description' => 'The index of the key point.',
-								),
-								'text'  => array(
-									'type'        => 'string',
-									'description' => 'The content of the key point.',
-								),
-							),
-							'required'   => array( 'index', 'text' ),
-						),
-					),
-				),
-				'required'   => array( 'points' ),
-			),
-		);
+	            // Add a default option
+	            echo '<option value="gpt-4o-mini"' . selected( $selected_model, 'gpt-4o-mini', false ) . '>' . esc_html__( 'Default (gpt-4o-mini)', 'summaraize' ) . '</option>';
 
-		$payload = array(
-			'description'     => 'Assistant for generating concise content summaries.',
-			'instructions'    => wp_json_encode( $initial_prompt ),
-			'name'            => 'SummarAIze Assistant',
-			'tools'           => array(
-				array(
-					'type'     => 'function',
-					'function' => $function_definition,
-				),
-			),
-			'model'           => 'gpt-4o',
-			'response_format' => array( 'type' => 'json_object' ),
-		);
-
-		$response = wp_remote_post(
-			'https://api.openai.com/v1/assistants',
-			array(
-				'headers' => array(
-					'Content-Type'  => 'application/json',
-					'Authorization' => 'Bearer ' . $api_key,
-					'OpenAI-Beta'   => 'assistants=v2',
-				),
-				'body'    => wp_json_encode( $payload ),
-			)
-		);
-
-		if ( is_wp_error( $response ) ) {
-			return false;
-		}
-
-		$response_body  = wp_remote_retrieve_body( $response );
-		$assistant_data = json_decode( $response_body, true );
-
-		if ( isset( $assistant_data['id'] ) ) {
-			return $assistant_data['id'];
-		}
-
-		return false;
+	            foreach ( $models as $model ) {
+	                echo '<option value="' . esc_attr( $model ) . '"' . selected( $selected_model, $model, false ) . '>' . esc_html( $model ) . '</option>';
+	            }
+	            echo '</select>';
+	            echo '<p class="description">';
+	            esc_html_e( 'These models support the function calling ability that is required to use SummarAIze.', 'summaraize' );
+	            echo '</p>';
+	        } else {
+	            echo '<p class="summaraize-alert">';
+	            esc_html_e( 'Unable to retrieve models. Please check your API key.', 'summaraize' );
+	            echo '</p>';
+	        }
+	    } else {
+	        echo '<p class="summaraize-alert">';
+	        esc_html_e( 'Please enter a valid OpenAI API key first.', 'summaraize' );
+	        echo '</p>';
+	    }
 	}
+
+
+
 
 	/**
-	 * Validate the OpenAI API key.
+	 * Validates the OpenAI API key and fetches models that support function calling.
 	 *
-	 * @param string $api_key The OpenAI API key to validate.
-	 * @return bool True if the API key is valid, false otherwise.
+	 * @since 1.0.0
+	 * @param string $api_key The API key to validate.
+	 * @return array|bool List of models if successful, false otherwise.
 	 */
 	public static function validate_openai_api_key( $api_key ) {
-		$response = wp_remote_get(
-			'https://api.openai.com/v1/models',
-			array(
-				'headers' => array(
-					'Content-Type'  => 'application/json',
-					'Authorization' => 'Bearer ' . $api_key,
-				),
-			)
-		);
+	    if ( empty( $api_key ) ) {
+	        return false;
+	    }
 
-		if ( is_wp_error( $response ) ) {
-			return false;
-		}
+	    $response = wp_remote_get(
+	        'https://api.openai.com/v1/models',
+	        array(
+	            'headers' => array(
+	                'Content-Type'  => 'application/json',
+	                'Authorization' => 'Bearer ' . $api_key,
+	            ),
+	        )
+	    );
 
-		$body = wp_remote_retrieve_body( $response );
-		$data = json_decode( $body, true );
+	    if ( is_wp_error( $response ) ) {
+	        return false;
+	    }
 
-		return isset( $data['data'] ) && is_array( $data['data'] );
+	    $body = wp_remote_retrieve_body( $response );
+	    $data = json_decode( $body, true );
+
+	    $function_calling_cutoff          = 1686614400;
+	    $parallel_function_calling_cutoff = 1699228800;
+
+	    if ( isset( $data['data'] ) && is_array( $data['data'] ) ) {
+	        $models = array_filter(
+	            $data['data'],
+	            function ( $model ) use ( $function_calling_cutoff, $parallel_function_calling_cutoff ) {
+	                return isset( $model['created'] ) && (
+	                    $model['created'] >= $function_calling_cutoff ||
+	                    $model['created'] >= $parallel_function_calling_cutoff
+	                );
+	            }
+	        );
+
+	        return array_map(
+	            function ( $model ) {
+	                return $model['id'];
+	            },
+	            $models
+	        );
+	    }
+
+	    return false;
 	}
+
 }

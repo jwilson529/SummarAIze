@@ -211,3 +211,72 @@ p.summaraize-settings {
     align-items: center;
     gap: 8px;
 }
+
+.summaraize-alert {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.settings_page_summaraize-settings .summaraize-alert h2 {
+    margin-top: 0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+#summaraize_override_options {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+#summaraize_override_options p {
+    margin-bottom: 15px;
+}
+
+#summaraize_override_options label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+#summaraize_override_options select,
+#summaraize_override_options input[type="text"],
+#summaraize_override_options input[type="color"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    margin-bottom: 5px;
+}
+
+#summaraize_override_options .summaraize-description {
+    font-style: italic;
+    color: #666;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
+
+#summaraize_override_options .summaraize-button-style-wrapper,
+#summaraize_override_options .summaraize-button-color-wrapper {
+    margin-top: 15px;
+}
+
+#summaraize_override_options optgroup {
+    font-weight: bold;
+    color: #0073aa;
+}
+
+#summaraize_override_options .summaraize-button-style-description,
+#summaraize_override_options .summaraize-button-color-description {
+    margin-top: 5px;
+}
