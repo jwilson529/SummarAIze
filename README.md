@@ -42,7 +42,7 @@ SummarAIze uses advanced AI algorithms to analyze your post content and extract 
 
 ### Can I customize the display of the key points?
 
-Yes! SummarAIze offers several customization options. You can choose to display key points above or below your content, switch between dark and light modes, and even use a popup version with customizable buttons. Additionally, you can override the main settings per post or page by using the provided shortcode.
+Yes! SummarAIze offers several customization options. You can choose to display key points above or below your content, switch between dark and light modes, and even use a popup version with customizable buttons. Additionally, you can override the main settings per post or page by using the provided options.
 
 ### What happens if I don’t provide an API key?
 
@@ -74,6 +74,13 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
    *The settings page for configuring display options.*
 
 ## Changelog
+
+### 1.1.9
+* Added advanced settings tab for customizing the Assistant's prompt type, custom instructions, and AI model.
+* Implemented model selection dropdown with a default option set to gpt-4o-mini.
+* Improved UI with updated CSS for a more polished look.
+* Added a warning message in the advanced settings tab to inform users about the need to regenerate the Assistant after changing certain settings.
+* Improved AJAX auto-save functionality to handle empty values correctly.
 
 ### 1.1.8
 * Added option to display key points as ordered or unordered lists.
