@@ -280,3 +280,38 @@ p.summaraize-settings {
 #summaraize_override_options .summaraize-button-color-description {
     margin-top: 5px;
 }
+
+.settings_page_summaraize-settings .notice:not(:first-of-type) {
+  display: none;
+}
+
+.summaraize-spinner-container {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+    opacity: 1; /* Set opacity to 1 for testing */
+    background-color: rgba(0, 0, 0, 0.1); /* Ensure visibility */
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.summaraize-spinner {
+    margin-right: 10px;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ccc;
+    border-top: 2px solid #000;
+    border-radius: 50%;
+    animation: summaraize-spin 1s linear infinite;
+    background-color: red; /* Temporary background color for visibility */
+}
+
+.summaraize-spinner-message {
+    font-size: 14px;
+    color: #000; /* Ensure the text color is visible */
+}
+
+@keyframes summaraize-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

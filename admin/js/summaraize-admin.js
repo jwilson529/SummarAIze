@@ -31,7 +31,7 @@
 
         // Show the main tab by default and hide the advanced tab
         $('#main-settings').show();
-        $('#advanced-settings').hide(); 
+        $('#advanced-settings').hide();
 
         // Show/hide custom prompt textarea based on dropdown selection
         $('#summaraize_prompt_type').on('change', function() {
@@ -326,18 +326,71 @@
             }
         });
 
+        // Adds a spinner with a message below the input field.
+        function addSpinnerWithMessage($field, message) {
+            // Remove any existing spinner container to prevent duplicates
+            $field.siblings('.summaraize-spinner-container').remove();
+
+            // Create the spinner container, spinner, and message
+            const spinnerContainer = $('<div class="summaraize-spinner-container"></div>');
+            const spinner = $('<div class="summaraize-spinner"></div>');
+            const spinnerMessage = $('<span class="summaraize-spinner-message"></span>').text(message);
+
+            // Append the spinner and message to the container and then add it after the input field
+            spinnerContainer.append(spinner).append(spinnerMessage);
+            $field.after(spinnerContainer);
+
+            // Fade in the spinner container
+            spinnerContainer.fadeIn('fast');
+        }
+
+        // Removes the spinner and message from below the input field.
+        function removeSpinnerWithMessage($field) {
+            $field.siblings('.summaraize-spinner-container').fadeOut('slow', function() {
+                $(this).remove();
+            });
+        }
+
+
         /**
          * Monitor the API key field for input and paste events.
          */
         const apiKeyField = $('input[name="summaraize_openai_api_key"]');
         apiKeyField.on('input paste', debounce(function() {
             const apiKey = $(this).val();
-            if (apiKey.length === 51) { // OpenAI API key length is 51 characters
-                autoSaveField($(this));
-                setTimeout(function() {
-                    location.reload();
-                }, 1000); // Give some time for auto-save to complete before refreshing
-            }
+
+            // Add the spinner with a message
+            addSpinnerWithMessage(apiKeyField, 'Validating API key...');
+
+            // Perform an AJAX request to validate the API key
+            $.ajax({
+                    url: summaraize_admin_vars.ajax_url,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'summaraize_ajax_validate_openai_api_key',
+                        nonce: summaraize_admin_vars.summaraize_ajax_nonce,
+                        api_key: apiKey
+                    }
+                })
+                .done(function(validationResponse) {
+                    if (validationResponse.success) {
+                        // If valid, auto-save the key and refresh
+                        autoSaveField(apiKeyField);
+                        setTimeout(function() {
+                            location.reload(); // Refresh the page after a short delay
+                        }, 1000);
+                    } else {
+                        showNotification(validationResponse.data.message || 'Invalid API key.', 'error');
+                    }
+                })
+                .fail(function() {
+                    showNotification('Error validating API key.', 'error');
+                })
+                .always(function() {
+                    // Remove the spinner after the request completes
+                    removeSpinnerWithMessage(apiKeyField);
+                });
         }, 500));
 
         /**

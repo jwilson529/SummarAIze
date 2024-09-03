@@ -166,6 +166,7 @@ class Summaraize {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_menu', $plugin_settings, 'summaraize_register_options_page' );
 		$this->loader->add_action( 'admin_init', $plugin_settings, 'summaraize_register_settings' );
+		$this->loader->add_action( 'wp_ajax_summaraize_ajax_validate_openai_api_key', $plugin_settings, 'summaraize_ajax_validate_openai_api_key' );
 		$this->loader->add_action( 'save_post', $plugin_metabox, 'save_summaraize_points' );
 		$this->loader->add_action( 'wp_ajax_summaraize_gather_content', $plugin_admin, 'summaraize_gather_content' );
 		$this->loader->add_action( 'wp_ajax_summaraize_auto_save', $plugin_settings, 'summaraize_auto_save' );
