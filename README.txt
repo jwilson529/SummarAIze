@@ -1,7 +1,7 @@
 === SummarAIze - Generate Key Takeaways with AI ===
 Contributors: jwilson529
 Donate link: https://oneclickcontent.com/donate/
-Tags: ai, summary, content-enhancement, content-summarization
+Tags: ai, summary, content-enhancement
 Requires at least: 5.0
 Tested up to: 6.6.1
 Stable tag: 1.1.10
@@ -36,6 +36,66 @@ SummarAIze relies on the OpenAI API to generate key takeaways. This means that d
 - **Flexible API Integration**: Integrate with your own OpenAI API key, allowing for control over usage and billing.
 - **Assistant Configuration**: Use the default Assistant ID or configure your own in the OpenAI Playground.
 - **Enhance SEO and Readability**: Improve your content's SEO by providing search engines with structured summaries, and enhance readability for your audience.
+
+## Shortcode Documentation
+
+The Summaraize shortcode is used to display the top 5 key points for a post. You can customize the display with several attributes, such as the view mode, color, and button style.
+
+### Basic Shortcode Usage:
+
+`[summaraize]`
+
+### Available Attributes:
+
+**id (optional):**  
+The post ID for which to display the key points. If not provided, the shortcode will use the current post's ID.
+Example: `[summaraize id="123"]`
+
+**view (optional):**  
+Defines where the output should be positioned relative to the post content. Possible values are:
+– `above`: Places the key points above the content.
+– `below`: Places the key points below the content.
+– `popup`: Renders a popup button that displays the key points in a modal when clicked.
+Default: `above`
+Example: `[summaraize view="popup"]`
+
+**mode (optional):**  
+Sets the display mode for light or dark theme. Possible values:
+– `light`: Light theme.
+– `dark`: Dark theme.
+Default: `light`
+Example: `[summaraize mode="dark"]`
+
+**title (optional):**  
+Sets a custom title for the key points widget or popup. If no custom title is provided, the default "Key Takeaways" will be used.
+Example: `[summaraize title="Quick Summary"]`
+
+**button_style (optional):**  
+Defines the button style when using the popup view. Possible values: `flat`, `rounded`, etc.
+Default: `flat`
+Example: `[summaraize view="popup" button_style="rounded"]`
+
+**button_color (optional):**  
+Sets the background color of the popup button. Use any valid hex color code.
+Default: `#0073aa`
+Example: `[summaraize view="popup" button_color="#ff0000"]`
+
+**list_type (optional):**  
+Specifies how the key points list is displayed. Possible values:
+– `ordered`: Displays an ordered list (`<ol>`).
+– `unordered`: Displays an unordered list (`<ul>`).
+Default: `unordered`
+Example: `[summaraize list_type="ordered"]`
+
+### Example Usage:
+
+Basic Usage (displays the key points above the content with default settings): `[summaraize]`
+
+Customizing the Position and Style (displays the key points in a popup with a red button and rounded style): `[summaraize view="popup" button_style="rounded" button_color="#ff0000"]`
+
+Using a Custom Title and Dark Mode: `[summaraize mode="dark" title="Quick Summary"]`
+
+Displaying an Ordered List Below the Content: `[summaraize view="below" list_type="ordered"]`
 
 ## Requirements
 
@@ -111,6 +171,10 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 
 5. ![Settings Screen](assets/settings-screen.png)
    *The settings page for configuring display options.*
+
+## Upgrade Notice
+
+The 1.1.10 update includes several enhancements to the shortcode functionality, including the ability to use attributes for customization. It also includes improvements to the detection of processed shortcodes and Gutenberg blocks to prevent duplication. We recommend updating to this version to take advantage of these new features.
 
 ## Changelog
 
