@@ -6,7 +6,7 @@
         // Regenerate Assistant ID
         $(document).on('click', '#summariaze_create_assistant', function(event) {
             event.preventDefault();
-            console.log('Button clicked'); // Debugging line
+            
             $('#summaraize_assistant_id').val('');
 
             // Manually trigger auto-save for the Assistant ID field
@@ -193,11 +193,11 @@
          */
         $(document).on('click', '#generate-summaraize-button', function(event) {
             event.preventDefault();
-            console.log('Button clicked');
+            
 
             var $button = $(this);
             $button.prop('disabled', true);
-            console.log('Button disabled');
+            
 
             var $spinner = $button.find('.summaraize-spinner');
             $spinner.css({
@@ -210,17 +210,17 @@
                 animation: 'summaraize-spin 1s linear infinite',
                 marginRight: '8px'
             });
-            console.log('Spinner displayed');
+            
 
             var originalText = 'Generate Top 5 Points';
             $button.contents().filter(function() {
                 return this.nodeType === 3;
             }).remove();
             $button.append(' Generating...');
-            console.log('Button text changed to "Generating..."');
+            
 
             var editorData = getEditorData();
-            console.log('Editor data:', editorData);
+            
 
             $.ajax({
                     url: summaraize_admin_vars.ajax_url,
@@ -235,7 +235,7 @@
                     }
                 })
                 .done(function(response) {
-                    console.log('AJAX request successful', response);
+                    
                     $button.prop('disabled', false);
                     $spinner.hide();
                     $button.text(originalText);
@@ -261,7 +261,7 @@
                     }
                 })
                 .fail(function(response) {
-                    console.log('AJAX request failed', response);
+                    
                     $button.prop('disabled', false);
                     $spinner.hide();
                     $button.text(originalText);
