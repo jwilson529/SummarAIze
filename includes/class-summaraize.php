@@ -186,10 +186,15 @@ class Summaraize {
 	private function define_public_hooks() {
 		$plugin_public = new Summaraize_Public( $this->get_plugin_name(), $this->get_version() );
 
+		// Enqueue styles and scripts.
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-		$this->loader->add_action( 'init', $plugin_public, 'register_shortcodes' );
-		$this->loader->add_action( 'the_content', $plugin_public, 'append_summaraize_to_content_automatically' );
+
+		// Register the shortcode separately.
+		$this->loader->add_action( 'init', $plugin_public, 'register_shortcodes', 1 );  // Very high priority to register early.
+
+		// Append content automatically after the shortcode is processed.
+		$this->loader->add_action( 'the_content', $plugin_public, 'append_summaraize_to_content_automatically', 20 );  // Lower priority, so this fires after shortcodes.
 	}
 
 	/**

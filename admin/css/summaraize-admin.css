@@ -303,7 +303,6 @@ p.summaraize-settings {
     border-top: 2px solid #000;
     border-radius: 50%;
     animation: summaraize-spin 1s linear infinite;
-    background-color: red; /* Temporary background color for visibility */
 }
 
 .summaraize-spinner-message {

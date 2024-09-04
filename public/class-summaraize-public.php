@@ -82,17 +82,23 @@ class Summaraize_Public {
 	 * @return string HTML content to display.
 	 */
 	public function summaraize_shortcode( $atts, $content = null ) {
-
 		$atts = shortcode_atts(
 			array(
-				'view' => '', // Empty default value to allow fallback to settings.
-				'mode' => '', // Empty default value to allow fallback to settings.
+				'id'           => '',  // Optional post ID. Default to current post if empty.
+				'view'         => '',  // Empty default value to allow fallback to settings.
+				'mode'         => '',  // Empty default value to allow fallback to settings.
+				'title'        => '',  // Optional custom title.
+				'button_style' => '',  // Button style (e.g., flat, rounded).
+				'button_color' => '',  // Button color (e.g., #0073aa).
+				'list_type'    => '',  // List type (e.g., ordered, unordered).
 			),
 			$atts,
 			'summaraize'
 		);
 
-		$post_id           = get_the_ID();
+		$post_id = ! empty( $atts['id'] ) ? intval( $atts['id'] ) : get_the_ID();
+
+		// Retrieve the 'summaraize_points' meta data for the specified post ID.
 		$summaraize_points = get_post_meta( $post_id, 'summaraize_points', true );
 
 		if ( ! is_array( $summaraize_points ) ) {
@@ -106,22 +112,13 @@ class Summaraize_Public {
 			return '<p>' . esc_html__( 'No key points have been set for this post.', 'summaraize' ) . '</p>';
 		}
 
-		$override_settings = get_post_meta( $post_id, 'summaraize_override_settings', true );
-		if ( '1' === $override_settings ) {
-			$view         = get_post_meta( $post_id, 'summaraize_view', true );
-			$mode         = get_post_meta( $post_id, 'summaraize_mode', true );
-			$widget_title = get_post_meta( $post_id, 'summaraize_widget_title', true );
-			$button_style = get_post_meta( $post_id, 'summaraize_button_style', true );
-			$button_color = get_post_meta( $post_id, 'summaraize_button_color', true );
-			$list_type    = get_post_meta( $post_id, 'summaraize_list_type', true );
-		} else {
-			$view         = ! empty( $atts['view'] ) ? $atts['view'] : get_option( 'summaraize_display_position', 'above' );
-			$mode         = ! empty( $atts['mode'] ) ? $atts['mode'] : get_option( 'summaraize_display_mode', 'light' );
-			$widget_title = get_option( 'summaraize_widget_title', 'Key Takeaways' );
-			$button_style = get_option( 'summaraize_button_style', 'flat' );
-			$button_color = get_option( 'summaraize_button_color', '#0073aa' );
-			$list_type    = get_option( 'summaraize_list_type', 'unordered' );
-		}
+		// Always use the shortcode attributes or fallback to defaults.
+		$view         = ! empty( $atts['view'] ) ? $atts['view'] : get_option( 'summaraize_display_position', 'above' );
+		$mode         = ! empty( $atts['mode'] ) ? $atts['mode'] : get_option( 'summaraize_display_mode', 'light' );
+		$widget_title = ! empty( $atts['title'] ) ? $atts['title'] : get_option( 'summaraize_widget_title', 'Key Takeaways' );
+		$button_style = ! empty( $atts['button_style'] ) ? $atts['button_style'] : get_option( 'summaraize_button_style', 'flat' );
+		$button_color = ! empty( $atts['button_color'] ) ? $atts['button_color'] : get_option( 'summaraize_button_color', '#0073aa' );
+		$list_type    = ! empty( $atts['list_type'] ) ? $atts['list_type'] : get_option( 'summaraize_list_type', 'unordered' );
 
 		// Ensure $list_type has a default value in case it is missing.
 		if ( empty( $list_type ) ) {
@@ -203,26 +200,34 @@ class Summaraize_Public {
 	}
 
 	/**
-	 * Automatically append the top 5 points to the content.
+	 * Automatically append the Summaraize shortcode to the post content, if applicable.
 	 *
 	 * @since 1.0.0
 	 * @param string $content The post content.
 	 * @return string Modified post content.
 	 */
 	public function append_summaraize_to_content_automatically( $content ) {
-		// Avoid duplicate shortcode output.
-		if ( has_shortcode( $content, 'summaraize' ) ) {
+		// Check if we're inside the main query and in a singular post.
+		if ( ! is_singular() || ! in_the_loop() || is_admin() ) {
+
+			return $content;
+		}
+
+		// Avoid adding the shortcode if the generated HTML for it is already in the content.
+		if ( strpos( $content, 'summaraize-wrap' ) !== false ) {
+
 			return $content;
 		}
 
 		$post_id           = get_the_ID();
 		$summaraize_points = get_post_meta( $post_id, 'summaraize_points', true );
 
-		// Check if there are any points to display.
+		// Check if there are points to display.
 		if ( ! is_array( $summaraize_points ) || empty( array_filter( $summaraize_points ) ) ) {
 			return $content;
 		}
 
+		// Log the override settings check.
 		$override_settings = get_post_meta( $post_id, 'summaraize_override_settings', true );
 		if ( '1' === $override_settings ) {
 			$view         = get_post_meta( $post_id, 'summaraize_view', true );
@@ -245,16 +250,34 @@ class Summaraize_Public {
 			$list_type = 'unordered';
 		}
 
-		// Pass the $list_type to build_view and wrap output.
-		$shortcode_output  = '<div class="summaraize-wrap">' . $this->build_view( $summaraize_points, $view, $mode, '', $widget_title, $button_style, $button_color, $list_type ) . '</div>';
-		$shortcode_output .= '<div style="clear: both;"></div>'; // Clear floats.
+		// Generate the shortcode output.
+		$shortcode_output = '<div class="summaraize-wrap">' . $this->build_view(
+			$summaraize_points,
+			$view,
+			$mode,
+			'', // Content is passed as empty, only points are shown.
+			$widget_title,
+			$button_style,
+			$button_color,
+			$list_type
+		) . '</div>';
 
+		// Clear floats to avoid layout issues.
+		$shortcode_output .= '<div style="clear: both;"></div>';
+
+		// Append the shortcode output based on the view setting.
 		if ( 'below' === $view ) {
 			return $content . $shortcode_output;
-		} else {
-			return $shortcode_output . $content;
 		}
+
+		// Default to adding above the content.
+		return $shortcode_output . $content;
 	}
+
+
+
+
+
 
 	/**
 	 * Determine if we should enqueue assets.
