@@ -38,8 +38,6 @@ Example: `[summaraize id="123"]`
 
 **view (optional):**  
 Defines where the output should be positioned relative to the post content. Possible values are:
-– `above`: Places the key points above the content.
-– `below`: Places the key points below the content.
 – `popup`: Renders a popup button that displays the key points in a modal when clicked.
 Default: `above`
 Example: `[summaraize view="popup"]`
