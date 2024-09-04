@@ -114,6 +114,13 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 
 ## Changelog
 
+### 1.1.10
+* Added shortcode with attributes so that you could use it anywhere.
+* Improved detection of processed shortcodes and generated HTML to prevent duplication.
+* Added a more robust detection mechanism for Gutenberg blocks and shortcodes within the content.
+* Updated the logic for appending the shortcode automatically only when necessary.
+
+
 ### 1.1.9
 * Added advanced settings tab for customizing the Assistant's prompt type, custom instructions, and AI model.
 * Implemented model selection dropdown with a default option set to gpt-4o-mini.
