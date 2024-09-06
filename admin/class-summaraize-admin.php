@@ -53,19 +53,27 @@ class Summaraize_Admin {
 	 * @since 1.0.0
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/summaraize-admin.js', array( 'jquery' ), $this->version, false );
+	    // Enqueue the admin script for your plugin.
+	    wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/summaraize-admin.js', array( 'jquery' ), $this->version, false );
 
-		// Localize the script with the necessary nonces.
-		wp_localize_script(
-			$this->plugin_name,
-			'summaraize_admin_vars',
-			array(
-				'ajax_url'                  => admin_url( 'admin-ajax.php' ),
-				'summaraize_ajax_nonce'     => wp_create_nonce( 'summaraize_ajax_nonce' ),
-				'summaraize_meta_box_nonce' => wp_create_nonce( 'summaraize_meta_box' ),
-			)
-		);
+	    // Enqueue Sortable.js from CDN.
+	    wp_enqueue_script( 'sortablejs', 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js', array(), null, true );
+
+	    // Localize the script with the necessary nonces.
+	    wp_localize_script(
+	        $this->plugin_name,
+	        'summaraize_admin_vars',
+	        array(
+	            'ajax_url'                  => admin_url( 'admin-ajax.php' ),
+	            'summaraize_ajax_nonce'     => wp_create_nonce( 'summaraize_ajax_nonce' ),
+	            'summaraize_meta_box_nonce' => wp_create_nonce( 'summaraize_meta_box' ),
+	            'post_id'                   => get_the_ID(), // Ensure post_id is included here
+	        )
+	    );
 	}
+
+
+
 
 	/**
 	 * Handle AJAX request from the front-end.

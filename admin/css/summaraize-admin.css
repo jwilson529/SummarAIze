@@ -285,6 +285,40 @@ p.summaraize-settings {
   display: none;
 }
 
+.summaraize-input-container {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.summaraize-input-container label {
+    flex: 0 0 auto;
+    margin-right: 10px;
+}
+
+.summaraize-input-container input {
+    flex: 1;
+    width: 100%;
+}
+
+.summaraize-input-container .remove-point {
+    flex: 0 0 auto;
+    margin-left: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 0;
+    line-height: 1;
+    color: #d63638; /* Optional */
+}
+
+.summaraize-input-container .remove-point:hover {
+    color: #ff0000; /* Optional hover color */
+}
+
+
+
 .summaraize-spinner-container {
     display: flex;
     align-items: center;

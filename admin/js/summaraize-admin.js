@@ -18,6 +18,22 @@
             }, 1000);
         });
 
+        // When the trashcan icon is clicked
+        $('.remove-point').click(function() {
+            // Get the ID of the associated input field
+            var pointInputId = $(this).data('point-id');
+            
+            // Clear the value of the input field
+            $('#' + pointInputId).val('');
+        });
+
+        // Make the list of points sortable.
+        $('#summaraize-points-list').sortable({
+            handle: ".dashicons-menu",
+            animation: 150
+        });
+
+
         // Tab switching
         $('.nav-tab-wrapper a').click(function(e) {
             e.preventDefault();
@@ -74,16 +90,113 @@
             return { title, content, tags };
         }
 
-        /**
-         * Initialize auto-save for all fields in the settings form.
-         */
-        function initializeAutoSave() {
-            $('.summaraize-settings-form').find('input, select, textarea').on('input change', debounce(function() {
-                autoSaveField($(this));
-            }, 500));
-        }
+        // Function to auto-save field, extended to handle sortable save
+            function autoSaveField(fieldName, fieldValue) {
+                $.ajax({
+                    url: summaraize_admin_vars.ajax_url,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'summaraize_auto_save',
+                        nonce: summaraize_admin_vars.summaraize_ajax_nonce,
+                        field_name: fieldName, // Keep the [] for the option name
+                        field_value: fieldValue
+                    }
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        showNotification('Field saved successfully.');
+                        if (response.data.refresh) {
+                            location.reload();
+                        }
+                    } else {
+                        showNotification(response.data.message, 'error');
+                    }
+                })
+                .fail(function() {
+                    showNotification('Error saving field.', 'error');
+                });
+            }
 
-        initializeAutoSave();
+            // Initialize sortable and handle the save on drop
+               $('#summaraize-points-list').sortable({
+                   handle: ".dashicons-menu",
+                   animation: 150,
+                   update: function(event, ui) {
+                       console.log('Sortable update event triggered'); // Log when sortable update is triggered
+                       
+                       var sortedPoints = [];
+                       
+                       // Log before gathering values
+                       console.log('Gathering values from input fields');
+                       $('#summaraize-points-list input[type="text"]').each(function() {
+                           sortedPoints.push($(this).val());
+                           console.log('Added point:', $(this).val()); // Log each value
+                       });
+
+                       // Log sorted points array
+                       console.log('Sorted points:', sortedPoints);
+
+                       // Ensure post_id is available
+                       var post_id = summaraize_admin_vars.post_id || null;
+                       if (!post_id) {
+                           console.log('Post ID is missing');
+                           return;
+                       }
+
+                       // Save the sorted points after dropping
+                       $.ajax({
+                           url: summaraize_admin_vars.ajax_url,
+                           type: 'POST',
+                           dataType: 'json',
+                           data: {
+                               action: 'summaraize_auto_save',
+                               nonce: summaraize_admin_vars.summaraize_ajax_nonce,
+                               post_id: post_id, // Add post_id for meta saving
+                               field_name: 'summaraize_points_sorted',
+                               field_value: JSON.stringify(sortedPoints)
+                           }
+                       })
+                       .done(function(response) {
+                           console.log('Auto-save success:', response); // Log the successful response
+                           if (response.success) {
+                               showNotification('Field saved successfully.');
+                               if (response.data.refresh) {
+                                   location.reload();
+                               }
+                           } else {
+                               showNotification(response.data.message, 'error');
+                           }
+                       })
+                       .fail(function() {
+                           console.log('Auto-save failed'); // Log failure
+                           showNotification('Error saving field.', 'error');
+                       });
+                   }
+               });
+
+            // Auto-save fields on change or input
+            function initializeAutoSave() {
+                $('.summaraize-settings-form').find('input, select, textarea').on('input change', debounce(function() {
+                    var $field = $(this);
+                    var fieldName = $field.attr('name');
+                    var fieldValue;
+
+                    // Handle checkboxes separately
+                    if ($field.attr('type') === 'checkbox') {
+                        fieldValue = [];
+                        $('input[name="' + fieldName + '"]:checked').each(function() {
+                            fieldValue.push($(this).val());
+                        });
+                    } else {
+                        fieldValue = $field.val();
+                    }
+
+                    autoSaveField(fieldName, fieldValue);
+                }, 500));
+            }
+
+            initializeAutoSave();
 
         /**
          * Show a popup notification.
@@ -125,48 +238,65 @@
         }
 
         /**
-         * Auto-save function for input field changes.
+         * Auto-save function for input field changes or sortable save.
          * 
-         * @param {Object} $field The jQuery object for the field.
+         * @param {Object|String} $field The jQuery object for the field or the field name (for special cases).
+         * @param {String} [value] The value to save (only needed if $field is a string).
          */
-        function autoSaveField($field) {
-            var fieldValue;
-            var fieldName = $field.attr('name');
+        function autoSaveField($field, value) {
+            var fieldName, fieldValue;
 
-            // Handle checkboxes
-            if ($field.attr('type') === 'checkbox') {
-                fieldValue = [];
-                $('input[name="' + fieldName + '"]:checked').each(function() {
-                    fieldValue.push($(this).val());
-                });
+            if (typeof $field === 'string') {
+                // Special case: when $field is a string (like 'summaraize_points_sorted')
+                fieldName = $field;
+                fieldValue = value;
             } else {
-                fieldValue = $field.val();
+                // Normal case: when $field is a jQuery object
+                $field = $($field); // Wrap it if it's not already a jQuery object
+                fieldName = $field.attr('name');
+                console.log('Field name:', fieldName); // Log the field name
+
+                // Handle checkboxes
+                if ($field.attr('type') === 'checkbox') {
+                    fieldValue = [];
+                    $('input[name="' + fieldName + '"]:checked').each(function() {
+                        fieldValue.push($(this).val());
+                        console.log('Checkbox value added:', $(this).val()); // Log checkbox values
+                    });
+                } else {
+                    fieldValue = $field.val();
+                    console.log('Field value:', fieldValue); // Log field value
+                }
             }
 
+            // Perform AJAX to save the field value
             $.ajax({
-                    url: summaraize_admin_vars.ajax_url,
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'summaraize_auto_save',
-                        nonce: summaraize_admin_vars.summaraize_ajax_nonce,
-                        field_name: fieldName, // Keep the [] for the option name
-                        field_value: fieldValue
+                url: summaraize_admin_vars.ajax_url,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'summaraize_auto_save',
+                    nonce: summaraize_admin_vars.summaraize_ajax_nonce,
+                    post_id: summaraize_admin_vars.post_id, // Ensure post_id is available for meta
+                    field_name: fieldName,
+                    field_value: fieldValue
+                }
+            })
+            .done(function(response) {
+                console.log('Auto-save success:', response); // Log the successful response
+                if (response.success) {
+                    showNotification('Field saved successfully.');
+                    if (response.data.refresh) {
+                        location.reload();
                     }
-                })
-                .done(function(response) {
-                    if (response.success) {
-                        showNotification('Field saved successfully.');
-                        if (response.data.refresh) {
-                            location.reload();
-                        }
-                    } else {
-                        showNotification(response.data.message, 'error');
-                    }
-                })
-                .fail(function() {
-                    showNotification('Error saving field.', 'error');
-                });
+                } else {
+                    showNotification(response.data.message, 'error');
+                }
+            })
+            .fail(function() {
+                console.log('Auto-save failed'); // Log failure
+                showNotification('Error saving field.', 'error');
+            });
         }
 
         /**
@@ -396,9 +526,10 @@
         /**
          * Additional handler for checkbox changes.
          */
-        $(document).on('change', '.summaraize-settings-field', function() {
+        $(document).on('input, select, textarea', '.summaraize-settings-field', function() {
             autoSaveField($(this));
         });
+
     });
 
 })(jQuery);
