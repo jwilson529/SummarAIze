@@ -69,25 +69,22 @@ class Summaraize_Admin_Metabox {
 
 		echo '<button id="generate-summaraize-button"><div class="summaraize-spinner" style="display: none;"></div>' . esc_html__( 'Generate Top 5 Points', 'summaraize' ) . '</button>';
 
-
 		echo '<div id="summaraize-points-list" class="list-group" style="list-style: none; padding: 0;">';
 
 		for ( $i = 1; $i <= 5; $i++ ) {
-		    $point = isset( $summaraize_points[ $i - 1 ] ) ? $summaraize_points[ $i - 1 ] : '';
-		    $point = preg_replace( '/\*\*(.*?)\*\*/', '$1', $point );
+			$point = isset( $summaraize_points[ $i - 1 ] ) ? $summaraize_points[ $i - 1 ] : '';
+			$point = preg_replace( '/\*\*(.*?)\*\*/', '$1', $point );
 
-		    echo '<div class="summaraize-input-container" style="margin-bottom: 10px; display: flex; align-items: center;">';
-		    echo '<span class="dashicons dashicons-menu" style="margin-right: 10px; cursor: move;"></span>'; // Handle for dragging
-		    echo '<label for="summaraize_points_' . esc_attr( $i ) . '" style="flex: 0 0 auto;">' . esc_html( "Point $i:" ) . '</label>';
-		    echo '<input id="summaraize_points_' . esc_attr( $i ) . '" style="flex: 1; width: 100%;" type="text" name="summaraize_points[' . esc_attr( $i ) . ']" value="' . esc_attr( $point ) . '" placeholder="' . esc_attr( "Point $i" ) . '" />';
-		    echo '<button type="button" class="remove-point dashicons dashicons-trash" style="flex: 0 0 auto; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0; line-height: 1;" data-point-id="summaraize_points_' . esc_attr( $i ) . '"></button>';
-		    echo '</div>';
+			echo '<div class="summaraize-input-container" style="margin-bottom: 10px; display: flex; align-items: center;">';
+			echo '<span class="dashicons dashicons-menu" style="margin-right: 10px; cursor: move;"></span>';
+			echo '<input id="summaraize_points_' . esc_attr( $i ) . '" style="flex: 1; width: 100%;" type="text" name="summaraize_points[' . esc_attr( $i ) . ']" value="' . esc_attr( $point ) . '" placeholder="' . esc_attr( "Empty points are not shown." ) . '" />';
+			echo '<button type="button" class="remove-point dashicons dashicons-trash" style="flex: 0 0 auto; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0; line-height: 1;" data-point-id="summaraize_points_' . esc_attr( $i ) . '"></button>';
+			echo '</div>';
 		}
 
-
-
-
 		echo '</div>';
+
+		echo '<input type="hidden" id="summaraize_points_sorted" name="summaraize_points_sorted" value="">';
 
 		echo '<p><input type="checkbox" id="summaraize_override_settings" name="summaraize_override_settings" value="1"' . checked( 1, $override_settings, false ) . ' />';
 		echo '<label for="summaraize_override_settings">' . esc_html__( 'Override Settings', 'summaraize' ) . '</label></p>';
@@ -187,11 +184,19 @@ class Summaraize_Admin_Metabox {
 	        return;
 	    }
 
-	    // Save sorted points.
+	    // Save sorted points if the hidden field exists.
 	    if ( isset( $_POST['summaraize_points_sorted'] ) ) {
-	        $summaraize_points = json_decode( stripslashes( $_POST['summaraize_points_sorted'] ), true );
+	        // Unslash and sanitize the sorted points.
+	        $summaraize_points_sorted = wp_unslash( $_POST['summaraize_points_sorted'] );
+	        $summaraize_points        = json_decode( $summaraize_points_sorted, true );
+
+	        // Check if the points are an array
 	        if ( is_array( $summaraize_points ) ) {
-	            update_post_meta( $post_id, 'summaraize_points', $summaraize_points );
+	            // Sanitize each point in the array, including empty values
+	            $sanitized_points = array_map( 'sanitize_text_field', $summaraize_points );
+
+	            // Update the meta field with the sanitized points
+	            update_post_meta( $post_id, 'summaraize_points', $sanitized_points );
 	        }
 	    }
 
@@ -222,5 +227,6 @@ class Summaraize_Admin_Metabox {
 	        delete_post_meta( $post_id, 'summaraize_list_type' );
 	    }
 	}
+
 
 }

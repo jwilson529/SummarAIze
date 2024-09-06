@@ -317,7 +317,11 @@ p.summaraize-settings {
     color: #ff0000; /* Optional hover color */
 }
 
-
+/* Style the placeholder text */
+.summaraize-input-container  input::placeholder {
+    color: #b3b3b3;
+    opacity: 1;
+}
 
 .summaraize-spinner-container {
     display: flex;

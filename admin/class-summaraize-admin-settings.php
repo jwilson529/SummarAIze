@@ -502,81 +502,90 @@ class Summaraize_Admin_Settings {
 	 * @since 1.0.0
 	 */
 	public function summaraize_auto_save() {
-	    // Check AJAX nonce for security.
-	    check_ajax_referer( 'summaraize_ajax_nonce', 'nonce' );
+		// Check AJAX nonce for security.
+		check_ajax_referer( 'summaraize_ajax_nonce', 'nonce' );
 
-	    // Verify the user has the appropriate capability.
-	    if ( ! current_user_can( 'manage_options' ) ) {
-	        wp_send_json_error( array( 'message' => __( 'Permission denied.', 'summaraize' ) ) );
-	    }
+		// Verify the user has the appropriate capability.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'summaraize' ) ) );
+		}
 
-	    if ( ! isset( $_POST['field_name'] ) ) {
-	        wp_send_json_error( array( 'message' => __( 'Missing field name.', 'summaraize' ) ) );
-	    }
+		// Ensure 'field_name' is set in the request.
+		if ( ! isset( $_POST['field_name'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Missing field name.', 'summaraize' ) ) );
+		}
 
-	    $field_name = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
+		// Sanitize the field name.
+		$field_name = sanitize_text_field( wp_unslash( $_POST['field_name'] ) );
 
-	    // Special handling for 'summaraize_points_sorted'
-	    if ( 'summaraize_points_sorted' === $field_name ) {
-	        // Ensure we have the post ID and sorted points
-	        if ( ! isset( $_POST['post_id'] ) || ! isset( $_POST['field_value'] ) ) {
-	            wp_send_json_error( array( 'message' => __( 'Missing post ID or points data.', 'summaraize' ) ) );
-	        }
+		// Special handling for 'summaraize_points_sorted'.
+		if ( 'summaraize_points_sorted' === $field_name ) {
+			// Ensure we have the post ID and sorted points.
+			if ( ! isset( $_POST['post_id'] ) || ! isset( $_POST['field_value'] ) ) {
+				wp_send_json_error( array( 'message' => __( 'Missing post ID or points data.', 'summaraize' ) ) );
+			}
 
-	        $post_id      = absint( $_POST['post_id'] );
-	        $sorted_points = json_decode( stripslashes( $_POST['field_value'] ), true );
+			// Sanitize post ID.
+			$post_id = absint( $_POST['post_id'] );
 
-	        // Validate that the sorted points are an array
-	        if ( ! is_array( $sorted_points ) ) {
-	            wp_send_json_error( array( 'message' => __( 'Invalid points data.', 'summaraize' ) ) );
-	        }
+			if ( isset( $_POST['field_value'] ) ) {
+				$sanitized_json = sanitize_text_field( wp_unslash( $_POST['field_value'] ) );
 
-	        // First, remove existing 'summaraize_points' meta
-	        delete_post_meta( $post_id, 'summaraize_points' );
+				$sorted_points = json_decode( $sanitized_json, true );
 
-	        // Then re-add the sorted points in the correct format
-	        update_post_meta( $post_id, 'summaraize_points', $sorted_points );
+				if ( ! is_array( $sorted_points ) ) {
+					wp_send_json_error( array( 'message' => __( 'Invalid points data.', 'summaraize' ) ) );
+				}
 
-	        wp_send_json_success( array( 'message' => __( 'Points reordered and saved.', 'summaraize' ) ) );
-	    }
+				$sanitized_points = array_map( 'sanitize_text_field', $sorted_points );
 
-	    // Define allowed option keys for other settings.
-	    $allowed_options = array(
-	        'summaraize_openai_api_key',
-	        'summaraize_post_types',
-	        'summaraize_assistant_id',
-	        'summaraize_widget_title',
-	        'summaraize_display_position',
-	        'summaraize_display_mode',
-	        'summaraize_button_style',
-	        'summaraize_button_color',
-	        'summaraize_list_type',
-	        'summaraize_prompt_type',
-	        'summaraize_custom_prompt',
-	        'summaraize_ai_model',
-	    );
+				update_post_meta( $post_id, 'summaraize_points', $sanitized_points );
 
-	    $option_key = sanitize_key( str_replace( '[]', '', $field_name ) ); // Use sanitize_key() for option keys.
+				wp_send_json_success( array( 'message' => __( 'Points reordered and saved.', 'summaraize' ) ) );
+			}
+		}
 
-	    // Check if the option key is in the allowed options.
-	    if ( ! in_array( $option_key, $allowed_options, true ) ) {
-	        wp_send_json_error( array( 'message' => __( 'Invalid option key.', 'summaraize' ) ) );
-	    }
+		// Define allowed option keys for other settings.
+		$allowed_options = array(
+			'summaraize_openai_api_key',
+			'summaraize_post_types',
+			'summaraize_assistant_id',
+			'summaraize_widget_title',
+			'summaraize_display_position',
+			'summaraize_display_mode',
+			'summaraize_button_style',
+			'summaraize_button_color',
+			'summaraize_list_type',
+			'summaraize_prompt_type',
+			'summaraize_custom_prompt',
+			'summaraize_ai_model',
+		);
 
-	    // Unslash and sanitize field_value simultaneously, allow empty values.
-	    if ( isset( $_POST['field_value'] ) && is_array( $_POST['field_value'] ) ) {
-	        $field_value = array_map( 'sanitize_text_field', wp_unslash( $_POST['field_value'] ) );
-	    } else {
-	        $field_value = isset( $_POST['field_value'] ) ? sanitize_text_field( wp_unslash( $_POST['field_value'] ) ) : '';
-	    }
+		// Sanitize the option key.
+		$option_key = sanitize_key( str_replace( '[]', '', $field_name ) );
 
-	    // Save the option.
-	    if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {
-	        wp_send_json_success( array( 'message' => __( 'Option saved.', 'summaraize' ) ) );
-	    } else {
-	        wp_send_json_error( array( 'message' => __( 'Failed to save option.', 'summaraize' ) ) );
-	    }
+		// Check if the option key is valid.
+		if ( ! in_array( $option_key, $allowed_options, true ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid option key.', 'summaraize' ) ) );
+		}
+
+		// Sanitize field_value based on its type.
+		if ( isset( $_POST['field_value'] ) && is_array( $_POST['field_value'] ) ) {
+			// If it's an array, sanitize each element.
+			$field_value = array_map( 'sanitize_text_field', wp_unslash( $_POST['field_value'] ) );
+		} else {
+			// Otherwise, sanitize it as a string.
+			$field_value = isset( $_POST['field_value'] ) ? sanitize_text_field( wp_unslash( $_POST['field_value'] ) ) : '';
+		}
+
+		// Save the option.
+		if ( update_option( $option_key, $field_value ) || get_option( $option_key ) === $field_value ) {
+			wp_send_json_success( array( 'message' => __( 'Option saved.', 'summaraize' ) ) );
+		} else {
+			wp_send_json_error( array( 'message' => __( 'Failed to save option.', 'summaraize' ) ) );
+		}
 	}
+
 
 
 

@@ -6,82 +6,100 @@
         // Regenerate Assistant ID
         $(document).on('click', '#summariaze_create_assistant', function(event) {
             event.preventDefault();
-            
+
+            // Clear the Assistant ID field
             $('#summaraize_assistant_id').val('');
 
-            // Manually trigger auto-save for the Assistant ID field
+            // Trigger auto-save for the Assistant ID field
             autoSaveField($('#summaraize_assistant_id'));
 
-            // Refresh the page after a short delay to ensure auto-save completes
+            // Reload the page after a short delay to ensure the changes are reflected
             setTimeout(function() {
                 window.location.reload();
             }, 1000);
         });
 
-        // When the trashcan icon is clicked
+        // Remove a point from the list when the trashcan icon is clicked
         $('.remove-point').click(function() {
-            // Get the ID of the associated input field
             var pointInputId = $(this).data('point-id');
-            
-            // Clear the value of the input field
-            $('#' + pointInputId).val('');
+            $('#' + pointInputId).val(''); // Clear the input field
+
+            // Update the sorted points to reflect the removal
+            updateSortedPoints();
         });
 
-        // Make the list of points sortable.
-        $('#summaraize-points-list').sortable({
-            handle: ".dashicons-menu",
-            animation: 150
-        });
+        // Function to update the hidden field with the current order of points
+        function updateSortedPoints() {
+            var sortedPoints = [];
+            $('#summaraize-points-list input[type="text"]').each(function() {
+                sortedPoints.push($(this).val()); // Push even empty values
+            });
+
+            // Store the sorted order (including empty values) in a hidden field
+            $('#summaraize_points_sorted').val(JSON.stringify(sortedPoints));
+        }
+
+        // Make points list sortable if it exists
+        if ($('#summaraize-points-list').length) {
+            $('#summaraize-points-list').sortable({
+                handle: ".dashicons-menu", // Handle for dragging items
+                animation: 150, // Animation speed for sorting
+                stop: function() {
+                    // This will update the input fields with the correct order after sorting.
+                    var sortedPoints = [];
+                    $('#summaraize-points-list input[type="text"]').each(function() {
+                        sortedPoints.push($(this).val());
+                    });
+
+                    // Store the sorted order in a hidden field to be submitted with the form.
+                    $('#summaraize_points_sorted').val(JSON.stringify(sortedPoints));
+                }
+            });
+        }
 
 
-        // Tab switching
+        // Handle tab switching functionality
         $('.nav-tab-wrapper a').click(function(e) {
             e.preventDefault();
             $('.nav-tab-wrapper a').removeClass('nav-tab-active');
             $(this).addClass('nav-tab-active');
 
-            // Hide all tabs and show the selected one
+            // Show the selected tab and hide others
             $('.tab-content').hide();
             $($(this).attr('href')).show();
         });
 
-        // Show the main tab by default and hide the advanced tab
+        // Set the initial tab visibility
         $('#main-settings').show();
         $('#advanced-settings').hide();
 
-        // Show/hide custom prompt textarea based on dropdown selection
+        // Show or hide the custom prompt field based on dropdown selection
         $('#summaraize_prompt_type').on('change', function() {
             var selectedValue = $(this).val();
             if (selectedValue === 'custom') {
-                $('#summaraize_custom_prompt_row').show(); // Show the entire row
-                $('#summaraize_custom_prompt_custom').css('display', 'block'); // Ensure the textarea itself is displayed
+                $('#summaraize_custom_prompt_row').show(); // Show custom prompt row
+                $('#summaraize_custom_prompt_custom').css('display', 'block'); // Show custom textarea
             } else {
-                $('#summaraize_custom_prompt_row').hide(); // Hide the entire row
-
-                // Clear the textarea and trigger auto-save
-                $('#summaraize_custom_prompt_custom').val('');
-                autoSaveField($('#summaraize_custom_prompt_custom')); // Explicitly trigger auto-save with the cleared value
+                $('#summaraize_custom_prompt_row').hide(); // Hide custom prompt row
+                $('#summaraize_custom_prompt_custom').val(''); // Clear the value
+                autoSaveField($('#summaraize_custom_prompt_custom')); // Auto-save the cleared value
             }
         });
 
-        // Trigger change on page load to set initial state for custom prompt visibility
+        // Trigger change event on load to initialize the state
         $('#summaraize_prompt_type').trigger('change');
-        /**
-         * Get the editor data from either the Gutenberg or Classic editor.
-         * 
-         * @return {Object} The editor data including title, content, and tags.
-         */
+
+        // Function to get editor data from Gutenberg or Classic editor
         function getEditorData() {
             var title, content, tags;
 
             if ($('#editor').length) {
-                // Gutenberg editor
+                // Get data from Gutenberg editor
                 title = wp.data.select('core/editor').getEditedPostAttribute('title');
                 content = wp.data.select('core/editor').getEditedPostContent();
-                var tagArray = wp.data.select('core/editor').getEditedPostAttribute('tags');
-                tags = Array.isArray(tagArray) ? tagArray.join(', ') : '';
+                tags = wp.data.select('core/editor').getEditedPostAttribute('tags').join(', ');
             } else {
-                // Classic editor
+                // Get data from Classic editor
                 title = $('input#title').val();
                 content = $('textarea#content').val();
                 tags = $('input[name="tax_input[post_tag]"]').val();
@@ -90,182 +108,27 @@
             return { title, content, tags };
         }
 
-        // Function to auto-save field, extended to handle sortable save
-            function autoSaveField(fieldName, fieldValue) {
-                $.ajax({
-                    url: summaraize_admin_vars.ajax_url,
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'summaraize_auto_save',
-                        nonce: summaraize_admin_vars.summaraize_ajax_nonce,
-                        field_name: fieldName, // Keep the [] for the option name
-                        field_value: fieldValue
-                    }
-                })
-                .done(function(response) {
-                    if (response.success) {
-                        showNotification('Field saved successfully.');
-                        if (response.data.refresh) {
-                            location.reload();
-                        }
-                    } else {
-                        showNotification(response.data.message, 'error');
-                    }
-                })
-                .fail(function() {
-                    showNotification('Error saving field.', 'error');
-                });
-            }
-
-            // Initialize sortable and handle the save on drop
-               $('#summaraize-points-list').sortable({
-                   handle: ".dashicons-menu",
-                   animation: 150,
-                   update: function(event, ui) {
-                       console.log('Sortable update event triggered'); // Log when sortable update is triggered
-                       
-                       var sortedPoints = [];
-                       
-                       // Log before gathering values
-                       console.log('Gathering values from input fields');
-                       $('#summaraize-points-list input[type="text"]').each(function() {
-                           sortedPoints.push($(this).val());
-                           console.log('Added point:', $(this).val()); // Log each value
-                       });
-
-                       // Log sorted points array
-                       console.log('Sorted points:', sortedPoints);
-
-                       // Ensure post_id is available
-                       var post_id = summaraize_admin_vars.post_id || null;
-                       if (!post_id) {
-                           console.log('Post ID is missing');
-                           return;
-                       }
-
-                       // Save the sorted points after dropping
-                       $.ajax({
-                           url: summaraize_admin_vars.ajax_url,
-                           type: 'POST',
-                           dataType: 'json',
-                           data: {
-                               action: 'summaraize_auto_save',
-                               nonce: summaraize_admin_vars.summaraize_ajax_nonce,
-                               post_id: post_id, // Add post_id for meta saving
-                               field_name: 'summaraize_points_sorted',
-                               field_value: JSON.stringify(sortedPoints)
-                           }
-                       })
-                       .done(function(response) {
-                           console.log('Auto-save success:', response); // Log the successful response
-                           if (response.success) {
-                               showNotification('Field saved successfully.');
-                               if (response.data.refresh) {
-                                   location.reload();
-                               }
-                           } else {
-                               showNotification(response.data.message, 'error');
-                           }
-                       })
-                       .fail(function() {
-                           console.log('Auto-save failed'); // Log failure
-                           showNotification('Error saving field.', 'error');
-                       });
-                   }
-               });
-
-            // Auto-save fields on change or input
-            function initializeAutoSave() {
-                $('.summaraize-settings-form').find('input, select, textarea').on('input change', debounce(function() {
-                    var $field = $(this);
-                    var fieldName = $field.attr('name');
-                    var fieldValue;
-
-                    // Handle checkboxes separately
-                    if ($field.attr('type') === 'checkbox') {
-                        fieldValue = [];
-                        $('input[name="' + fieldName + '"]:checked').each(function() {
-                            fieldValue.push($(this).val());
-                        });
-                    } else {
-                        fieldValue = $field.val();
-                    }
-
-                    autoSaveField(fieldName, fieldValue);
-                }, 500));
-            }
-
-            initializeAutoSave();
-
-        /**
-         * Show a popup notification.
-         * 
-         * @param {String} message The message to display.
-         * @param {String} type The type of notification (success, error).
-         */
-        function showNotification(message, type = 'success') {
-            var $notification = $('<div class="summaraize-notification ' + type + '">' + message + '</div>');
-            $('body').append($notification);
-            $notification.fadeIn('fast');
-
-            setTimeout(function() {
-                $notification.fadeOut('slow', function() {
-                    $notification.remove();
-                });
-            }, 2000);
-        }
-
-        /**
-         * Show the WordPress settings saved notification.
-         */
-        function showWpSettingsSavedNotification() {
-            var $notification = $(
-                '<div id="setting-error-settings_updated" class="notice notice-success settings-error is-dismissible">' +
-                '<p><strong>Settings saved.</strong></p>' +
-                '<button type="button" class="notice-dismiss">' +
-                '<span class="screen-reader-text">Dismiss this notice.</span>' +
-                '</button></div>'
-            );
-            $('.wrap').prepend($notification);
-
-            // Automatically dismiss the notice after a few seconds
-            setTimeout(function() {
-                $notification.fadeOut('slow', function() {
-                    $notification.remove();
-                });
-            }, 4000);
-        }
-
-        /**
-         * Auto-save function for input field changes or sortable save.
-         * 
-         * @param {Object|String} $field The jQuery object for the field or the field name (for special cases).
-         * @param {String} [value] The value to save (only needed if $field is a string).
-         */
-        function autoSaveField($field, value) {
+        // Function to auto-save field values
+        function autoSaveField($field, value = null) {
             var fieldName, fieldValue;
 
             if (typeof $field === 'string') {
-                // Special case: when $field is a string (like 'summaraize_points_sorted')
+                // If $field is a string, use it as the field name and value
                 fieldName = $field;
                 fieldValue = value;
             } else {
-                // Normal case: when $field is a jQuery object
-                $field = $($field); // Wrap it if it's not already a jQuery object
+                // If $field is a jQuery object, handle normally
+                $field = $($field);
                 fieldName = $field.attr('name');
-                console.log('Field name:', fieldName); // Log the field name
 
-                // Handle checkboxes
+                // Handle checkboxes separately
                 if ($field.attr('type') === 'checkbox') {
                     fieldValue = [];
                     $('input[name="' + fieldName + '"]:checked').each(function() {
                         fieldValue.push($(this).val());
-                        console.log('Checkbox value added:', $(this).val()); // Log checkbox values
                     });
                 } else {
                     fieldValue = $field.val();
-                    console.log('Field value:', fieldValue); // Log field value
                 }
             }
 
@@ -277,59 +140,69 @@
                 data: {
                     action: 'summaraize_auto_save',
                     nonce: summaraize_admin_vars.summaraize_ajax_nonce,
-                    post_id: summaraize_admin_vars.post_id, // Ensure post_id is available for meta
+                    post_id: summaraize_admin_vars.post_id, // Ensure post_id is available
                     field_name: fieldName,
                     field_value: fieldValue
                 }
             })
             .done(function(response) {
-                console.log('Auto-save success:', response); // Log the successful response
                 if (response.success) {
                     showNotification('Field saved successfully.');
-                    if (response.data.refresh) {
-                        location.reload();
-                    }
                 } else {
                     showNotification(response.data.message, 'error');
                 }
             })
             .fail(function() {
-                console.log('Auto-save failed'); // Log failure
                 showNotification('Error saving field.', 'error');
             });
         }
 
-        /**
-         * Debounce function to limit the rate at which a function can fire.
-         * 
-         * @param {Function} func The function to debounce.
-         * @param {Number} wait The time to wait before executing the function.
-         * @returns {Function} The debounced function.
-         */
-        function debounce(func, wait) {
-            let timeout;
-            return function() {
-                const context = this;
-                const args = arguments;
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(context, args), wait);
-            };
+        // Initialize auto-save functionality on form field changes
+        function initializeAutoSave() {
+            $('.summaraize-settings-form').find('input, select, textarea').on('input change', debounce(function() {
+                var $field = $(this);
+                var fieldName = $field.attr('name');
+                var fieldValue;
+
+                // Handle checkboxes separately
+                if ($field.attr('type') === 'checkbox') {
+                    fieldValue = [];
+                    $('input[name="' + fieldName + '"]:checked').each(function() {
+                        fieldValue.push($(this).val());
+                    });
+                } else {
+                    fieldValue = $field.val();
+                }
+
+                autoSaveField(fieldName, fieldValue);
+            }, 500));
         }
 
-        /**
-         * Event handler for the Generate Top 5 Points button click.
-         * 
-         * @param {Event} event The click event.
-         */
+        initializeAutoSave(); // Call to initialize auto-save
+
+        // Function to show notification popups
+        function showNotification(message, type = 'success') {
+            var $notification = $('<div class="summaraize-notification ' + type + '">' + message + '</div>');
+            $('body').append($notification);
+            $notification.fadeIn('fast');
+
+            // Fade out the notification after 2 seconds
+            setTimeout(function() {
+                $notification.fadeOut('slow', function() {
+                    $notification.remove();
+                });
+            }, 2000);
+        }
+
+        // Handle "Generate Top 5 Points" button click
         $(document).on('click', '#generate-summaraize-button', function(event) {
             event.preventDefault();
-            
 
             var $button = $(this);
-            $button.prop('disabled', true);
-            
-
+            $button.prop('disabled', true); // Disable the button while processing
             var $spinner = $button.find('.summaraize-spinner');
+
+            // Show the loading spinner
             $spinner.css({
                 display: 'inline-block',
                 width: '16px',
@@ -340,196 +213,149 @@
                 animation: 'summaraize-spin 1s linear infinite',
                 marginRight: '8px'
             });
-            
 
-            var originalText = 'Generate Top 5 Points';
-            $button.contents().filter(function() {
-                return this.nodeType === 3;
-            }).remove();
-            $button.append(' Generating...');
-            
+            var editorData = getEditorData(); // Gather editor data
 
-            var editorData = getEditorData();
-            
-
+            // AJAX request to gather content and generate top 5 points
             $.ajax({
-                    url: summaraize_admin_vars.ajax_url,
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'summaraize_gather_content',
-                        nonce: summaraize_admin_vars.summaraize_ajax_nonce,
-                        title: editorData.title,
-                        tags: editorData.tags || '',
-                        content: editorData.content,
-                    }
-                })
-                .done(function(response) {
-                    
-                    $button.prop('disabled', false);
-                    $spinner.hide();
-                    $button.text(originalText);
+                url: summaraize_admin_vars.ajax_url,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'summaraize_gather_content',
+                    nonce: summaraize_admin_vars.summaraize_ajax_nonce,
+                    title: editorData.title,
+                    tags: editorData.tags || '',
+                    content: editorData.content,
+                }
+            })
+            .done(function(response) {
+                $button.prop('disabled', false); // Re-enable the button
+                $spinner.hide(); // Hide the spinner
+                $button.text('Generate Top 5 Points');
 
-                    if (response.success) {
-                        if (response.data && response.data.points && Array.isArray(response.data.points)) {
-                            response.data.points.forEach(function(point) {
-                                var inputSelector = '#summaraize_points_' + point.index;
-                                var inputField = $(inputSelector);
-
-                                if (inputField.length) {
-                                    inputField.val(point.text).change();
-                                    setTimeout(function() {
-                                        inputField.val(point.text).trigger('change');
-                                    }, 100);
-                                }
-                            });
+                // Populate the points if successful
+                if (response.success && response.data.points) {
+                    response.data.points.forEach(function(point) {
+                        var inputField = $('#summaraize_points_' + point.index);
+                        if (inputField.length) {
+                            inputField.val(point.text).change();
                         }
-                    } else {
-                        if (response.data && response.data.data === 'Assistant ID is not configured.') {
-                            alert('Assistant ID is not configured. Please set it in the plugin settings.');
-                        }
-                    }
-                })
-                .fail(function(response) {
-                    
-                    $button.prop('disabled', false);
-                    $spinner.hide();
-                    $button.text(originalText);
-                });
+                    });
+                }
+            })
+            .fail(function() {
+                $button.prop('disabled', false); // Re-enable the button
+                $spinner.hide(); // Hide the spinner
+                $button.text('Generate Top 5 Points');
+            });
         });
 
-        /**
-         * Toggle visibility of settings fields based on display mode.
-         */
+        // Toggle settings fields based on display mode
         function toggleSettingsFields() {
             var displayMode = $('#summaraize_display_position').val();
             if (displayMode === 'popup') {
-                $('#summaraize_button_style').closest('tr').show();
-                $('#summaraize_button_color').closest('tr').show();
+                $('#summaraize_button_style, #summaraize_button_color').closest('tr').show();
                 $('#summaraize_display_mode').closest('tr').hide();
             } else {
-                $('#summaraize_button_style').closest('tr').hide();
-                $('#summaraize_button_color').closest('tr').hide();
+                $('#summaraize_button_style, #summaraize_button_color').closest('tr').hide();
                 $('#summaraize_display_mode').closest('tr').show();
             }
         }
 
-        // Initial toggle based on the current value
-        toggleSettingsFields();
+        toggleSettingsFields(); // Initial toggle on page load
+        $('#summaraize_display_position').change(toggleSettingsFields); // Toggle fields on dropdown change
 
-        // Toggle fields on change
-        $('#summaraize_display_position').change(function() {
-            toggleSettingsFields();
-        });
-
-        /**
-         * Toggle visibility of override settings fields based on view mode.
-         */
+        // Toggle override settings fields based on view mode
         function toggleOverrideFields() {
             var displayMode = $('#summaraize_view').val();
             if (displayMode === 'popup') {
-                $('.button-style-wrapper').show();
-                $('.button-style-description').show();
-                $('.button-color-wrapper').show();
-                $('.button-color-description').show();
+                $('.button-style-wrapper, .button-style-description, .button-color-wrapper, .button-color-description').show();
             } else {
-                $('.button-style-wrapper').hide();
-                $('.button-style-description').hide();
-                $('.button-color-wrapper').hide();
-                $('.button-color-description').hide();
+                $('.button-style-wrapper, .button-style-description, .button-color-wrapper, .button-color-description').hide();
             }
         }
 
-        // Initial toggle based on the current value
-        toggleOverrideFields();
+        toggleOverrideFields(); // Initial toggle on page load
+        $('#summaraize_view').change(toggleOverrideFields); // Toggle fields on dropdown change
 
-        // Toggle fields on change
-        $('#summaraize_view').change(function() {
-            toggleOverrideFields();
-        });
-
+        // Toggle visibility of override options based on checkbox
         $('#summaraize_override_settings').change(function() {
-            if ($(this).is(':checked')) {
-                $('#summaraize_override_options').show();
-            } else {
-                $('#summaraize_override_options').hide();
-            }
+            $('#summaraize_override_options').toggle($(this).is(':checked'));
         });
 
-        // Adds a spinner with a message below the input field.
+        // Add a spinner with a message below the input field
         function addSpinnerWithMessage($field, message) {
-            // Remove any existing spinner container to prevent duplicates
-            $field.siblings('.summaraize-spinner-container').remove();
+            $field.siblings('.summaraize-spinner-container').remove(); // Remove any existing spinner
 
-            // Create the spinner container, spinner, and message
+            // Create the spinner container and append the spinner and message
             const spinnerContainer = $('<div class="summaraize-spinner-container"></div>');
             const spinner = $('<div class="summaraize-spinner"></div>');
             const spinnerMessage = $('<span class="summaraize-spinner-message"></span>').text(message);
 
-            // Append the spinner and message to the container and then add it after the input field
             spinnerContainer.append(spinner).append(spinnerMessage);
-            $field.after(spinnerContainer);
-
-            // Fade in the spinner container
-            spinnerContainer.fadeIn('fast');
+            $field.after(spinnerContainer); // Insert after the input field
+            spinnerContainer.fadeIn('fast'); // Show the spinner container
         }
 
-        // Removes the spinner and message from below the input field.
+        // Remove the spinner and message from the input field
         function removeSpinnerWithMessage($field) {
             $field.siblings('.summaraize-spinner-container').fadeOut('slow', function() {
                 $(this).remove();
             });
         }
 
-
-        /**
-         * Monitor the API key field for input and paste events.
-         */
+        // Validate API key with debounce
         const apiKeyField = $('input[name="summaraize_openai_api_key"]');
         apiKeyField.on('input paste', debounce(function() {
             const apiKey = $(this).val();
 
-            // Add the spinner with a message
             addSpinnerWithMessage(apiKeyField, 'Validating API key...');
 
-            // Perform an AJAX request to validate the API key
+            // Perform AJAX request to validate API key
             $.ajax({
-                    url: summaraize_admin_vars.ajax_url,
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'summaraize_ajax_validate_openai_api_key',
-                        nonce: summaraize_admin_vars.summaraize_ajax_nonce,
-                        api_key: apiKey
-                    }
-                })
-                .done(function(validationResponse) {
-                    if (validationResponse.success) {
-                        // If valid, auto-save the key and refresh
-                        autoSaveField(apiKeyField);
-                        setTimeout(function() {
-                            location.reload(); // Refresh the page after a short delay
-                        }, 1000);
-                    } else {
-                        showNotification(validationResponse.data.message || 'Invalid API key.', 'error');
-                    }
-                })
-                .fail(function() {
-                    showNotification('Error validating API key.', 'error');
-                })
-                .always(function() {
-                    // Remove the spinner after the request completes
-                    removeSpinnerWithMessage(apiKeyField);
-                });
+                url: summaraize_admin_vars.ajax_url,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'summaraize_ajax_validate_openai_api_key',
+                    nonce: summaraize_admin_vars.summaraize_ajax_nonce,
+                    api_key: apiKey
+                }
+            })
+            .done(function(validationResponse) {
+                if (validationResponse.success) {
+                    autoSaveField(apiKeyField); // Auto-save the key
+                    setTimeout(function() {
+                        location.reload(); // Refresh the page after saving
+                    }, 1000);
+                } else {
+                    showNotification(validationResponse.data.message || 'Invalid API key.', 'error');
+                }
+            })
+            .fail(function() {
+                showNotification('Error validating API key.', 'error');
+            })
+            .always(function() {
+                removeSpinnerWithMessage(apiKeyField); // Remove spinner after validation
+            });
         }, 500));
 
-        /**
-         * Additional handler for checkbox changes.
-         */
-        $(document).on('input, select, textarea', '.summaraize-settings-field', function() {
+        // Auto-save settings fields on change or input
+        $(document).on('input change', '.summaraize-settings-field', function() {
             autoSaveField($(this));
         });
 
-    });
+        // Debounce function to limit the rate of function execution
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
 
+    });
 })(jQuery);

@@ -1,0 +1,14 @@
+
+FILE: /Users/jameswilson/Local Sites/wp-clean-install/app/public/wp-content/plugins/summaraize/admin/class-summaraize-admin-settings.php
+----------------------------------------------------------------------------------------------------------------------------------------
+FOUND 5 ERRORS AFFECTING 5 LINES
+----------------------------------------------------------------------------------------------------------------------------------------
+ 532 | ERROR | Inline comments must end in full-stops, exclamation marks, or question marks
+ 535 | ERROR | Inline comments must end in full-stops, exclamation marks, or question marks
+ 538 | ERROR | Inline comments must end in full-stops, exclamation marks, or question marks
+ 543 | ERROR | Inline comments must end in full-stops, exclamation marks, or question marks
+ 546 | ERROR | Inline comments must end in full-stops, exclamation marks, or question marks
+----------------------------------------------------------------------------------------------------------------------------------------
+
+Time: 608ms; Memory: 20MB
+
