@@ -184,7 +184,8 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 
 ## Upgrade Notice
 
-The 1.1.10 update includes several enhancements to the shortcode functionality, including the ability to use attributes for customization. It also includes improvements to the detection of processed shortcodes and Gutenberg blocks to prevent duplication. We recommend updating to this version to take advantage of these new features.
+The 1.1.11 update introduces drag-and-drop ordering for key points, automatic removal of empty points from the front end, and improved saving functionality. We recommend updating to streamline content management and display.
+
 
 ## Changelog
 
