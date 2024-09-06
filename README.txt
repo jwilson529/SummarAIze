@@ -4,7 +4,7 @@ Donate link: https://oneclickcontent.com/donate/
 Tags: ai, summary, content-enhancement
 Requires at least: 5.0
 Tested up to: 6.6.1
-Stable tag: 1.1.10
+Stable tag: 1.1.11
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -36,6 +36,18 @@ SummarAIze relies on the OpenAI API to generate key takeaways. This means that d
 - **Flexible API Integration**: Integrate with your own OpenAI API key, allowing for control over usage and billing.
 - **Assistant Configuration**: Use the default Assistant ID or configure your own in the OpenAI Playground.
 - **Enhance SEO and Readability**: Improve your content's SEO by providing search engines with structured summaries, and enhance readability for your audience.
+
+## Drag-and-Drop Feature
+
+You can now easily reorder your points using the drag-and-drop functionality. Here's how:
+
+1. Hover over the point you want to reorder.
+2. Click and hold the "menu" icon (represented by the three lines) to the left of the point.
+3. Drag the point to your desired position in the list.
+4. The new order is automatically updated and saved when you publish or update the post.
+
+Empty points will be removed from the front-end display automatically, ensuring only meaningful points are shown to your users.
+
 
 ## Shortcode Documentation
 
@@ -175,6 +187,15 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 The 1.1.10 update includes several enhancements to the shortcode functionality, including the ability to use attributes for customization. It also includes improvements to the detection of processed shortcodes and Gutenberg blocks to prevent duplication. We recommend updating to this version to take advantage of these new features.
 
 ## Changelog
+
+### 1.1.11
+* Added drag-and-drop functionality to reorder points in the admin interface.
+* Enhanced the system to automatically remove empty points from the front-end display.
+* Improved meta box save functionality, ensuring data is only saved upon post publish/update.
+* Added frontend filtering to prevent empty list items from being displayed.
+* Cleaned up the JavaScript for smoother handling of point removal.
+* Adjusted sanitization logic for the sorted points to prevent potential security issues.
+
 
 ### 1.1.10
 * Added shortcode with attributes so that you could use it anywhere.

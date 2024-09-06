@@ -147,52 +147,55 @@ class Summaraize_Public {
 	 * @return string HTML content to display.
 	 */
 	public function build_view( $summaraize_points, $view, $mode, $content, $widget_title, $button_style, $button_color, $list_type ) {
-	    ob_start();
+		ob_start();
 
-	    // Filter out empty points
-	    $summaraize_points = array_filter( $summaraize_points, function( $point ) {
-	        return ! empty( $point );
-	    });
+		// Filter out empty points.
+		$summaraize_points = array_filter(
+			$summaraize_points,
+			function ( $point ) {
+				return ! empty( $point );
+			}
+		);
 
-	    if ( 'popup' === $view ) {
-	        $mode_class = ( 'dark' === $mode ) ? 'dark' : 'light';
-	        echo '<button class="summaraize-popup-btn ' . esc_attr( $mode_class ) . ' ' . esc_attr( $button_style ) . '" style="background-color: ' . esc_attr( $button_color ) . ';">' . esc_html( $widget_title ) . '</button>';
-	        echo '<div class="summaraize-popup-modal" style="display:none;">';
-	        echo '<div class="summaraize-popup-content">';
-	        echo '<span class="summaraize-popup-close">&times;</span>';
-	        echo '<h2>' . esc_html( $widget_title ) . '</h2>';
+		if ( 'popup' === $view ) {
+			$mode_class = ( 'dark' === $mode ) ? 'dark' : 'light';
+			echo '<button class="summaraize-popup-btn ' . esc_attr( $mode_class ) . ' ' . esc_attr( $button_style ) . '" style="background-color: ' . esc_attr( $button_color ) . ';">' . esc_html( $widget_title ) . '</button>';
+			echo '<div class="summaraize-popup-modal" style="display:none;">';
+			echo '<div class="summaraize-popup-content">';
+			echo '<span class="summaraize-popup-close">&times;</span>';
+			echo '<h2>' . esc_html( $widget_title ) . '</h2>';
 
-	        // Choose list type.
-	        echo ( 'ordered' === $list_type ) ? '<ol>' : '<ul>';
-	        foreach ( $summaraize_points as $point ) {
-	            echo '<li>' . esc_html( $point ) . '</li>';
-	        }
-	        echo ( 'ordered' === $list_type ) ? '</ol>' : '</ul>';
+			// Choose list type.
+			echo ( 'ordered' === $list_type ) ? '<ol>' : '<ul>';
+			foreach ( $summaraize_points as $point ) {
+				echo '<li>' . esc_html( $point ) . '</li>';
+			}
+			echo ( 'ordered' === $list_type ) ? '</ol>' : '</ul>';
 
-	        echo '</div>';
-	        echo '</div>';
-	    } else {
-	        $mode_class = ( 'dark' === $mode ) ? 'dark' : 'light';
-	        echo '<div class="summaraize ' . esc_attr( $mode_class ) . '">';
-	        echo '<h2>' . esc_html( $widget_title ) . '</h2>';
+			echo '</div>';
+			echo '</div>';
+		} else {
+			$mode_class = ( 'dark' === $mode ) ? 'dark' : 'light';
+			echo '<div class="summaraize ' . esc_attr( $mode_class ) . '">';
+			echo '<h2>' . esc_html( $widget_title ) . '</h2>';
 
-	        // Choose list type.
-	        echo ( 'ordered' === $list_type ) ? '<ol>' : '<ul>';
-	        foreach ( $summaraize_points as $point ) {
-	            echo '<li>' . esc_html( $point ) . '</li>';
-	        }
-	        echo ( 'ordered' === $list_type ) ? '</ol>' : '</ul>';
+			// Choose list type.
+			echo ( 'ordered' === $list_type ) ? '<ol>' : '<ul>';
+			foreach ( $summaraize_points as $point ) {
+				echo '<li>' . esc_html( $point ) . '</li>';
+			}
+			echo ( 'ordered' === $list_type ) ? '</ol>' : '</ul>';
 
-	        echo '</div>';
-	    }
+			echo '</div>';
+		}
 
-	    $output = ob_get_clean();
+		$output = ob_get_clean();
 
-	    if ( 'below' === $view ) {
-	        return $content . $output;
-	    } else {
-	        return $output . $content;
-	    }
+		if ( 'below' === $view ) {
+			return $content . $output;
+		} else {
+			return $output . $content;
+		}
 	}
 
 

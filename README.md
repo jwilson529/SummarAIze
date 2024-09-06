@@ -22,6 +22,17 @@ SummarAIze relies on the OpenAI API to generate key takeaways. This means that d
 - **Assistant Configuration**: Use the default Assistant ID or configure your own in the OpenAI Playground.
 - **Enhance SEO and Readability**: Improve your content’s SEO by providing search engines with structured summaries, and enhance readability for your audience.
 
+## Drag-and-Drop Feature
+
+You can now easily reorder your points using the drag-and-drop functionality. Here's how:
+
+- Hover over the point you want to reorder.
+- Click and hold the "menu" icon (represented by the three lines) to the left of the point.
+- Drag the point to your desired position in the list.
+- The new order is automatically updated and saved when you publish or update the post.
+
+Empty points will be removed from the front-end display automatically, ensuring only meaningful points are shown to your users.
+
 ## Shortcode Documentation
 
 The Summaraize shortcode is used to display the top 5 key points for a post. You can customize the display with several attributes, such as the view mode, color, and button style.
@@ -131,7 +142,19 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 5. ![Settings Screen](assets/settings-screen.png)
    *The settings page for configuring display options.*
 
+6. ![Drag and Drop Ordering](assets/DragDropOrdering.png)
+   *Reorder key points easily with drag-and-drop functionality.*
+
 ## Changelog
+
+### 1.1.11
+* Added drag-and-drop functionality to reorder points in the admin interface.
+* Enhanced the system to automatically remove empty points from the front-end display.
+* Improved meta box save functionality, ensuring data is only saved upon post publish/update.
+* Added frontend filtering to prevent empty list items from being displayed.
+* Cleaned up the JavaScript for smoother handling of point removal.
+* Adjusted sanitization logic for the sorted points to prevent potential security issues.
+
 
 ### 1.1.10
 * Added shortcode with attributes so that you could use it anywhere.

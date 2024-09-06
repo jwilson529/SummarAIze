@@ -77,7 +77,7 @@ class Summaraize_Admin_Metabox {
 
 			echo '<div class="summaraize-input-container" style="margin-bottom: 10px; display: flex; align-items: center;">';
 			echo '<span class="dashicons dashicons-menu" style="margin-right: 10px; cursor: move;"></span>';
-			echo '<input id="summaraize_points_' . esc_attr( $i ) . '" style="flex: 1; width: 100%;" type="text" name="summaraize_points[' . esc_attr( $i ) . ']" value="' . esc_attr( $point ) . '" placeholder="' . esc_attr( "Empty points are not shown." ) . '" />';
+			echo '<input id="summaraize_points_' . esc_attr( $i ) . '" style="flex: 1; width: 100%;" type="text" name="summaraize_points[' . esc_attr( $i ) . ']" value="' . esc_attr( $point ) . '" placeholder="' . esc_attr( 'Empty points are not shown.' ) . '" />';
 			echo '<button type="button" class="remove-point dashicons dashicons-trash" style="flex: 0 0 auto; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0; line-height: 1;" data-point-id="summaraize_points_' . esc_attr( $i ) . '"></button>';
 			echo '</div>';
 		}
@@ -165,68 +165,68 @@ class Summaraize_Admin_Metabox {
 	 * @param int $post_id The ID of the post being saved.
 	 */
 	public function save_summaraize_points( $post_id ) {
-	    // Verify nonce.
-	    if ( ! isset( $_POST['summaraize_meta_box_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['summaraize_meta_box_nonce'] ) ), 'summaraize_meta_box' ) ) {
-	        return;
-	    }
+		// Verify nonce.
+		if ( ! isset( $_POST['summaraize_meta_box_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['summaraize_meta_box_nonce'] ) ), 'summaraize_meta_box' ) ) {
+			return;
+		}
 
-	    // Check for autosave.
-	    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-	        return;
-	    }
+		// Check for autosave.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
 
-	    // Check post type permissions.
-	    if ( isset( $_POST['post_type'] ) && 'page' === sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) ) {
-	        if ( ! current_user_can( 'edit_page', $post_id ) ) {
-	            return;
-	        }
-	    } elseif ( ! current_user_can( 'edit_post', $post_id ) ) {
-	        return;
-	    }
+		// Check post type permissions.
+		if ( isset( $_POST['post_type'] ) && 'page' === sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) ) {
+			if ( ! current_user_can( 'edit_page', $post_id ) ) {
+				return;
+			}
+		} elseif ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
 
-	    // Save sorted points if the hidden field exists.
-	    if ( isset( $_POST['summaraize_points_sorted'] ) ) {
-	        // Unslash and sanitize the sorted points.
-	        $summaraize_points_sorted = wp_unslash( $_POST['summaraize_points_sorted'] );
-	        $summaraize_points        = json_decode( $summaraize_points_sorted, true );
+		// Save sorted points if the hidden field exists.
+		if ( isset( $_POST['summaraize_points_sorted'] ) ) {
+			// Unslash the input first, then sanitize it as a string.
+			$summaraize_points_sorted = sanitize_text_field( wp_unslash( $_POST['summaraize_points_sorted'] ) );
 
-	        // Check if the points are an array
-	        if ( is_array( $summaraize_points ) ) {
-	            // Sanitize each point in the array, including empty values
-	            $sanitized_points = array_map( 'sanitize_text_field', $summaraize_points );
+			// Decode the JSON data after sanitization.
+			$summaraize_points = json_decode( $summaraize_points_sorted, true );
 
-	            // Update the meta field with the sanitized points
-	            update_post_meta( $post_id, 'summaraize_points', $sanitized_points );
-	        }
-	    }
+			// Check if the points are an array.
+			if ( is_array( $summaraize_points ) ) {
+				// Sanitize each point in the array, including empty values.
+				$sanitized_points = array_map( 'sanitize_text_field', $summaraize_points );
 
-	    // Save override settings and other options.
-	    $override_settings = isset( $_POST['summaraize_override_settings'] ) ? 1 : 0;
-	    update_post_meta( $post_id, 'summaraize_override_settings', $override_settings );
+				// Update the meta field with the sanitized points.
+				update_post_meta( $post_id, 'summaraize_points', $sanitized_points );
+			}
+		}
 
-	    if ( $override_settings ) {
-	        $view         = isset( $_POST['summaraize_view'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_view'] ) ) : '';
-	        $mode         = isset( $_POST['summaraize_mode'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_mode'] ) ) : '';
-	        $widget_title = isset( $_POST['summaraize_widget_title'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_widget_title'] ) ) : '';
-	        $button_style = isset( $_POST['summaraize_button_style'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_button_style'] ) ) : '';
-	        $button_color = isset( $_POST['summaraize_button_color'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_button_color'] ) ) : '';
-	        $list_type    = isset( $_POST['summaraize_list_type'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_list_type'] ) ) : '';
+		// Save override settings and other options.
+		$override_settings = isset( $_POST['summaraize_override_settings'] ) ? 1 : 0;
+		update_post_meta( $post_id, 'summaraize_override_settings', $override_settings );
 
-	        update_post_meta( $post_id, 'summaraize_view', $view );
-	        update_post_meta( $post_id, 'summaraize_mode', $mode );
-	        update_post_meta( $post_id, 'summaraize_widget_title', $widget_title );
-	        update_post_meta( $post_id, 'summaraize_button_style', $button_style );
-	        update_post_meta( $post_id, 'summaraize_button_color', $button_color );
-	        update_post_meta( $post_id, 'summaraize_list_type', $list_type );
-	    } else {
-	        delete_post_meta( $post_id, 'summaraize_view' );
-	        delete_post_meta( $post_id, 'summaraize_mode' );
-	        delete_post_meta( $post_id, 'summaraize_widget_title' );
-	        delete_post_meta( $post_id, 'summaraize_button_style' );
-	        delete_post_meta( $post_id, 'summaraize_button_color' );
-	        delete_post_meta( $post_id, 'summaraize_list_type' );
-	    }
+		if ( $override_settings ) {
+			$view         = isset( $_POST['summaraize_view'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_view'] ) ) : '';
+			$mode         = isset( $_POST['summaraize_mode'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_mode'] ) ) : '';
+			$widget_title = isset( $_POST['summaraize_widget_title'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_widget_title'] ) ) : '';
+			$button_style = isset( $_POST['summaraize_button_style'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_button_style'] ) ) : '';
+			$button_color = isset( $_POST['summaraize_button_color'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_button_color'] ) ) : '';
+			$list_type    = isset( $_POST['summaraize_list_type'] ) ? sanitize_text_field( wp_unslash( $_POST['summaraize_list_type'] ) ) : '';
+
+			update_post_meta( $post_id, 'summaraize_view', $view );
+			update_post_meta( $post_id, 'summaraize_mode', $mode );
+			update_post_meta( $post_id, 'summaraize_widget_title', $widget_title );
+			update_post_meta( $post_id, 'summaraize_button_style', $button_style );
+			update_post_meta( $post_id, 'summaraize_button_color', $button_color );
+			update_post_meta( $post_id, 'summaraize_list_type', $list_type );
+		} else {
+			delete_post_meta( $post_id, 'summaraize_view' );
+			delete_post_meta( $post_id, 'summaraize_mode' );
+			delete_post_meta( $post_id, 'summaraize_widget_title' );
+			delete_post_meta( $post_id, 'summaraize_button_style' );
+			delete_post_meta( $post_id, 'summaraize_button_color' );
+			delete_post_meta( $post_id, 'summaraize_list_type' );
+		}
 	}
-
-
 }
