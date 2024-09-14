@@ -147,7 +147,7 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 
 ## Changelog
 
-### 1.1.12
+### 1.1.13
 * Fixed metabox data saving issue.
 * Improved UI for metabox inputs.
 * Minor bug fixes and optimizations.
