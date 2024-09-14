@@ -34,7 +34,7 @@ class Summaraize_Admin_Metabox {
 					add_meta_box(
 						'summaraize_meta_box',
 						__( 'SummarAIze', 'summaraize' ),
-						array( 'Summaraize_Admin_Metabox', 'render_meta_box' ),
+						array( $this, 'render_meta_box' ),
 						$post_type,
 						'side',
 						'default'
@@ -44,8 +44,6 @@ class Summaraize_Admin_Metabox {
 		}
 	}
 
-
-
 	/**
 	 * Render the meta box.
 	 *
@@ -53,7 +51,7 @@ class Summaraize_Admin_Metabox {
 	 *
 	 * @param WP_Post $post The current post.
 	 */
-	public static function render_meta_box( $post ) {
+	public function render_meta_box( $post ) {
 		wp_nonce_field( 'summaraize_meta_box', 'summaraize_meta_box_nonce' );
 
 		$summaraize_points_meta = get_post_meta( $post->ID, 'summaraize_points', true );
@@ -71,20 +69,18 @@ class Summaraize_Admin_Metabox {
 
 		echo '<div id="summaraize-points-list" class="list-group" style="list-style: none; padding: 0;">';
 
-		for ( $i = 1; $i <= 5; $i++ ) {
-			$point = isset( $summaraize_points[ $i - 1 ] ) ? $summaraize_points[ $i - 1 ] : '';
+		for ( $i = 0; $i < 5; $i++ ) {
+			$point = isset( $summaraize_points[ $i ] ) ? $summaraize_points[ $i ] : '';
 			$point = preg_replace( '/\*\*(.*?)\*\*/', '$1', $point );
 
 			echo '<div class="summaraize-input-container" style="margin-bottom: 10px; display: flex; align-items: center;">';
 			echo '<span class="dashicons dashicons-menu" style="margin-right: 10px; cursor: move;"></span>';
-			echo '<input id="summaraize_points_' . esc_attr( $i ) . '" style="flex: 1; width: 100%;" type="text" name="summaraize_points[' . esc_attr( $i ) . ']" value="' . esc_attr( $point ) . '" placeholder="' . esc_attr( 'Empty points are not shown.' ) . '" />';
-			echo '<button type="button" class="remove-point dashicons dashicons-trash" style="flex: 0 0 auto; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0; line-height: 1;" data-point-id="summaraize_points_' . esc_attr( $i ) . '"></button>';
+			echo '<input id="summaraize_points_' . esc_attr( $i + 1 ) . '" style="flex: 1; width: 100%;" type="text" name="summaraize_points[]" value="' . esc_attr( $point ) . '" placeholder="' . esc_attr( 'Empty points are not shown.' ) . '" />';
+			echo '<button type="button" class="remove-point dashicons dashicons-trash" style="flex: 0 0 auto; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0; line-height: 1;" data-point-id="summaraize_points_' . esc_attr( $i + 1 ) . '"></button>';
 			echo '</div>';
 		}
 
 		echo '</div>';
-
-		echo '<input type="hidden" id="summaraize_points_sorted" name="summaraize_points_sorted" value="">';
 
 		echo '<p><input type="checkbox" id="summaraize_override_settings" name="summaraize_override_settings" value="1"' . checked( 1, $override_settings, false ) . ' />';
 		echo '<label for="summaraize_override_settings">' . esc_html__( 'Override Settings', 'summaraize' ) . '</label></p>';
@@ -156,7 +152,6 @@ class Summaraize_Admin_Metabox {
 		echo '</div>';
 	}
 
-
 	/**
 	 * Save the meta box data.
 	 *
@@ -166,7 +161,8 @@ class Summaraize_Admin_Metabox {
 	 */
 	public function save_summaraize_points( $post_id ) {
 		// Verify nonce.
-		if ( ! isset( $_POST['summaraize_meta_box_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['summaraize_meta_box_nonce'] ) ), 'summaraize_meta_box' ) ) {
+		if ( ! isset( $_POST['summaraize_meta_box_nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['summaraize_meta_box_nonce'] ) ), 'summaraize_meta_box' ) ) {
 			return;
 		}
 
@@ -184,22 +180,16 @@ class Summaraize_Admin_Metabox {
 			return;
 		}
 
-		// Save sorted points if the hidden field exists.
-		if ( isset( $_POST['summaraize_points_sorted'] ) ) {
-			// Unslash the input first, then sanitize it as a string.
-			$summaraize_points_sorted = sanitize_text_field( wp_unslash( $_POST['summaraize_points_sorted'] ) );
+		// Save 'summaraize_points' directly if set.
+		if ( isset( $_POST['summaraize_points'] ) && is_array( $_POST['summaraize_points'] ) ) {
+			// Sanitize each point.
+			$summaraize_points = array_map( 'sanitize_text_field', wp_unslash( $_POST['summaraize_points'] ) );
 
-			// Decode the JSON data after sanitization.
-			$summaraize_points = json_decode( $summaraize_points_sorted, true );
+			// Optionally, remove empty points.
+			$summaraize_points = array_filter( $summaraize_points, 'strlen' );
 
-			// Check if the points are an array.
-			if ( is_array( $summaraize_points ) ) {
-				// Sanitize each point in the array, including empty values.
-				$sanitized_points = array_map( 'sanitize_text_field', $summaraize_points );
-
-				// Update the meta field with the sanitized points.
-				update_post_meta( $post_id, 'summaraize_points', $sanitized_points );
-			}
+			// Update the meta field.
+			update_post_meta( $post_id, 'summaraize_points', $summaraize_points );
 		}
 
 		// Save override settings and other options.
