@@ -147,6 +147,11 @@ If you encounter any issues or have questions about using SummarAIze, you can ge
 
 ## Changelog
 
+### 1.1.12
+* Fixed metabox data saving issue.
+* Improved UI for metabox inputs.
+* Minor bug fixes and optimizations.
+
 ### 1.1.11
 * Added drag-and-drop functionality to reorder points in the admin interface.
 * Enhanced the system to automatically remove empty points from the front-end display.

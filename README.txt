@@ -4,7 +4,7 @@ Donate link: https://oneclickcontent.com/donate/
 Tags: ai, summary, content-enhancement
 Requires at least: 5.0
 Tested up to: 6.6.1
-Stable tag: 1.1.11
+Stable tag: 1.1.12
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -188,6 +188,11 @@ The 1.1.11 update introduces drag-and-drop ordering for key points, automatic re
 
 
 ## Changelog
+
+### 1.1.12
+* Fixed metabox data saving issue.
+* Improved UI for metabox inputs.
+* Minor bug fixes and optimizations.
 
 ### 1.1.11
 * Added drag-and-drop functionality to reorder points in the admin interface.
