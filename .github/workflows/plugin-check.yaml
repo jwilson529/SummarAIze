@@ -28,6 +28,7 @@ jobs:
       # Install WPCS dependencies
       - name: Install WPCS
         run: |
+          composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
           composer global require "wp-coding-standards/wpcs"
           composer global require "dealerdirect/phpcodesniffer-composer-installer"
 
