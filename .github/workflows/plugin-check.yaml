@@ -1,7 +1,6 @@
 name: 'build-test'
 
 on:
-  # Trigger on pull requests and pushes to main or release branches
   pull_request:
   push:
     branches:
@@ -16,5 +15,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      # Remove hidden files like .DS_Store
+      - name: Remove hidden files
+        run: find . -name ".DS_Store" -delete
+
+      # Set up PHP environment
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+
+      # Install WPCS dependencies
+      - name: Install WPCS
+        run: |
+          composer global require "wp-coding-standards/wpcs"
+          composer global require "dealerdirect/phpcodesniffer-composer-installer"
+
+      # Run WPCS checks
+      - name: Run WPCS
+        run: |
+          ~/.composer/vendor/bin/phpcs --standard=WordPress . --ignore=vendor,node_modules
+
+      # Run plugin check
       - name: Run plugin check
         uses: wordpress/plugin-check-action@v1
